@@ -1,7 +1,6 @@
 .env
 
 package-lock.json
-vite.config.js
 
 /docs
 /dist
