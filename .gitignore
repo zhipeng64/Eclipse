@@ -1,0 +1,10 @@
+.env
+
+package-lock.json
+vite.config.js
+
+/docs
+/dist
+/assets
+/node_modules
+
