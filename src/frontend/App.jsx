@@ -1,4 +1,4 @@
-import LandingPage from "./frontend/Lobby/LandingPage";
+import LandingPage from "./Lobby/LandingPage";
 
 export default function App() {
   return <LandingPage />;

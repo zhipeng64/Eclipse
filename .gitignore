@@ -3,7 +3,7 @@
 package-lock.json
 
 /docs
+/tests
 /dist
-/assets
 /node_modules
 

@@ -9,7 +9,7 @@ import cors from "cors";
 dotenv.config({ path: "../../.env" });
 
 // Local custom modules
-import { router as accountsRouter } from "./public/routes/registration.js";
+import { router as accountsRouter } from "./public/routes/account_registration.js";
 
 // https://expressjs.com/en/resources/middleware/cors.html
 // https://treblle.com/blog/setup-cors-rest-api#heading-how-to-configure-cors-for-your-rest-api
