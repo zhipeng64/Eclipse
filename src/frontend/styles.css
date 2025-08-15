@@ -5,3 +5,11 @@
     0 0 4px 0.5px #90cdf4,
     0 0 1px 2px white;
 }
+
+.focusTextInput:focus {
+  min-height: 3rem;
+}
+
+.hideScrollBar::-webkit-scrollbar {
+  display: none;
+}
