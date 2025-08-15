@@ -1,10 +1,10 @@
-export default function NavigationBar({ toggleSignUp, toggleLogin }) {
+export default function NavigationBar() {
   return (
-    <nav className="bg-[#0F0F1A] border-[#F5F5F5] border-b-1 text-[#F5F5F5] p-2">
+    <nav className="bg-[#08090d] border-[#F5F5F5] border-b-1 text-[#F5F5F5] p-2">
       <div className="flex justify-between items-center">
         <div className="text-base font-bold sm:text-xl sm:ml-1.5">Eclipse</div>
 
-        <div className="text-xs space-x-3.5 sm:space-x-6 sm:text-base sm:p-2 sm:mr-20">
+        {/* <div className="text-xs space-x-3.5 sm:space-x-6 sm:text-base sm:p-2 sm:mr-20">
           <a
             href="#"
             onClick={(e) => {
@@ -25,7 +25,7 @@ export default function NavigationBar({ toggleSignUp, toggleLogin }) {
           >
             Sign Up
           </a>
-        </div>
+        </div> */}
       </div>
     </nav>
   );

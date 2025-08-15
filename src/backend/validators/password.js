@@ -1,6 +1,6 @@
 import { passwordSchema } from "../schemas/password.js";
 
-const isValidPassword = (password, detailed = False) => {
+const isValidPassword = (password, detailed = false) => {
   const list = passwordSchema.validate(password, { details: detailed });
   return list;
 };

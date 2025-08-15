@@ -1,5 +1,6 @@
 import PasswordValidator from "password-validator";
 
+// Password policy
 const passwordSchema = new PasswordValidator();
 passwordSchema
   .is()
@@ -11,11 +12,9 @@ passwordSchema
   .has()
   .lowercase(1, "lowercase") // Must have lowercase letters
   .has()
-  .digits(1, "digit") // Must have at least 1 digits
-  .has()
-  .symbols(1, "symbol") // Must have at least 1 symbol
-  .has()
-  .not()
-  .spaces(); // Should not have spaces
+  .symbols(1, "symbol"); // Must have at least 1 symbol
 
-export { passwordSchema };
+// Hash Settings
+const SALT_ROUNDS = 12;
+
+export { passwordSchema, SALT_ROUNDS };

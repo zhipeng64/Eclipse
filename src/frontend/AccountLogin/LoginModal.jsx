@@ -18,7 +18,7 @@ export default function LoginModal({
         className={`${isLogin ? "flex" : "hidden"} fixed inset-0 bg-[#00000080] z-10 overflow-auto"`}
       >
         <div
-          className="m-auto w-1/5 max-w-md pt-3 pr-1 pl-1 bg-[#0F0F1A] text-[#F5F5F5] border-white border-solid border-1"
+          className="m-auto w-1/5 max-w-md pt-3 pr-1 pl-1 bg-[#0F0F1A] text-[#F5F5F5] border-white border-solid border-1 rounded-lg"
           ref={modalRef}
         >
           <form className="flex flex-col pb-5 space-y-4" onSubmit={handleForm}>
@@ -26,7 +26,7 @@ export default function LoginModal({
             <div className="flex justify-center items-center gap-x-3">
               <FaUser />
               <input
-                className="w-[65%] border-solid p-1 border-white border-1"
+                className="w-[65%] border-solid p-1 border-white border-1 rounded-md"
                 placeholder="username"
               ></input>
             </div>
@@ -34,19 +34,19 @@ export default function LoginModal({
               <div className="flex justify-center items-center gap-x-3">
                 <FaLock />
                 <input
-                  className="w-[65%] border-solid p-1 border-white border-1"
+                  className="w-[65%] border-solid p-1 border-white border-1 rounded-md"
                   placeholder="password"
                   type="password"
                 ></input>
               </div>
-              <a className="text-xs ml-17 text-[#b5d4eb] w-fit" href="#">
+              <a className="text-xs ml-17 text-[#90cdf4] w-fit" href="#">
                 Forgot Password?
               </a>
             </div>
             <div className="flex flex-col">
               <div className="flex justify-center">
                 <input
-                  className="bg-[#b5d4eb] text-[#121212] w-[90%] font-semibold p-1.5 rounded-md cursor-pointer"
+                  className="bg-[#90cdf4] text-white w-[90%] font-semibold p-1.5 rounded-md cursor-pointer focusBtn"
                   type="submit"
                   value="Login"
                 ></input>
@@ -55,7 +55,7 @@ export default function LoginModal({
                 <p className="text-xs p-1.5 w-[90%]">
                   Don't have an account?{" "}
                   <button
-                    className="text-[#b5d4eb] w-fit cursor-pointer"
+                    className="text-[#90cdf4] w-fit cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
                       forgotPasswordCallback();

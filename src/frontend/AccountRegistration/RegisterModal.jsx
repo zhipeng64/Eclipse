@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { checkValidPassword } from "../utils/utils";
 import { FaEye } from "react-icons/fa";
 
@@ -121,6 +121,7 @@ export default function RegisterModal({ isSignUp, modalRef }) {
     try {
       const response = await fetch(url, {
         method: "POST",
+        credentials: "include", // Needed to set or send cookie
         body: JSON.stringify(postData),
         headers: {
           "Content-Type": "application/json",
@@ -145,7 +146,7 @@ export default function RegisterModal({ isSignUp, modalRef }) {
       >
         <div
           id="modal"
-          className="flex m-auto w-1/3 p-5 max-w-md bg-[#0F0F1A] border-1 border-solid border-[#f5f5f5]"
+          className="flex m-auto w-1/3 p-5 max-w-md bg-black border-1 border-solid border-[#f5f5f5] rounded-lg"
           ref={modalRef}
         >
           <form
@@ -262,7 +263,7 @@ export default function RegisterModal({ isSignUp, modalRef }) {
               <input
                 type="submit"
                 name="submit"
-                className="bg-[#b5d4eb] text-[#121212] font-semibold mt-3.5 p-2 block w-1/5 rounded-md cursor-pointer"
+                className="bg-[#90cdf4] text-white font-semibold mt-3.5 p-2 block w-1/5 rounded-lg cursor-pointer focusBtn"
               ></input>
             </div>
           </form>
