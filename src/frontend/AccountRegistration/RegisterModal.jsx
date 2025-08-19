@@ -141,24 +141,24 @@ export default function RegisterModal({ isSignUp, modalRef }) {
 
   return (
     <>
-      <div
-        className={`${isSignUp ? "flex" : "hidden"} fixed inset-0 z-10 overflow-auto bg-[#00000080]`}
-      >
+      <div className={`${isSignUp ? "flex" : "hidden"} modal-overlay`}>
         <div
           id="modal"
-          className="flex m-auto w-1/3 p-5 max-w-md bg-black border-1 border-solid border-[#f5f5f5] rounded-lg"
+          className="flex m-auto p-5 w-full max-w-md shadow-card rounded-card primary-container"
           ref={modalRef}
         >
           <form
             id="registration"
-            className="text-[#F5F5F5] w-full flex flex-col space-y-6"
+            className="text-gray-200 w-full flex flex-col space-y-6"
             onSubmit={handleSubmit}
           >
-            <h1 className="text-2xl text-center">Register account</h1>
+            <h1 className="font-bold text-2xl mb-6 text-center">
+              Register account
+            </h1>
             <div>
               <div>
-                <h3>Password must contain a minimum of:</h3>
-                <ul className="text-[#b5d4eb] text-sm">
+                <p>Password must contain a minimum of:</p>
+                <ul className="text-gray-300 text-sm">
                   <li>
                     {passwordStatus.hasMinLength ? "✅" : "❌"} 12 characters
                   </li>
@@ -177,94 +177,98 @@ export default function RegisterModal({ isSignUp, modalRef }) {
                 </div>
               )}
             </div>
-            <div>
-              <label htmlFor="username" className="block">
-                Username
-              </label>
-              <input
-                id="username"
-                type="text"
-                placeholder="username"
-                name="username"
-                className="p-1.5 block w-full rounded-md border-1 border-solid border-[#f5f5f5]"
-              ></input>
-            </div>
+            <div className="flex flex-col space-y-4">
+              <div>
+                <label htmlFor="username" className="block">
+                  Username
+                </label>
+                <input
+                  id="username"
+                  type="text"
+                  placeholder="username"
+                  name="username"
+                  className="neon-input p-1.5 rounded-lg w-full placeholder-gray-400"
+                ></input>
+              </div>
 
-            <div>
-              <label htmlFor="email" className="block">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                placeholder="email"
-                name="email"
-                className="p-1.5 block w-full rounded-md border-1 border-solid border-[#f5f5f5]"
-              ></input>
-            </div>
+              <div>
+                <label htmlFor="email" className="block">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="email"
+                  name="email"
+                  className="neon-input p-1.5 rounded-lg w-full placeholder-gray-400"
+                ></input>
+              </div>
 
-            <div className="relative">
-              <label htmlFor="password" className="block">
-                Password
-              </label>
-              <input
-                id="password"
-                type={isPasswordVisible ? "text" : "password"}
-                placeholder="password"
-                name="password"
-                className="p-1.5 block w-full rounded-md border-1 border-solid border-[#f5f5f5]"
-                onChange={handleChange}
-              ></input>
+              <div className="relative">
+                <label htmlFor="password" className="block">
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type={isPasswordVisible ? "text" : "password"}
+                  placeholder="password"
+                  name="password"
+                  className="neon-input p-1.5 rounded-lg w-full placeholder-gray-400"
+                  onChange={handleChange}
+                ></input>
 
-              <div className="absolute flex flex-col space-y-1 bottom-2.5 right-3 cursor-pointer">
-                {/* Tooltip Wrapper */}
-                <div className="group relative">
-                  {/* Tooltip */}
-                  <div
-                    className="invisible absolute bottom-[180%] -right-[3.45rem] mb-2 w-32 bg-gray-800
+                <div className="absolute flex flex-col space-y-1 bottom-2.5 right-3 cursor-pointer">
+                  {/* Tooltip Wrapper */}
+                  <div className="group relative">
+                    {/* Tooltip */}
+                    <div
+                      className="invisible absolute bottom-[180%] -right-[3.45rem] mb-2 w-32 bg-gray-800
                    text-[#F5F5F5] text-sm text-center py-1 px-2 rounded select-none cursor-default
                     before:content-[''] before:absolute before:top-full before:right-13 
                     before:w-0 before:h-0
                     before:border-x-[0.8em] before:border-x-transparent
                     before:border-t-[1.7em]  before:border-gray-800
-                    group-hover:visible
+                    group-hover:visible 
                   "
-                  >
-                    Show password
-                  </div>
+                    >
+                      Show password
+                    </div>
 
-                  {/* Icon */}
-                  <FaEye onClick={toggleIsPasswordVisible} />
+                    {/* Icon */}
+                    <i>
+                      <FaEye onClick={toggleIsPasswordVisible} />
+                    </i>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div>
               <div>
-                <label htmlFor="confirm-password" className="block">
-                  Confirm Password
-                </label>
+                <div>
+                  <label htmlFor="confirm-password" className="block">
+                    Confirm Password
+                  </label>
+                  <input
+                    id="confirm-password"
+                    type="password"
+                    placeholder="confirm password"
+                    name="confirmPassword"
+                    className="neon-input p-1.5 rounded-lg w-full placeholder-gray-400"
+                  ></input>
+                </div>
+
+                {hasErrors.isPasswordMismatch && (
+                  <div className="text-[#D32F2F]">
+                    <p>Passwords do not match</p>
+                  </div>
+                )}
+              </div>
+
+              <div>
                 <input
-                  id="confirm-password"
-                  type="password"
-                  placeholder="confirm password"
-                  name="confirmPassword"
-                  className="p-1.5 block w-full rounded-md border-1 border-solid border-[#f5f5f5]"
+                  type="submit"
+                  name="submit"
+                  className="neon-button neon-button-animated rounded-lg py-2 px-4 mt-4"
                 ></input>
               </div>
-
-              {hasErrors.isPasswordMismatch && (
-                <div className="text-[#D32F2F]">
-                  <p>Passwords do not match</p>
-                </div>
-              )}
-            </div>
-
-            <div>
-              <input
-                type="submit"
-                name="submit"
-                className="bg-[#90cdf4] text-white font-semibold mt-3.5 p-2 block w-1/5 rounded-lg cursor-pointer focusBtn"
-              ></input>
             </div>
           </form>
         </div>

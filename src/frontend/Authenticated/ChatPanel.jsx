@@ -16,11 +16,11 @@ function ChatPanel(chatData) {
     // use width:full and height_full
     <div
       id="chat-panel"
-      className="bg-[#08090d] text-white w-full min-h-screen flex flex-col"
+      className="text-white primary-container w-full max-w-5xl h-full flex flex-col rounded-lg shadow-sm shadow-white/30"
     >
       <div
         id="recipient"
-        className="flex items-center justify-between px-2 mb-0.5"
+        className="flex items-center justify-between px-5 py-2 mb-5 shadow-sm shadow-white/30"
       >
         <div className="flex items-center">
           <img
@@ -28,21 +28,20 @@ function ChatPanel(chatData) {
             alt="Avatar"
             className="w-11 h-11 rounded-full mr-2"
           />
-          <h2 className="text-md">John Zena</h2>
+          <p className="text-md">John Zena</p>
         </div>
-        <div className="flex space-x-7 text-gray-200">
-          <i className="text-[1.4rem] cursor-pointer">
+        <div className="flex space-x-7 text-gray-200 pr-2">
+          <i className="standard-icon">
             <IoVideocam />
           </i>
-          <i className="text-[1.4rem] cursor-pointer">
+          <i className="standard-icon">
             <IoMic />
           </i>
-          <i className="text-[1.4rem] cursor-pointer">
+          <i className="standard-icon">
             <IoSettingsSharp />
           </i>
         </div>
       </div>
-      <hr className="text-[#90CDF4] " />
       <div
         id="chat-messages"
         className="text-gray-200 flex flex-col space-y-6 grow-1"
@@ -59,8 +58,8 @@ function ChatPanel(chatData) {
             {/* Right side: Name, Timestamp, Message */}
             <div>
               <div className="flex items-center space-x-2">
-                <h2 className="text-md font-semibold">John Zena</h2>
-                <span className="text-gray-400 text-xs font-semibold">
+                <p className="text-md">John Zena</p>
+                <span className="text-gray-400/70 text-xs font-semibold">
                   6/20/2025 18:30:50 PM EST
                 </span>
               </div>
@@ -68,7 +67,7 @@ function ChatPanel(chatData) {
               {/* Uses block element alignment rather than flex-col */}
               <p className="text-gray-300 max-w-3xl break-words">
                 Hey, we need to get some coffee and dumplings too. Huh? Those
-                two are such a strange combination, don't you think?
+                two are such a strange combination, don't you think?.
               </p>
             </div>
           </div>
@@ -86,8 +85,8 @@ function ChatPanel(chatData) {
             {/* Right side: Name, Timestamp, Message */}
             <div>
               <div className="flex items-center space-x-2">
-                <h2 className="text-md font-semibold">Stewart</h2>
-                <span className="text-gray-400 text-xs font-semibold">
+                <p className="text-md">Stewart</p>
+                <span className="text-gray-400/70 text-xs font-semibold">
                   6/21/2025 12:10:10 PM EST
                 </span>
               </div>
@@ -101,8 +100,10 @@ function ChatPanel(chatData) {
         </div>
       </div>
 
-      <hr className="text-[#90CDF4]" />
-      <div id="chat-input-box" className="flex items-center px-2 bg-gray-800">
+      <div
+        id="chat-input-box"
+        className="flex items-center px-2 bg-gray-800 rounded-lg"
+      >
         <div className="flex items-center space-x-3 mr-3">
           <i>
             <FaPlus className="text-2xl cursor-pointer" />
@@ -114,7 +115,7 @@ function ChatPanel(chatData) {
         <textarea
           id="chat-input"
           placeholder="Type a message..."
-          className="w-full p-2 m-2 rounded-lg text-white min-h-1 bg-gray-700 resize-none hideScrollBar"
+          className="w-full p-2 m-2 rounded-lg text-white min-h-1 bg-gray-900 resize-none hideScrollBar"
           rows={inputSettings.focus ? inputSettings.inputRowCount : 1}
           onFocus={(e) => {
             e.stopPropagation();

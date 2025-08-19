@@ -14,11 +14,9 @@ export default function LoginModal({
   };
   return (
     <>
-      <div
-        className={`${isLogin ? "flex" : "hidden"} fixed inset-0 bg-[#00000080] z-10 overflow-auto"`}
-      >
+      <div className={`${isLogin ? "flex" : "hidden"} modal-overlay`}>
         <div
-          className="m-auto w-1/5 max-w-md pt-3 pr-1 pl-1 bg-[#0F0F1A] text-[#F5F5F5] border-white border-solid border-1 rounded-lg"
+          className="m-auto w-full max-w-xs pt-3 px-1 text-[#F5F5F5] shadow-card rounded-card primary-container"
           ref={modalRef}
         >
           <form className="flex flex-col pb-5 space-y-4" onSubmit={handleForm}>
@@ -26,7 +24,7 @@ export default function LoginModal({
             <div className="flex justify-center items-center gap-x-3">
               <FaUser />
               <input
-                className="w-[65%] border-solid p-1 border-white border-1 rounded-md"
+                className="w-[65%] p-1 rounded-lg neon-input"
                 placeholder="username"
               ></input>
             </div>
@@ -34,7 +32,7 @@ export default function LoginModal({
               <div className="flex justify-center items-center gap-x-3">
                 <FaLock />
                 <input
-                  className="w-[65%] border-solid p-1 border-white border-1 rounded-md"
+                  className="w-[65%] border-solid p-1 rounded-lg neon-input"
                   placeholder="password"
                   type="password"
                 ></input>
@@ -46,7 +44,7 @@ export default function LoginModal({
             <div className="flex flex-col">
               <div className="flex justify-center">
                 <input
-                  className="bg-[#90cdf4] text-white w-[90%] font-semibold p-1.5 rounded-md cursor-pointer focusBtn"
+                  className="w-[90%] font-semibold p-1.5 rounded-lg neon-button neon-button-animated"
                   type="submit"
                   value="Login"
                 ></input>

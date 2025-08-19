@@ -28,35 +28,35 @@ export default function LandingPage() {
   useCloseOnClickOutside(loginModalRef, isLogin, () => setIsLogin(false));
 
   return (
-    <div id="landing-page" className="min-h-screen flex flex-col w-auto">
+    <div
+      id="landing-page"
+      className="min-h-screen flex flex-col w-auto bg-gradient-to-br from-[#0f1a2b]/100 to-[#1a2a44]/90 
+"
+    >
       <NavigationBar />
-      <div
-        id="body"
-        className="text-[#F5F5F5] bg-[#08090d] bg-opacity-70 flex-1 flex"
-      >
-        <div id="main-display" className="flex w-full items-start">
-          <div className="mt-20 ml-55 flex flex-col space-y-5 w-[40%] break-words">
-            <h1 className="font-bold text-7xl">Feeling Lonely?</h1>
-            <div className="text-gray-50 text-2xl font-semibold">
+      <div id="body" className="text-gray-200 flex-1 flex items-start">
+        <div id="main-display" className="ml-45 mr-20 max-w-2xl">
+          <div className="flex flex-col space-y-5 w-full break-words p-20 shadow-card rounded-card hover-shadow primary-container">
+            <h1 className="heading text-6xl mb-6">Join the Community</h1>
+            <div className="text-gray-400 text-2xl font-medium space-y-2">
               <p>
                 Welcome to Eclipse, a place to meet others and make longlasting
                 relationships.
               </p>
-              <br />
               <p>
                 Get access to emotes, real-time video chats, and an
                 unforgettable memory.
               </p>
             </div>
 
-            <div className="text-xs sm:space-x-7 sm:text-base">
+            <div className="text-lg font-bold sm:space-x-7 sm:text-base mt-4">
               <button
                 href="#"
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleLogin();
                 }}
-                className="font-semibold bg-[#90cdf4] text-white cursor-pointer px-3 py-2 rounded-lg focusBtn"
+                className="neon-button neon-button-animated rounded-lg py-3 px-6"
               >
                 Log In
               </button>
@@ -66,19 +66,25 @@ export default function LandingPage() {
                   e.stopPropagation();
                   toggleSignUp();
                 }}
-                className="font-semibold bg-[#90cdf4] text-white cursor-pointer px-3 py-2 rounded-lg focusBtn"
+                className="neon-button neon-button-animated rounded-lg py-3 px-6"
               >
                 Sign Up
               </button>
             </div>
           </div>
-
-          <div className="ml-8 mr-8 mt-20">
-            <img
-              src="../assets/sunrise2.jpg"
-              className="w-200 rounded-lg brightness-100 contrast-90 saturate-80 mix-blend-color-overlay border-none ring-1 ring-white/10 shadow-lg"
-            ></img>
-          </div>
+        </div>
+        <div
+          id="feature-section"
+          className="flex flex-col px-15 pb-15 self-center max-w-2xl"
+        >
+          <h1 className="font-bold text-5xl mb-6 text-shadow-[0_0_12px_rgba(144,205,244,0.6)]">
+            Features
+          </h1>
+          <ul className="text-gray-300 font-medium space-y-3 text-xl list-disc list-inside marker:text-[#90cdf4]">
+            <li>Supports up to 1GB file uploads</li>
+            <li>Real-time video chats</li>
+            <li>AI Chat Assistant</li>
+          </ul>
         </div>
       </div>
       <RegisterModal isSignUp={isSignUp} modalRef={registrationModalRef} />
