@@ -1,14 +1,13 @@
 import express from "express";
-import {
-  loginCookieValidator,
-  loginSanitizer,
-} from "../middleware/loginValidation.js";
+import { verifyJWTToken, verifyRefreshToken } from "../middleware/auth.js";
+import { loginSanitizer } from "../schemas/auth.js";
 import { validateResult } from "../middleware/validateResult.js";
 
 const router = express.Router();
 router.post(
   "/",
-  loginCookieValidator,
+  verifyJWTToken,
+  verifyRefreshToken,
   loginSanitizer,
   validateResult,
   (req, res) => {

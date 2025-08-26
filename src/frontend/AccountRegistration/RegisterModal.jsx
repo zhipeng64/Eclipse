@@ -2,7 +2,11 @@ import { useState } from "react";
 import { checkValidPassword } from "../utils/utils";
 import { FaEye } from "react-icons/fa";
 
-export default function RegisterModal({ isSignUp, modalRef }) {
+export default function RegisterModal({
+  isSignUp,
+  handleRegistrationSuccess,
+  modalRef,
+}) {
   // Detects onchanging form data
   const [formData, setFormData] = useState({
     name: "",
@@ -131,8 +135,21 @@ export default function RegisterModal({ isSignUp, modalRef }) {
       if (!response.ok) {
         throw new Error(`Response status: ${response.status}`);
       }
-      const data = await response.json();
-      console.log(data);
+
+      // Ensure cookies are set before navigation
+      const cookieResponse = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/authentication`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+      if (cookieResponse.ok) {
+        // Navigate to main lobby
+        handleRegistrationSuccess();
+      } else {
+        console.log("cookie validation failed");
+      }
     } catch (error) {
       console.log(error);
       console.log("Error encountered on registering account.");

@@ -5,9 +5,9 @@ function ChatOption(chatData) {
   return (
     <div
       id="chat-option"
-      className="text-white bg-[#0f0f1a] w-full max-w-lg h-full flex flex-col rounded-lg shadow-sm shadow-white/30"
+      className="text-white bg-[#0f0f1a] w-full max-w-lg h-full flex flex-col rounded-lg opac-shadow"
     >
-      <div id="top-navigation" className="shadow-sm shadow-white/30">
+      <div id="top-navigation" className="opac-shadow">
         <div className="flex items-center justify-between p-3 mb-0.5">
           <h1 className="text-3xl">Chat</h1>
           <div className="flex space-x-7 text-gray-200 pr-2">
@@ -22,7 +22,7 @@ function ChatOption(chatData) {
       </div>
       <div
         id="status-bar"
-        className="flex items-center space-x-5 p-2 shadow-sm shadow-white/30"
+        className="flex items-center space-x-5 p-2 opac-shadow"
       >
         <div className="flex flex-col items-center justify-center space-y-1">
           <img
@@ -45,7 +45,7 @@ function ChatOption(chatData) {
         id="recent-chats"
         className="flex flex-col items-start space-y-0 grow"
       >
-        <div className="flex w-full py-2 px-4 shadow-sm shadow-white/30">
+        <div className="flex w-full py-2 px-4 opac-shadow">
           <img
             src="../assets/sunrise2.jpg"
             alt="Avatar"
@@ -58,7 +58,7 @@ function ChatOption(chatData) {
             </p>
           </div>
         </div>
-        <div className="flex w-full py-2 px-4 shadow-sm shadow-white/30">
+        <div className="flex w-full py-2 px-4 opac-shadow">
           <img
             src="../assets/sunrise.jpg"
             alt="Avatar"

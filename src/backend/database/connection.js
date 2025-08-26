@@ -50,4 +50,5 @@ async function closeMongoConnection() {
   }
 }
 
+await connectToMongo();
 export { connectToMongo, closeMongoConnection };

@@ -3,6 +3,7 @@
 package-lock.json
 
 /docs
+/certs
 /tests
 /dist
 /temp

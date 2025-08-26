@@ -16,11 +16,11 @@ function ChatPanel(chatData) {
     // use width:full and height_full
     <div
       id="chat-panel"
-      className="text-white primary-container w-full max-w-5xl h-full flex flex-col rounded-lg shadow-sm shadow-white/30"
+      className="text-white primary-container w-full max-w-5xl h-full flex flex-col rounded-lg opac-shadow"
     >
       <div
         id="recipient"
-        className="flex items-center justify-between px-5 py-2 mb-5 shadow-sm shadow-white/30"
+        className="flex items-center justify-between px-5 py-2 mb-5 opac-shadow"
       >
         <div className="flex items-center">
           <img

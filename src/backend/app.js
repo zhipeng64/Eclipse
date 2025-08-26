@@ -1,5 +1,7 @@
 // Core modules and frameworks
 import express from "express";
+import https from "https";
+import fs from "fs"; // Import Node.js 'fs' module
 
 // Third party modules
 import dotenv from "dotenv";
@@ -12,6 +14,7 @@ dotenv.config({ path: "../../.env" });
 // Local custom modules
 import { router as accountRouter } from "./routes/account_registration.js";
 import { router as loginRouter } from "./routes/account_login.js";
+import { router as authRouter } from "./routes/auth.js";
 import { closeMongoConnection } from "./database/connection.js";
 
 // https://expressjs.com/en/resources/middleware/cors.html
@@ -22,11 +25,22 @@ const corsConfiguration = {
   methods: ["GET", "POST"],
   credentials: true,
 };
+
+// Configure to use SSL Certificate
+const privateKey = fs.readFileSync(process.env.CERT_PRIVATE_KEY_PATH);
+const cert = fs.readFileSync(process.env.CERT_PATH);
+const options = {
+  key: privateKey,
+  cert: cert,
+};
+const httpsServer = https.createServer(options, app);
+
 app.use(cors(corsConfiguration)); // Cors settings applied to all imported public  routes
 app.use(express.json()); // Accepts incoming JSON data in HTTP requests
 app.use(cookieParser()); // For parsing cookies from a client
 app.use("/users", accountRouter);
 app.use("/session", loginRouter);
+app.use("/authentication", authRouter);
 
 // In case the backend may terminate due to runtime errors (which don't generate signals) or signals,
 // handle it gracefully by performing any cleanup operations.
@@ -52,7 +66,8 @@ process.on("unhandledRejection", async (reason) => {
 });
 
 // Start the backend server
-const port = 3000;
-app.listen(port, process.env.BACKEND_IP, () => {
-  console.log(`Server listening at port ${process.env.BACKEND_IP}:${port}`);
+httpsServer.listen(process.env.BACKEND_PORT, process.env.BACKEND_IP, () => {
+  console.log(
+    `HTTPS Server listening at ${process.env.BACKEND_IP}:${process.env.BACKEND_PORT}`
+  );
 });

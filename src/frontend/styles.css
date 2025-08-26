@@ -12,6 +12,16 @@ h3 {
   text-shadow: 0 0 12px rgba(144, 205, 244, 1);
 }
 
+/* Primary background */
+.primary-background {
+  background: linear-gradient(
+    to bottom right,
+    rgba(15, 26, 43, 1),
+    rgba(26, 42, 68, 0.9)
+  );
+  color: white;
+}
+
 /* Primary container styling */
 .primary-container {
   background-color: #0f0f1a;
@@ -24,6 +34,15 @@ h3 {
 /* Divider styling */
 .neon-divider {
   border-bottom: 1px solid #90cdf4;
+}
+
+.opac-divider {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* General shadows */
+.opac-shadow {
+  box-shadow: 0 1px 2px 0 rgba(255, 255, 255, 0.3);
 }
 
 /* Modal styling */

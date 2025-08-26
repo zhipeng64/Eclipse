@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import NavigationBar from "../utils/NavigationBar";
 import Footer from "../utils/Footer";
 import RegisterModal from "../AccountRegistration/RegisterModal";
@@ -8,11 +9,13 @@ import LoginModal from "../AccountLogin/LoginModal";
 import { useCloseOnClickOutside } from "../utils/modules";
 
 export default function LandingPage() {
+  const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
   const registrationModalRef = useRef(null);
   const loginModalRef = useRef(null);
 
+  // State updates
   const toggleSignUp = () => {
     setIsSignUp(!isSignUp);
   };
@@ -27,6 +30,10 @@ export default function LandingPage() {
   );
   useCloseOnClickOutside(loginModalRef, isLogin, () => setIsLogin(false));
 
+  // Callbacks
+  const handleRegistrationSuccess = () => {
+    navigate("/main-lobby");
+  };
   return (
     <div
       id="landing-page"
@@ -87,7 +94,11 @@ export default function LandingPage() {
           </ul>
         </div>
       </div>
-      <RegisterModal isSignUp={isSignUp} modalRef={registrationModalRef} />
+      <RegisterModal
+        isSignUp={isSignUp}
+        handleRegistrationSuccess={handleRegistrationSuccess}
+        modalRef={registrationModalRef}
+      />
       <LoginModal
         isLogin={isLogin}
         modalRef={loginModalRef}
