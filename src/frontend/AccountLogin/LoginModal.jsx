@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 // Icons
 import { FaUser, FaLock } from "react-icons/fa";
 
@@ -9,8 +11,10 @@ export default function LoginModal({
   const handleForm = (event) => {
     event.stopPropagation();
     event.preventDefault();
-    const target = event.target;
-    console.log(target);
+    const { username, password } = Object.fromEntries(
+      new FormData(event.target).entries()
+    );
+    console.log(username, password);
   };
   return (
     <>
@@ -25,6 +29,7 @@ export default function LoginModal({
               <FaUser />
               <input
                 className="w-[65%] p-1 rounded-lg neon-input"
+                name="username"
                 placeholder="username"
               ></input>
             </div>
@@ -34,6 +39,7 @@ export default function LoginModal({
                 <input
                   className="w-[65%] border-solid p-1 rounded-lg neon-input"
                   placeholder="password"
+                  name="password"
                   type="password"
                 ></input>
               </div>

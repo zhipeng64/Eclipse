@@ -1,3 +1,4 @@
+// Low-level, generic CRUD operations
 import { connectToMongo } from "./connection.js";
 import { ALLOWED_COLLECTIONS } from "../schemas/database.js";
 
