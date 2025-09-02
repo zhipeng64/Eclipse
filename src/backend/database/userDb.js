@@ -5,20 +5,32 @@ class UserRepository {
     this.collection = process.env.DB_USER_COLLECTION;
   }
 
-  // Search
-  async isUserDuplicate(username, email) {
+  // Get
+  async getUser(username, email = null) {
+    if (!username)
+      throw new Error(
+        "Invalid parameters given when getting a user from database"
+      );
     // Check if user exists in database
-    const query = { $or: [{ username }, { email }] };
-    const userExist = await getEntry(query, this.collection);
-    return userExist;
+    const query = { $or: [{ "account.username": username }] };
+
+    // Email is optional
+    if (email) {
+      query.$or.push({ "account.email": email });
+    }
+    const user = await getEntry(query, this.collection);
+    return user;
   }
 
   // Insert
-  async insertUser(username, email, hashedPassword) {
+  async insertUser({ account, profile }) {
+    if (!account || !profile)
+      throw new Error(
+        "Invalid parameters given when inserting user to database"
+      );
     const entry = {
-      username,
-      email,
-      hashedPassword,
+      account,
+      profile,
     };
     const collection = this.collection;
     const result = await insertEntry(entry, collection);

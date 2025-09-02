@@ -1,11 +1,10 @@
 import { AuthContext } from "../Auth";
 import { Outlet } from "react-router-dom";
-import { isJWTValid } from "../../utils/auth";
-
+import { isAuthenticated } from "../../utils/auth.js";
 // Create the authentication Context Provider and set the context value
 function AuthProvider() {
   return (
-    <AuthContext.Provider value={isJWTValid}>
+    <AuthContext.Provider value={isAuthenticated}>
       <Outlet />
     </AuthContext.Provider>
   );

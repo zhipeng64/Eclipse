@@ -3,7 +3,7 @@ const createCookieOptions = (expirationMs) => {
     httpOnly: true, // Prevents client-side JS from accessing cookie
     secure: true,
     sameSite: "None", // Protects against CSRF attacks
-    expires: expirationMs,
+    maxAge: expirationMs,
   };
   return cookie;
 };

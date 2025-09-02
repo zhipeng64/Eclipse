@@ -8,13 +8,36 @@ export default function LoginModal({
   modalRef,
   forgotPasswordCallback,
 }) {
-  const handleForm = (event) => {
+  const navigate = useNavigate();
+  const handleForm = async (event) => {
     event.stopPropagation();
     event.preventDefault();
     const { username, password } = Object.fromEntries(
       new FormData(event.target).entries()
     );
-    console.log(username, password);
+    const url = `${import.meta.env.VITE_BACKEND_URL}/session`;
+    const postData = {
+      username: username,
+      password: password,
+    };
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        credentials: "include", // Needed to set or send cookie
+        body: JSON.stringify(postData),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Login for user failed");
+      } else {
+        navigate("/main-lobby");
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
   return (
     <>

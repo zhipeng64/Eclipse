@@ -39,7 +39,7 @@ async function connectToMongo() {
     console.log("mongodb connection established");
     return db;
   } catch (error) {
-    console.log(error);
+    throw error;
   }
 }
 

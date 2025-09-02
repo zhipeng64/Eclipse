@@ -1,5 +1,6 @@
-import { insertEntry } from "./crud.js";
+import { getEntry, insertEntry, updateEntry } from "./crud.js";
 import { REFRESH_TOKEN_LIFESPAN_DAYS } from "../schemas/auth.js";
+import { hashString } from "../utils/auth.js";
 
 class RefreshTokenRepository {
   constructor() {
@@ -7,15 +8,54 @@ class RefreshTokenRepository {
   }
 
   async insertRefreshToken(userId, refreshToken) {
+    if (!userId || !refreshToken)
+      throw new Error(
+        "Invalid parameters given when inserting refresh token to database"
+      );
     const entry = {
       userId: userId,
-      token: refreshToken,
+      token: hashString(refreshToken), // Stores the sha-256 hashed version of refresh token into database
       expiresAt: new Date(
         Date.now() + REFRESH_TOKEN_LIFESPAN_DAYS * 24 * 60 * 60 * 1000
       ),
     };
-    const collection = this.collection;
-    await insertEntry(entry, collection);
+    await insertEntry(entry, this.collection);
+  }
+
+  async getRefreshToken(refreshToken) {
+    if (!refreshToken)
+      throw new Error(
+        "Invalid parameters given when getting refresh token from database"
+      );
+    const query = {
+      token: hashString(refreshToken),
+    };
+    return await getEntry(query, this.collection);
+  }
+
+  async updateRefreshToken(userId, newRefreshToken) {
+    if (!userId || !newRefreshToken)
+      throw new Error(
+        "Invalid parameters given when updating refresh token to database"
+      );
+    // Filter to match documents
+    const query = {
+      userId: userId,
+    };
+
+    // The properties you specify that will be updated (unspecified ones remain unchanged)
+    const update = {
+      $set: { token: hashString(newRefreshToken) },
+    };
+
+    const options = {};
+    const result = await updateEntry(
+      query,
+      update,
+      options,
+      process.env.DB_REFRESH_TOKEN_COLLECTION
+    );
+    return result;
   }
 }
 

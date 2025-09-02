@@ -16,6 +16,7 @@ import { router as accountRouter } from "./routes/account_registration.js";
 import { router as loginRouter } from "./routes/account_login.js";
 import { router as authRouter } from "./routes/auth.js";
 import { closeMongoConnection } from "./database/connection.js";
+import { errorHandler } from "./middleware/error.js";
 
 // https://expressjs.com/en/resources/middleware/cors.html
 // https://treblle.com/blog/setup-cors-rest-api#heading-how-to-configure-cors-for-your-rest-api
@@ -64,6 +65,8 @@ process.on("unhandledRejection", async (reason) => {
   console.error(reason);
   await gracefulShutdown();
 });
+
+app.use(errorHandler);
 
 // Start the backend server
 httpsServer.listen(process.env.BACKEND_PORT, process.env.BACKEND_IP, () => {

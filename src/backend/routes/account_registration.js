@@ -2,7 +2,7 @@ import express from "express";
 import { registerPolicy } from "../middleware/auth.js";
 import { validateResult } from "../middleware/validateResult.js";
 import { registrationSanitizer } from "../middleware/sanitization.js";
-import { userController } from "../controllers/UserController.js";
+import userController from "../controllers/UserController.js";
 
 const router = express.Router();
 router.post(

@@ -7,14 +7,6 @@ export default function RegisterModal({
   handleRegistrationSuccess,
   modalRef,
 }) {
-  // Detects onchanging form data
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-
   // Detects onchanging password status and displays updated UI
   const [passwordStatus, setPasswordStatus] = useState({
     hasMinLength: false,
@@ -26,10 +18,12 @@ export default function RegisterModal({
   // Toggle to reveal or hide password
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
-  // List of potential errors on submission
+  // List of potential errors on submission that show UI messages
   const [hasErrors, setHasErrors] = useState({
-    isPasswordMismatch: false,
-    isPasswordPolicyViolated: false,
+    passwordPolicyViolated: "",
+    passwordMismatch: "",
+    invalidEmail: "",
+    customError: "",
   });
 
   const updatePasswordStatus = (password) => {
@@ -69,11 +63,6 @@ export default function RegisterModal({
     event.stopPropagation();
     event.preventDefault();
     const { name, value } = event.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-
     if (name == "password") updatePasswordStatus(value);
   };
 
@@ -86,33 +75,8 @@ export default function RegisterModal({
     event.preventDefault();
 
     const formData = new FormData(event.target);
-    const { username, password, confirmPassword, email } = Object.fromEntries(
-      new FormData(event.target)
-    );
-
-    // Password checks
-    // Password policy enforcement
-    let passwordPolicyViolated = false;
-    Object.keys(passwordStatus).forEach((key) => {
-      const value = passwordStatus[key];
-      if (!value) {
-        passwordPolicyViolated = true;
-      }
-    });
-    setHasErrors((prev) => ({
-      ...prev,
-      isPasswordPolicyViolated: passwordPolicyViolated,
-    }));
-
-    // Password match enforcement
-    let passwordMismatch = false;
-    if (password !== confirmPassword) {
-      passwordMismatch = true;
-    }
-    setHasErrors((prev) => ({
-      ...prev,
-      isPasswordMismatch: passwordMismatch,
-    }));
+    const { username, password, confirmPassword, email } =
+      Object.fromEntries(formData);
 
     const url = `${import.meta.env.VITE_BACKEND_URL}/users`;
     const postData = {
@@ -132,23 +96,49 @@ export default function RegisterModal({
         },
       });
 
+      const data = await response.json();
+      console.log("printing data...");
+      console.log(data);
       if (!response.ok) {
-        throw new Error(`Response status: ${response.status}`);
-      }
+        if (data.errors) {
+          const fields = [
+            "invalidEmail",
+            "passwordPolicyViolated",
+            "passwordMismatch",
+            "customError",
+          ];
+          const clearedErrors = fields.reduce((acc, field) => {
+            acc[field] = "";
+            return acc;
+          }, {});
 
-      // Ensure cookies are set before navigation
-      const cookieResponse = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/authentication`,
-        {
-          method: "GET",
-          credentials: "include",
+          // Process each error message
+          for (const { field, msg } of data.errors) {
+            switch (field) {
+              case "email":
+                clearedErrors.invalidEmail = msg;
+                break;
+              case "password":
+                clearedErrors.passwordPolicyViolated = msg;
+                break;
+              case "confirmPassword":
+                clearedErrors.passwordMismatch = msg;
+                break;
+              case "customError":
+                clearedErrors.customError = msg;
+                break;
+              default:
+                throw new Error(`An unknown error has occurred }`);
+            }
+          }
+          setHasErrors((prev) => ({
+            ...prev,
+            ...clearedErrors,
+          }));
         }
-      );
-      if (cookieResponse.ok) {
+      } else {
         // Navigate to main lobby
         handleRegistrationSuccess();
-      } else {
-        console.log("cookie validation failed");
       }
     } catch (error) {
       console.log(error);
@@ -188,9 +178,9 @@ export default function RegisterModal({
                   <li>{passwordStatus.hasSymbol ? "✅" : "❌"} 1 symbol</li>
                 </ul>
               </div>
-              {hasErrors.isPasswordPolicyViolated && (
+              {hasErrors.customError && (
                 <div className="text-[#D32F2F]">
-                  <p>Password requirements are not met</p>
+                  <p>{hasErrors.customError}</p>
                 </div>
               )}
             </div>
@@ -209,37 +199,45 @@ export default function RegisterModal({
               </div>
 
               <div>
-                <label htmlFor="email" className="block">
-                  Email
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="email"
-                  name="email"
-                  className="neon-input p-1.5 rounded-lg w-full placeholder-gray-400"
-                ></input>
+                <div>
+                  <label htmlFor="email" className="block">
+                    Email
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="email"
+                    name="email"
+                    className="neon-input p-1.5 rounded-lg w-full placeholder-gray-400"
+                  ></input>
+                </div>
+                {hasErrors.invalidEmail && (
+                  <div className="text-[#D32F2F]">
+                    <p>{hasErrors.invalidEmail}</p>
+                  </div>
+                )}
               </div>
 
-              <div className="relative">
-                <label htmlFor="password" className="block">
-                  Password
-                </label>
-                <input
-                  id="password"
-                  type={isPasswordVisible ? "text" : "password"}
-                  placeholder="password"
-                  name="password"
-                  className="neon-input p-1.5 rounded-lg w-full placeholder-gray-400"
-                  onChange={handleChange}
-                ></input>
+              <div>
+                <div className="relative">
+                  <label htmlFor="password" className="block">
+                    Password
+                  </label>
+                  <input
+                    id="password"
+                    type={isPasswordVisible ? "text" : "password"}
+                    placeholder="password"
+                    name="password"
+                    className="neon-input p-1.5 rounded-lg w-full placeholder-gray-400"
+                    onChange={handleChange}
+                  ></input>
 
-                <div className="absolute flex flex-col space-y-1 bottom-2.5 right-3 cursor-pointer">
-                  {/* Tooltip Wrapper */}
-                  <div className="group relative">
-                    {/* Tooltip */}
-                    <div
-                      className="invisible absolute bottom-[180%] -right-[3.45rem] mb-2 w-32 bg-gray-800
+                  <div className="absolute flex flex-col space-y-1 bottom-2.5 right-3 cursor-pointer">
+                    {/* Tooltip Wrapper */}
+                    <div className="group relative">
+                      {/* Tooltip */}
+                      <div
+                        className="invisible absolute bottom-[180%] -right-[3.45rem] mb-2 w-32 bg-gray-800
                    text-[#F5F5F5] text-sm text-center py-1 px-2 rounded select-none cursor-default
                     before:content-[''] before:absolute before:top-full before:right-13 
                     before:w-0 before:h-0
@@ -247,16 +245,22 @@ export default function RegisterModal({
                     before:border-t-[1.7em]  before:border-gray-800
                     group-hover:visible 
                   "
-                    >
-                      Show password
-                    </div>
+                      >
+                        Show password
+                      </div>
 
-                    {/* Icon */}
-                    <i>
-                      <FaEye onClick={toggleIsPasswordVisible} />
-                    </i>
+                      {/* Icon */}
+                      <i>
+                        <FaEye onClick={toggleIsPasswordVisible} />
+                      </i>
+                    </div>
                   </div>
                 </div>
+                {hasErrors.passwordPolicyViolated && (
+                  <div className="text-[#D32F2F]">
+                    <p>{hasErrors.passwordPolicyViolated}</p>
+                  </div>
+                )}
               </div>
               <div>
                 <div>
@@ -272,9 +276,9 @@ export default function RegisterModal({
                   ></input>
                 </div>
 
-                {hasErrors.isPasswordMismatch && (
+                {hasErrors.passwordMismatch && (
                   <div className="text-[#D32F2F]">
-                    <p>Passwords do not match</p>
+                    <p>{hasErrors.passwordMismatch}</p>
                   </div>
                 )}
               </div>

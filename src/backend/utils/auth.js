@@ -13,9 +13,17 @@ const createRefreshToken = () => {
   return refreshToken;
 };
 
+const hashString = (inputString) => {
+  const hashedString = crypto
+    .createHash("sha256")
+    .update(inputString)
+    .digest("hex");
+  return hashedString;
+};
+
 const hashPassword = async (password) => {
   const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
   return hashedPassword;
 };
 
-export { createJWT, createRefreshToken, hashPassword };
+export { createJWT, createRefreshToken, hashPassword, hashString };
