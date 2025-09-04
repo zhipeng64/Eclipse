@@ -62,6 +62,11 @@ h3 {
   color: #90cdf4;
 }
 
+.standard-icon-container {
+  color: #90cdf4;
+  box-shadow: 0 0 5px 0px rgba(144, 205, 244, 0.6);
+}
+
 .standard-icon {
   font-size: 1.4rem;
   cursor: pointer;
@@ -113,6 +118,14 @@ h3 {
   color: white;
   border-style: solid;
   border-color: #90cdf4;
+  border-width: 1px;
+  cursor: pointer;
+}
+
+.neon-button-purple {
+  color: white;
+  border-style: solid;
+  border-color: #b390f4;
   border-width: 1px;
   cursor: pointer;
 }

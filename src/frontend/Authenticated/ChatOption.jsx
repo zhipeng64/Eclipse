@@ -1,21 +1,49 @@
+import { useState, useRef } from "react";
 import { IoPersonAddSharp } from "react-icons/io5";
 import { FaSearch } from "react-icons/fa";
+import { CiMail } from "react-icons/ci";
+import SearchFriendModal from "./SearchFriendModal";
+import { useCloseOnClickOutside } from "../utils/modules";
 
-function ChatOption(chatData) {
+function ChatOption({ chatData }) {
+  const [isFriendSearchOpen, setIsFriendSearchOpen] = useState(false);
+  const friendModalRef = useRef(null);
+
+  const toggleFriendSearch = () => {
+    setIsFriendSearchOpen(!isFriendSearchOpen);
+  };
+
+  // Register event listeners
+  useCloseOnClickOutside(friendModalRef, isFriendSearchOpen, () =>
+    setIsFriendSearchOpen(false)
+  );
   return (
     <div
       id="chat-option"
       className="text-white bg-[#0f0f1a] w-full max-w-lg h-full flex flex-col rounded-lg opac-shadow"
     >
+      <SearchFriendModal
+        isFriendSearchOpen={isFriendSearchOpen}
+        friendModalRef={friendModalRef}
+      />
       <div id="top-navigation" className="opac-shadow">
         <div className="flex items-center justify-between p-3 mb-0.5">
           <h1 className="text-3xl">Chat</h1>
-          <div className="flex space-x-7 text-gray-200 pr-2">
-            <i>
+          <div className="flex space-x-7 text-gray-200 pr-2r">
+            <i className="standard-icon-container p-1">
               <FaSearch className="standard-icon" />
             </i>
-            <i>
+            <i
+              className="standard-icon-container p-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFriendSearch();
+              }}
+            >
               <IoPersonAddSharp className="standard-icon" />
+            </i>
+            <i className="standard-icon-container p-1">
+              <CiMail className="standard-icon" />
             </i>
           </div>
         </div>

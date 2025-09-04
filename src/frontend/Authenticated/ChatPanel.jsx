@@ -31,14 +31,14 @@ function ChatPanel(chatData) {
           <p className="text-md">John Zena</p>
         </div>
         <div className="flex space-x-7 text-gray-200 pr-2">
-          <i className="standard-icon">
-            <IoVideocam />
+          <i className="standard-icon-container p-1">
+            <IoVideocam className="standard-icon" />
           </i>
-          <i className="standard-icon">
-            <IoMic />
+          <i className="standard-icon-container p-1">
+            <IoMic className="standard-icon" />
           </i>
-          <i className="standard-icon">
-            <IoSettingsSharp />
+          <i className="standard-icon-container p-1">
+            <IoSettingsSharp className="standard-icon" />
           </i>
         </div>
       </div>

@@ -15,7 +15,7 @@ export default function LoginModal({
     const { username, password } = Object.fromEntries(
       new FormData(event.target).entries()
     );
-    const url = `${import.meta.env.VITE_BACKEND_URL}/session`;
+    const url = `${import.meta.env.VITE_BACKEND_URL}/users/session`;
     const postData = {
       username: username,
       password: password,

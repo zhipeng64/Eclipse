@@ -8,4 +8,5 @@ package-lock.json
 /dist
 /temp
 /node_modules
+**/tester.js
 

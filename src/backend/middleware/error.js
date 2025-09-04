@@ -24,7 +24,7 @@ export const errorHandler = (error, req, res, next) => {
     ],
   };
   if (intentionalError) {
-    clientResponse = intentionalError.clientResponse;
+    clientResponse = error.clientResponse;
   }
   return res.status(statusCode).json(clientResponse);
 };

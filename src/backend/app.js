@@ -1,9 +1,11 @@
 // Core modules and frameworks
 import express from "express";
 import https from "https";
+import { createServer } from "node:http";
 import fs from "fs"; // Import Node.js 'fs' module
 
 // Third party modules
+import { Server } from "socket.io";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -12,8 +14,7 @@ import cookieParser from "cookie-parser";
 dotenv.config({ path: "../../.env" });
 
 // Local custom modules
-import { router as accountRouter } from "./routes/account_registration.js";
-import { router as loginRouter } from "./routes/account_login.js";
+import { router as accountRouter } from "./routes/users/account.js";
 import { router as authRouter } from "./routes/auth.js";
 import { closeMongoConnection } from "./database/connection.js";
 import { errorHandler } from "./middleware/error.js";
@@ -36,11 +37,15 @@ const options = {
 };
 const httpsServer = https.createServer(options, app);
 
+// Socket IO Server
+const io = new Server(httpsServer, {
+  cors: corsConfiguration, // Need separate CORS configuration for SocketIO, not shared with ExpressJS
+});
+
 app.use(cors(corsConfiguration)); // Cors settings applied to all imported public  routes
 app.use(express.json()); // Accepts incoming JSON data in HTTP requests
 app.use(cookieParser()); // For parsing cookies from a client
 app.use("/users", accountRouter);
-app.use("/session", loginRouter);
 app.use("/authentication", authRouter);
 
 // In case the backend may terminate due to runtime errors (which don't generate signals) or signals,
@@ -64,6 +69,13 @@ process.on("uncaughtException", async (err) => {
 process.on("unhandledRejection", async (reason) => {
   console.error(reason);
   await gracefulShutdown();
+});
+
+// Accept socket connections
+io.on("connection", (socket) => {
+  socket.on("disconnect", () => {
+    console.log("client socket disconnected ");
+  });
 });
 
 app.use(errorHandler);
