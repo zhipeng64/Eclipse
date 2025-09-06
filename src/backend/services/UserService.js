@@ -128,7 +128,7 @@ class UserService {
     };
   }
 
-  async getUserAvatar(username) {
+  async getUserAvatar({ username }) {
     if (!username) {
       throw new Error("Invalid userId supplied");
     }
@@ -138,6 +138,51 @@ class UserService {
       throw new Error("Failed to retrieve user avatar");
     }
     return avatarImage;
+  }
+
+  async searchUser({ targetUsername }) {
+    try {
+      if (!targetUsername) {
+        throw new Error("InvalidUserLookup");
+      }
+      const user = await userRepository.getUser(targetUsername, null);
+      if (!user) {
+        throw new Error("No user matched lookup criteria");
+      }
+
+      const username = user?.account?.username;
+      const avatarImage = user?.profile?.avatarImage;
+
+      if (!username || !avatarImage) {
+        throw new Error("Invalid user field fetched from database");
+      }
+      console.log(username, avatarImage);
+      return {
+        username,
+        avatarImage,
+      };
+    } catch (error) {
+      const message = error.message;
+      switch (message) {
+        case "InvalidUserLookup":
+          throw new AppError({
+            originalErrorMessage: message,
+            originalErrorStackTrace: error.stack,
+            errorDescription: "username is invalid",
+            statusCode: 400,
+            clientResponse: {
+              errors: [
+                {
+                  field: "searchError",
+                  message: "Please try a different username",
+                },
+              ],
+            },
+          });
+        default:
+          throw error;
+      }
+    }
   }
 }
 

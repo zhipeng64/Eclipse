@@ -1,3 +1,4 @@
+// Definitions on the allowed connections
 const ALLOWED_COLLECTIONS = [
   "users",
   "refresh_tokens",

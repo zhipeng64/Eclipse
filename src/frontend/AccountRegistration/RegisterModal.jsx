@@ -78,7 +78,7 @@ export default function RegisterModal({
     const { username, password, confirmPassword, email } =
       Object.fromEntries(formData);
 
-    const url = `${import.meta.env.VITE_BACKEND_URL}/users`;
+    const url = `${import.meta.env.VITE_BACKEND_URL}/registration`;
     const postData = {
       username: username,
       email: email,
@@ -107,7 +107,7 @@ export default function RegisterModal({
             "passwordMismatch",
             "customError",
           ];
-          const clearedErrors = fields.reduce((acc, field) => {
+          const newErrors = fields.reduce((acc, field) => {
             acc[field] = "";
             return acc;
           }, {});
@@ -116,25 +116,22 @@ export default function RegisterModal({
           for (const { field, msg } of data.errors) {
             switch (field) {
               case "email":
-                clearedErrors.invalidEmail = msg;
+                newErrors.invalidEmail = msg;
                 break;
               case "password":
-                clearedErrors.passwordPolicyViolated = msg;
+                newErrors.passwordPolicyViolated = msg;
                 break;
               case "confirmPassword":
-                clearedErrors.passwordMismatch = msg;
+                newErrors.passwordMismatch = msg;
                 break;
               case "customError":
-                clearedErrors.customError = msg;
+                newErrors.customError = msg;
                 break;
               default:
                 throw new Error(`An unknown error has occurred }`);
             }
           }
-          setHasErrors((prev) => ({
-            ...prev,
-            ...clearedErrors,
-          }));
+          setHasErrors(newErrors);
         }
       } else {
         // Navigate to main lobby

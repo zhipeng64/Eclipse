@@ -1,25 +1,23 @@
 // Middleware to validate JWT Tokens and Refresh Tokens
-import { body } from "express-validator";
-import { isValidPassword, isSamePassword } from "../validators/password.js";
-// Account registration validation middleware
-const registerPolicy = [
-  body("email").isEmail().withMessage("Email is invalid"),
+import authService from "../services/authService.js";
 
-  body("username").notEmpty().withMessage("Username is required"),
+// Checks validity of both jwt token and refresh token
+const authHandler = async (req, res, next) => {
+  const jwtToken = req?.cookies?.jwt;
+  const refreshToken = req?.cookies?.refreshToken;
 
-  body("password").custom((password) => {
-    if (!isValidPassword(password)) {
-      throw new Error("Password is invalid.");
+  try {
+    const isJwtTokenValid = await authService.isJwtTokenValid(jwtToken);
+    const isRefreshTokenValid =
+      await authService.isRefreshTokenValid(refreshToken);
+    // If jwt or refresh token is invalid, then user is unauthorized to access protected routes
+    if (!isJwtTokenValid || !isRefreshTokenValid) {
+      throw new Error("Unauthorized");
     }
-    return true;
-  }),
+    next();
+  } catch (error) {
+    throw error;
+  }
+};
 
-  body("confirmPassword").custom((confirmPassword, { req }) => {
-    if (!isSamePassword(confirmPassword, req.body.password)) {
-      throw new Error("Passwords do not match.");
-    }
-    return true;
-  }),
-];
-
-export { registerPolicy };
+export { authHandler };

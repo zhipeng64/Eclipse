@@ -1,9 +1,6 @@
 import jwt from "jsonwebtoken";
 import { refreshTokenRepository } from "../database/RefreshTokenDb.js";
-import {
-  isJwtFormatInvalid,
-  isRefreshTokenFormatInvalid,
-} from "../validators/auth.js";
+import authValidator from "../validators/auth.js";
 import {
   JWT_TOKEN_LIFESPAN_MINUTES,
   REFRESH_TOKEN_LIFESPAN_DAYS,
@@ -46,7 +43,7 @@ export class AuthService {
     if (!refreshToken) {
       throw new Error("Refresh token is a falsy value");
     }
-    if (isRefreshTokenFormatInvalid(refreshToken)) {
+    if (authValidator.isRefreshTokenFormatInvalid(refreshToken)) {
       throw new Error("Refresh token format is invalid");
     }
 
@@ -75,7 +72,7 @@ export class AuthService {
       const decodedJwt = jwt.verify(jwtToken, process.env.JWT_SECRET);
 
       // Verify the decoded JWT message format
-      if (isJwtFormatInvalid(decodedJwt)) {
+      if (authValidator.isJwtFormatInvalid(decodedJwt)) {
         throw new Error("JWT token format is invalid");
       }
       return true;

@@ -1,8 +1,7 @@
 // Core modules and frameworks
 import express from "express";
 import https from "https";
-import { createServer } from "node:http";
-import fs from "fs"; // Import Node.js 'fs' module
+import fs from "fs";
 
 // Third party modules
 import { Server } from "socket.io";
@@ -14,8 +13,9 @@ import cookieParser from "cookie-parser";
 dotenv.config({ path: "../../.env" });
 
 // Local custom modules
-import { router as accountRouter } from "./routes/users/account.js";
-import { router as authRouter } from "./routes/auth.js";
+import { router as registerRouter } from "./routes/users/register.js";
+import { router as userRouter } from "./routes/authenticated/user.js";
+import { router as authRouter } from "./routes/authenticated/auth.js";
 import { closeMongoConnection } from "./database/connection.js";
 import { errorHandler } from "./middleware/error.js";
 
@@ -45,8 +45,9 @@ const io = new Server(httpsServer, {
 app.use(cors(corsConfiguration)); // Cors settings applied to all imported public  routes
 app.use(express.json()); // Accepts incoming JSON data in HTTP requests
 app.use(cookieParser()); // For parsing cookies from a client
-app.use("/users", accountRouter);
 app.use("/authentication", authRouter);
+app.use("/registration", registerRouter);
+app.use("/users", userRouter);
 
 // In case the backend may terminate due to runtime errors (which don't generate signals) or signals,
 // handle it gracefully by performing any cleanup operations.

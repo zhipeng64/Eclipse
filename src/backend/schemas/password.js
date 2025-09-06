@@ -1,6 +1,6 @@
+// Definitions on Password policy
 import PasswordValidator from "password-validator";
 
-// Password policy
 const passwordSchema = new PasswordValidator();
 passwordSchema
   .is()

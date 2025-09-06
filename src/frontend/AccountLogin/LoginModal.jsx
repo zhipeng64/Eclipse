@@ -15,7 +15,7 @@ export default function LoginModal({
     const { username, password } = Object.fromEntries(
       new FormData(event.target).entries()
     );
-    const url = `${import.meta.env.VITE_BACKEND_URL}/users/session`;
+    const url = `${import.meta.env.VITE_BACKEND_URL}/users/login`;
     const postData = {
       username: username,
       password: password,
@@ -54,6 +54,8 @@ export default function LoginModal({
                 className="w-[65%] p-1 rounded-lg neon-input"
                 name="username"
                 placeholder="username"
+                type="text"
+                autoComplete="on"
               ></input>
             </div>
             <div className="flex flex-col gap-y-2">
@@ -64,6 +66,7 @@ export default function LoginModal({
                   placeholder="password"
                   name="password"
                   type="password"
+                  autoComplete="current-password"
                 ></input>
               </div>
               <a className="text-xs ml-17 text-[#90cdf4] w-fit" href="#">
