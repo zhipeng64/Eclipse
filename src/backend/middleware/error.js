@@ -1,4 +1,4 @@
-import { AppError } from "../utils/error.js";
+import { AppError } from "../utils/AppError.js";
 
 // Centralized error handling for both intentional and unintentional errors
 export const errorHandler = (error, req, res, next) => {

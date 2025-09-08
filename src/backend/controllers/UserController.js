@@ -62,6 +62,9 @@ class UserController {
       success: true,
     });
   }
+
+  // Sends a friend request to target user
+  async addUser(req, res) {}
 }
 
 const userController = new UserController();

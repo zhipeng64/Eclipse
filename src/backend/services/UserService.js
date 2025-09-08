@@ -6,7 +6,7 @@ import { hashPassword } from "../utils/auth.js";
 import { userRepository } from "../database/UserDb.js";
 import { refreshTokenRepository } from "../database/RefreshTokenDb.js";
 import { AuthService } from "./authService.js";
-import { AppError } from "../utils/error.js";
+import { AppError } from "../utils/AppError.js";
 
 class UserService {
   // Registers user if no duplicate user is found
@@ -46,8 +46,7 @@ class UserService {
           "Failed to retrieve truthy return value after inserting user"
         );
       }
-      const userId = result.insertedId.toHexString();
-
+      const userId = result.insertedId;
       // JWT Payload
       const jwt = AuthService.createJwtToken(userId);
       const refreshToken = AuthService.createRefreshToken();
@@ -57,8 +56,8 @@ class UserService {
       return {
         jwt,
         refreshToken,
-        jwtExpiresAt: AuthService.getJwtTokenExpiration(),
-        refreshTokenExpiresAt: AuthService.getRefreshTokenExpiration(),
+        jwtExpiresAt: AuthService.getJwtTokenDuration(),
+        refreshTokenExpiresAt: AuthService.getRefreshTokenDuration(),
       };
     } catch (error) {
       const message = error.message;
@@ -91,7 +90,7 @@ class UserService {
     if (!user) {
       throw new Error("Login for user failed (user not found in database)");
     }
-    const userId = user._id.toHexString();
+    const userId = user._id;
 
     // Compare passwords
     const passwordHash = user.account.hashedPassword;
@@ -116,15 +115,16 @@ class UserService {
     if (!result || result.matchedCount == 0) {
       throw new Error("Updating refresh token failed");
     }
-    console.log("Updated user refresh token successfully");
 
     // Create new JWT token
     const newJwtToken = AuthService.createJwtToken(userId);
+    console.log("Updated user jwt and refresh tokens");
+
     return {
       jwt: newJwtToken,
       refreshToken: newRefreshToken,
-      jwtExpiresAt: AuthService.getJwtTokenExpiration(),
-      refreshTokenExpiresAt: AuthService.getRefreshTokenExpiration(),
+      jwtExpiresAt: AuthService.getJwtTokenDuration(),
+      refreshTokenExpiresAt: AuthService.getRefreshTokenDuration(),
     };
   }
 

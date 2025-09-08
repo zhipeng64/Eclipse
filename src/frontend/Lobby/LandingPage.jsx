@@ -1,13 +1,12 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { io } from "socket.io-client";
 import NavigationBar from "../utils/NavigationBar";
 import Footer from "../utils/Footer";
 import RegisterModal from "../AccountRegistration/RegisterModal";
 import LoginModal from "../AccountLogin/LoginModal";
 
 // Utility functions
-import { useCloseOnClickOutside } from "../utils/modules";
+import { useCloseOnClickOutside } from "../utils/customHooks";
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -15,10 +14,6 @@ export default function LandingPage() {
   const [isLogin, setIsLogin] = useState(false);
   const registrationModalRef = useRef(null);
   const loginModalRef = useRef(null);
-
-  useEffect(() => {
-    const socket = io(`${import.meta.env.VITE_BACKEND_URL}/`);
-  }, []);
 
   // State updates
   const toggleSignUp = () => {

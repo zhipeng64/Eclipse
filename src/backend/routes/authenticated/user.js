@@ -5,6 +5,7 @@ import userController from "../../controllers/UserController.js";
 import {
   loginSanitizer,
   userLookupSanitizer,
+  friendRequestSanitizer,
 } from "../../middleware/sanitization.js";
 import { validateResult } from "../../middleware/validateResult.js";
 
@@ -13,7 +14,6 @@ const router = express.Router();
 // Login Endpoint, /users/login
 router.post(
   "/login",
-  authHandler,
   loginSanitizer,
   validateResult,
   userController.loginHandler.bind(userController)
@@ -29,6 +29,12 @@ router.get(
 );
 
 // User Friend Request Endpoint, /users/friend-requests
-router.post("/friend-requests", authHandler);
+router.post(
+  "/friend-requests",
+  authHandler,
+  friendRequestSanitizer,
+  validateResult,
+  userController.addUser.bind(userController)
+);
 
 export { router };

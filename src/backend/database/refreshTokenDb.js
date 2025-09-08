@@ -1,12 +1,13 @@
 import { getEntry, insertEntry, updateEntry } from "./crud.js";
-import { REFRESH_TOKEN_LIFESPAN_DAYS } from "../schemas/auth.js";
 import { hashString } from "../utils/auth.js";
+import { AuthService } from "../services/authService.js";
 
 class RefreshTokenRepository {
   constructor() {
     this.collection = process.env.DB_REFRESH_TOKEN_COLLECTION;
   }
 
+  // userId is an ObjectId(<hex_string>) type, not a plain hexadecimal string
   async insertRefreshToken(userId, refreshToken) {
     if (!userId || !refreshToken)
       throw new Error(
@@ -15,9 +16,7 @@ class RefreshTokenRepository {
     const entry = {
       userId: userId,
       token: hashString(refreshToken), // Stores the sha-256 hashed version of refresh token into database
-      expiresAt: new Date(
-        Date.now() + REFRESH_TOKEN_LIFESPAN_DAYS * 24 * 60 * 60 * 1000
-      ),
+      expiresAt: new Date(AuthService.getRefreshTokenExpiration()),
     };
     await insertEntry(entry, this.collection);
   }

@@ -1,34 +1,52 @@
 import jwt from "jsonwebtoken";
 import { refreshTokenRepository } from "../database/RefreshTokenDb.js";
-import authValidator from "../validators/auth.js";
+import authValidator from "../validators/AuthValidator.js";
 import {
   JWT_TOKEN_LIFESPAN_MINUTES,
   REFRESH_TOKEN_LIFESPAN_DAYS,
 } from "../schemas/auth.js";
 import { createJWT, createRefreshToken } from "../utils/auth.js";
+import { ref } from "process";
 export class AuthService {
-  // Gets JWT token expiration (ms)
-  static getJwtTokenExpiration() {
-    const jwtExpiresAt = new Date(
-      Date.now() + JWT_TOKEN_LIFESPAN_MINUTES * 60 * 1000
-    );
+  // Gets JWT token duration in milliseconds
+  static getJwtTokenDuration() {
+    const jwtExpiresAt = JWT_TOKEN_LIFESPAN_MINUTES * 60 * 1000;
     return jwtExpiresAt;
   }
 
-  // Gets Refresh token expiration (ms)
-  static getRefreshTokenExpiration() {
-    const refreshTokenExpiresAt = new Date(
-      Date.now() + REFRESH_TOKEN_LIFESPAN_DAYS * 24 * 60 * 60 * 1000
-    );
+  // Gets Refresh token duration in milliseconds
+  static getRefreshTokenDuration() {
+    const refreshTokenExpiresAt =
+      REFRESH_TOKEN_LIFESPAN_DAYS * 24 * 60 * 60 * 1000;
     return refreshTokenExpiresAt;
+  }
+
+  // Gets JWT token expiration date, calculated using the current time and its duration
+  static getJwtTokenExpiration() {
+    const jwtDuration = AuthService.getJwtTokenDuration();
+    const jwtExpiration = Date.now() + jwtDuration;
+    return jwtExpiration;
+  }
+
+  // Gets refresh token expiration date, calculated using the current time and its duration
+  static getRefreshTokenExpiration() {
+    const refreshTokenDuration = AuthService.getRefreshTokenDuration();
+    const refreshTokenExpiration = Date.now() + refreshTokenDuration;
+    return refreshTokenExpiration;
   }
 
   // Creates a signed JWT token
   static createJwtToken(userId) {
-    const jwt = createJWT({
-      id: userId,
-      expiresIn: AuthService.getJwtTokenExpiration().toString(), // In ms
-    });
+    console.log("Received user id: ");
+    console.log(userId);
+    // Options specified are implictly inserted into the jwt token payload by jsonwebtoken
+    // Note: Payload data is serialized with JSON.stringify
+    const jwt = createJWT(
+      {
+        id: userId,
+      },
+      { expiresIn: AuthService.getJwtTokenDuration().toString() }
+    );
     return jwt;
   }
 
@@ -38,8 +56,44 @@ export class AuthService {
     return refreshToken;
   }
 
+  // Checks authentication status of user
+  // To pass the check, a user must have only a jwt token, or a refresh token, or both.
+  // The optional jwtCallback adds support for middleware to set its cookie
+  // Returns the jwt token
+  async validateTokens(jwtToken, refreshToken, jwtCallback = null) {
+    var parsedJwtToken = null;
+    var parsedRefreshToken = null;
+    try {
+      // Jwt token present
+      if (jwtToken) {
+        parsedJwtToken = await this.decodeAndVerifyJwt(jwtToken);
+        return parsedJwtToken;
+      }
+
+      // Refresh token present
+      if (refreshToken) {
+        parsedRefreshToken =
+          await this.decodeAndVerifyRefreshToken(refreshToken);
+
+        // Get the userId associated with the refresh token
+        const userId = parsedRefreshToken.userId;
+        const newJwtToken = AuthService.createJwtToken(userId);
+        const duration = AuthService.getJwtTokenDuration();
+        parsedJwtToken = await this.decodeAndVerifyJwt(newJwtToken);
+
+        // Optional callback to set jwt cookie for middleware
+        if (jwtCallback) {
+          jwtCallback(newJwtToken, duration);
+        }
+        return parsedJwtToken;
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // Verifies refresh token validity
-  async isRefreshTokenValid(refreshToken) {
+  async decodeAndVerifyRefreshToken(refreshToken) {
     if (!refreshToken) {
       throw new Error("Refresh token is a falsy value");
     }
@@ -54,31 +108,34 @@ export class AuthService {
       if (!dbRefreshToken) {
         throw new Error("Database refresh token not found");
       }
-      return true;
+      return dbRefreshToken;
     } catch (error) {
       console.log(error);
-      return false;
+      return null;
     }
   }
 
-  // Verifies JWT token validity
-  async isJwtTokenValid(jwtToken) {
+  // Returns decoded JWT if valid, null if not
+  async decodeAndVerifyJwt(jwtToken) {
     if (!jwtToken) {
-      throw new Error("JWT is a falsy value");
+      console.log("JWT is a falsy value");
+      return null;
     }
+
     try {
-      // Verify JWT signature and expiration
-      // If failed, the method throws an error
+      // Decode and verify the token
       const decodedJwt = jwt.verify(jwtToken, process.env.JWT_SECRET);
 
-      // Verify the decoded JWT message format
+      console.log(decodedJwt);
       if (authValidator.isJwtFormatInvalid(decodedJwt)) {
-        throw new Error("JWT token format is invalid");
+        console.log("JWT token format is invalid");
+        return null;
       }
-      return true;
+
+      return decodedJwt;
     } catch (err) {
-      console.log(err);
-      return false;
+      console.log("JWT verification failed:", err.message);
+      return null;
     }
   }
 }

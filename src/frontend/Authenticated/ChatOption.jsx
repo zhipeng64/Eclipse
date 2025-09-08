@@ -3,7 +3,7 @@ import { IoPersonAddSharp } from "react-icons/io5";
 import { FaSearch } from "react-icons/fa";
 import { CiMail } from "react-icons/ci";
 import SearchFriendModal from "./SearchFriendModal";
-import { useCloseOnClickOutside } from "../utils/modules";
+import { useCloseOnClickOutside } from "../utils/customHooks.jsx";
 
 function ChatOption({ chatData }) {
   const [isFriendSearchOpen, setIsFriendSearchOpen] = useState(false);

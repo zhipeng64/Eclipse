@@ -5,7 +5,7 @@ import { ChatOption } from "./Authenticated/ChatOption.jsx";
 import { HomeOption } from "./Authenticated/HomeOption.jsx";
 import { MainPanel } from "./Authenticated/MainPanel.jsx";
 import { SettingsOption } from "./Authenticated/SettingsOption.jsx";
-import { AuthProvider } from "./Context/Providers/AuthProvider.jsx";
+import ProtectedProvider from "./Context/Providers/ProtectedProvider.jsx";
 
 export default function App() {
   return (
@@ -15,7 +15,10 @@ export default function App() {
       <Route path="/chat" element={<ChatOption />} />
       <Route path="/home" element={<HomeOption />} />
 
-      <Route element={<AuthProvider />}>
+      {/* A Route is a child route if it is nested within another Route component
+      Here, two child routes exist. A component in parent route can render child 
+      component only if Outlet is used*/}
+      <Route element={<ProtectedProvider />}>
         <Route path="/main-lobby" element={<MainPanel />} />
         <Route path="/settings" element={<SettingsOption />} />
       </Route>

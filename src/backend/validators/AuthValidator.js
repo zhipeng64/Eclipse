@@ -6,8 +6,8 @@ class AuthValidator {
       typeof decodedJwt !== "object" ||
       !decodedJwt.id ||
       typeof decodedJwt.id !== "string" ||
-      !decodedJwt.expiresIn ||
-      typeof decodedJwt.expiresIn !== "string" ||
+      !decodedJwt.exp ||
+      typeof decodedJwt.exp !== "number" ||
       !decodedJwt.iat ||
       typeof decodedJwt.iat !== "number"
     );

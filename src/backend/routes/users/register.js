@@ -9,8 +9,8 @@ const router = express.Router();
 router.post(
   "/",
   registrationValidator,
-  validateResult,
   registrationSanitizer,
+  validateResult,
   userController.register.bind(userController) // Binds 'this' to object, since it is used as callback.
 );
 

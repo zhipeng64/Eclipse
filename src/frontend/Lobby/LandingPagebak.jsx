@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import Footer from "../utils/Footer";
 import RegisterModal from "../AccountRegistration/RegisterModal";
 import LoginModal from "../AccountLogin/LoginModal";
-import { useCloseOnClickOutside } from "../utils/modules";
+import { useCloseOnClickOutside } from "../utils/";
 import { FaUserAstronaut, FaRegStar, FaRegSmileBeam } from "react-icons/fa";
 
 export default function LandingPage() {

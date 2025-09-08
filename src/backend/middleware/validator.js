@@ -1,5 +1,5 @@
 import { body, query } from "express-validator";
-import passwordValidator from "../validators/password.js";
+import passwordValidator from "../validators/PasswordValidator.js";
 
 // Reusable validation rules
 const isNonEmptyString = (field, location = body) =>

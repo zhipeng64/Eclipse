@@ -4,7 +4,6 @@ import https from "https";
 import fs from "fs";
 
 // Third party modules
-import { Server } from "socket.io";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -16,8 +15,9 @@ dotenv.config({ path: "../../.env" });
 import { router as registerRouter } from "./routes/users/register.js";
 import { router as userRouter } from "./routes/authenticated/user.js";
 import { router as authRouter } from "./routes/authenticated/auth.js";
-import { closeMongoConnection } from "./database/connection.js";
 import { errorHandler } from "./middleware/error.js";
+import initializeGracefulShutdown from "./shutdown.js";
+import { initializeSocket } from "./socket.js";
 
 // https://expressjs.com/en/resources/middleware/cors.html
 // https://treblle.com/blog/setup-cors-rest-api#heading-how-to-configure-cors-for-your-rest-api
@@ -28,7 +28,7 @@ const corsConfiguration = {
   credentials: true,
 };
 
-// Configure to use SSL Certificate
+// Initialize an HTTPS server
 const privateKey = fs.readFileSync(process.env.CERT_PRIVATE_KEY_PATH);
 const cert = fs.readFileSync(process.env.CERT_PATH);
 const options = {
@@ -37,11 +37,7 @@ const options = {
 };
 const httpsServer = https.createServer(options, app);
 
-// Socket IO Server
-const io = new Server(httpsServer, {
-  cors: corsConfiguration, // Need separate CORS configuration for SocketIO, not shared with ExpressJS
-});
-
+// Initialize all route configuration and parser middlewares
 app.use(cors(corsConfiguration)); // Cors settings applied to all imported public  routes
 app.use(express.json()); // Accepts incoming JSON data in HTTP requests
 app.use(cookieParser()); // For parsing cookies from a client
@@ -49,36 +45,13 @@ app.use("/authentication", authRouter);
 app.use("/registration", registerRouter);
 app.use("/users", userRouter);
 
-// In case the backend may terminate due to runtime errors (which don't generate signals) or signals,
-// handle it gracefully by performing any cleanup operations.
-const gracefulShutdown = async () => {
-  console.log("Shutting down gracefully...");
-  // Close DB, server, cleanup, etc.
-  await closeMongoConnection();
-  process.exit(0);
-};
+// Initialize signal handlers
+initializeGracefulShutdown();
 
-// OS signals
-process.on("SIGINT", gracefulShutdown);
-process.on("SIGTERM", gracefulShutdown);
+// Initialize socket object and its listeners
+initializeSocket(httpsServer);
 
-// Runtime errors
-process.on("uncaughtException", async (err) => {
-  console.error(err);
-  await gracefulShutdown();
-});
-process.on("unhandledRejection", async (reason) => {
-  console.error(reason);
-  await gracefulShutdown();
-});
-
-// Accept socket connections
-io.on("connection", (socket) => {
-  socket.on("disconnect", () => {
-    console.log("client socket disconnected ");
-  });
-});
-
+// Initialize a global error-handling middleware
 app.use(errorHandler);
 
 // Start the backend server

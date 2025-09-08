@@ -1,5 +1,5 @@
 import { validationResult } from "express-validator";
-import { AppError } from "../utils/error.js";
+import { AppError } from "../utils/AppError.js";
 
 // Proper middleware
 const validateResult = (req, res, next) => {

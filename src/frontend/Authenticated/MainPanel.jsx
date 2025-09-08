@@ -1,32 +1,10 @@
-import { useContext, useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../Context/Auth";
 import { Navigation } from "./Navigation";
 import { ChatOption } from "./ChatOption";
 import { ChatPanel } from "./ChatPanel";
+import { useAuthenticationChecks } from "../utils/customHooks";
 
 function MainPanel() {
-  const navigate = useNavigate();
-  const authenticationContext = useContext(AuthContext);
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  // Sets user authentication status
-  useEffect(() => {
-    const authHandler = async () => {
-      console.log("preparing auth status...");
-      const authStatus = await authenticationContext();
-      console.log("auth status: ", authStatus);
-      setIsAuthenticated(authStatus);
-      setIsLoading(false);
-
-      if (!authStatus) {
-        navigate("/");
-      }
-    };
-    authHandler();
-  }, []);
+  const { isLoading, isAuthenticated } = useAuthenticationChecks();
 
   if (isLoading) {
     return <div>Loading...</div>;

@@ -4,8 +4,8 @@ import crypto from "crypto";
 
 import { SALT_ROUNDS } from "../schemas/password.js";
 
-const createJWT = (payload) => {
-  return jwt.sign(payload, process.env.JWT_SECRET);
+const createJWT = (payload, options = {}) => {
+  return jwt.sign(payload, process.env.JWT_SECRET, options);
 };
 
 const createRefreshToken = () => {
