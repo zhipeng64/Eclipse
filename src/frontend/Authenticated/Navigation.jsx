@@ -1,8 +1,11 @@
 import { FaHome } from "react-icons/fa";
 import { IoMdChatboxes } from "react-icons/io";
 import { IoSettings } from "react-icons/io5";
+import { useContext } from "react";
+import SocketContext from "../Context/Socket";
 
 function Navigation() {
+  const { newFriendRequest } = useContext(SocketContext);
   return (
     <nav
       id="top-nav"
@@ -20,6 +23,7 @@ function Navigation() {
           <IoMdChatboxes className="text-[1.4rem] cursor-pointer" />
         </i>
         <h2 className="text-lg">Chat</h2>
+        {newFriendRequest && <p>You have a new friend request!</p>}
       </div>
 
       <div id="settings-option" className="flex flex-col items-center">

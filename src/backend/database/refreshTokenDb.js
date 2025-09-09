@@ -7,7 +7,7 @@ class RefreshTokenRepository {
     this.collection = process.env.DB_REFRESH_TOKEN_COLLECTION;
   }
 
-  // userId is an ObjectId(<hex_string>) type, not a plain hexadecimal string
+  // userId is a hex string
   async insertRefreshToken(userId, refreshToken) {
     if (!userId || !refreshToken)
       throw new Error(

@@ -22,6 +22,15 @@ class UserRepository {
     return user;
   }
 
+  async getUserById(userId) {
+    if (!userId) {
+      throw new Error("Failed to get user by id");
+    }
+    const query = { _id: userId };
+    const user = await getEntry(query, this.collection);
+    return user;
+  }
+
   // Insert
   async insertUser({ account, profile }) {
     if (!account || !profile)

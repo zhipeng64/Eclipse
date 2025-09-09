@@ -82,7 +82,7 @@ export default function SearchFriendModal({
         const errors = data.errors || [];
         const newErrors = { friendRequestErrors: "" };
         for (const { field, msg } of errors) {
-          if (field === "friendRequestError") {
+          if (field === "customError") {
             newErrors.friendRequestErrors = msg;
           } else {
             throw new Error(
@@ -92,11 +92,12 @@ export default function SearchFriendModal({
         }
         setFriendRequestErrors(newErrors);
       } else {
-        const friendRequestStatus = data.friendRequestStatus;
+        const friendRequestStatus = data.success;
+        console.log("Friend request sent successfully: ", friendRequestStatus);
         if (friendRequestStatus) {
           setFriendRequestSent((prev) => ({
             ...prev,
-            username: true,
+            [username]: true, // Use the variable's value as the key
           }));
         }
       }
@@ -174,7 +175,7 @@ export default function SearchFriendModal({
                       disabled={sentFriendRequest}
                     >
                       {sentFriendRequest
-                        ? "Friend request sent"
+                        ? "Friend request sent!"
                         : "Send friend request"}
                     </button>
                   </div>

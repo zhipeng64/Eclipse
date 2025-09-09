@@ -7,11 +7,20 @@ import { userRepository } from "../database/UserDb.js";
 import { refreshTokenRepository } from "../database/RefreshTokenDb.js";
 import { AuthService } from "./authService.js";
 import { AppError } from "../utils/AppError.js";
+import friendRepository from "../database/FriendDb.js";
+import { ObjectId } from "mongodb";
+import { getIO, getMap } from "../socket.js";
+import { get } from "http";
 
 class UserService {
   // Registers user if no duplicate user is found
   async registerUser({ username, email, password }) {
     try {
+      if (!username || !email || !password) {
+        throw new Error(
+          "Invalid username, email, or password supplied when registering users"
+        );
+      }
       // Check if user already exists
       const user = await userRepository.getUser(username, email);
       if (user) {
@@ -85,47 +94,56 @@ class UserService {
 
   // Logs in the user and assigns the user jwt and refresh tokens
   async signInUser({ username, plaintextPassword }) {
-    // Fetch user
-    const user = await userRepository.getUser(username, null);
-    if (!user) {
-      throw new Error("Login for user failed (user not found in database)");
-    }
-    const userId = user._id;
+    try {
+      if (!username || !plaintextPassword) {
+        throw new Error("Invalid username or password supplied during signup");
+      }
+      // Fetch user
+      const user = await userRepository.getUser(username, null);
+      if (!user) {
+        throw new Error("Login for user failed (user not found in database)");
+      }
+      const userId = user._id;
 
-    // Compare passwords
-    const passwordHash = user.account.hashedPassword;
-    if (!passwordHash) {
-      throw new Error("Login for user failed (password hash is a falsy value)");
-    }
-    const isPasswordHashMatch = await bcrypt.compare(
-      plaintextPassword,
-      passwordHash
-    );
-    if (!isPasswordHashMatch) {
-      console.log(plaintextPassword, passwordHash);
-      throw new Error("Login for user failed (incorrect password supplied)");
-    }
+      // Compare passwords
+      const passwordHash = user.account.hashedPassword;
+      if (!passwordHash) {
+        throw new Error(
+          "Login for user failed (password hash is a falsy value)"
+        );
+      }
+      const isPasswordHashMatch = await bcrypt.compare(
+        plaintextPassword,
+        passwordHash
+      );
+      if (!isPasswordHashMatch) {
+        console.log(plaintextPassword, passwordHash);
+        throw new Error("Login for user failed (incorrect password supplied)");
+      }
 
-    // Update user's refresh token
-    const newRefreshToken = AuthService.createRefreshToken();
-    const result = await refreshTokenRepository.updateRefreshToken(
-      userId,
-      newRefreshToken
-    );
-    if (!result || result.matchedCount == 0) {
-      throw new Error("Updating refresh token failed");
+      // Update user's refresh token
+      const newRefreshToken = AuthService.createRefreshToken();
+      const result = await refreshTokenRepository.updateRefreshToken(
+        userId,
+        newRefreshToken
+      );
+      if (!result || result.matchedCount == 0) {
+        throw new Error("Updating refresh token failed");
+      }
+
+      // Create new JWT token
+      const newJwtToken = AuthService.createJwtToken(userId);
+      console.log("Updated user jwt and refresh tokens");
+
+      return {
+        jwt: newJwtToken,
+        refreshToken: newRefreshToken,
+        jwtExpiresAt: AuthService.getJwtTokenDuration(),
+        refreshTokenExpiresAt: AuthService.getRefreshTokenDuration(),
+      };
+    } catch (error) {
+      throw error;
     }
-
-    // Create new JWT token
-    const newJwtToken = AuthService.createJwtToken(userId);
-    console.log("Updated user jwt and refresh tokens");
-
-    return {
-      jwt: newJwtToken,
-      refreshToken: newRefreshToken,
-      jwtExpiresAt: AuthService.getJwtTokenDuration(),
-      refreshTokenExpiresAt: AuthService.getRefreshTokenDuration(),
-    };
   }
 
   async getUserAvatar({ username }) {
@@ -156,7 +174,7 @@ class UserService {
       if (!username || !avatarImage) {
         throw new Error("Invalid user field fetched from database");
       }
-      console.log(username, avatarImage);
+      //   console.log(username, avatarImage);
       return {
         username,
         avatarImage,
@@ -182,6 +200,62 @@ class UserService {
         default:
           throw error;
       }
+    }
+  }
+
+  // The id is a hex string fetched from the decoded jwt token
+  async addUser({ currentUserId, targetUsername }) {
+    try {
+      if (!currentUserId || !targetUsername) {
+        throw new Error("Invalid user id or target username supplied");
+      }
+
+      // Check if current username exists
+      const currentUser = await userRepository.getUserById(
+        new ObjectId(currentUserId)
+      );
+      if (!currentUser) {
+        throw new Error("Failed to get current user by id in addUser");
+      }
+
+      // Get target user id if exist
+      const targetUserId = (await userRepository.getUser(targetUsername))?._id;
+      if (!targetUserId) {
+        throw new Error("Failed to find target user id in addUser");
+      }
+
+      // Check if friend request entry exists, if not create it
+      const friendRequest = await friendRepository.getFriendEntry({
+        userId: currentUser._id,
+        targetUserId,
+      });
+      if (!friendRequest) {
+        // Insert a new entry
+        await friendRepository.insertFriendEntry({
+          userId: currentUser._id,
+          targetUserId,
+        });
+      } else {
+        throw new Error("Friend request already exists");
+      }
+
+      // Notify the recipient, if the user is currently online (has a socket session)
+      const map = getMap();
+
+      // User is online
+      const userSocket = map.get(targetUserId.toHexString());
+      console.log(userSocket);
+      if (userSocket) {
+        userSocket.emit(
+          "new-friend-request",
+          "You have received a new friend request!",
+          (clientResponse) => {
+            console.log(clientResponse);
+          }
+        );
+      }
+    } catch (error) {
+      throw error;
     }
   }
 }

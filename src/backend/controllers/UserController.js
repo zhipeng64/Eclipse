@@ -10,6 +10,11 @@ class UserController {
   async register(req, res) {
     console.log("inside registration handler");
     const { username, email, password } = req?.body;
+    if (!username || !email || !password) {
+      throw new Error(
+        "Controller received invalid username or email or password"
+      );
+    }
 
     // Register user if not already exists
     const { jwt, refreshToken, jwtExpiresAt, refreshTokenExpiresAt } =
@@ -33,6 +38,9 @@ class UserController {
   // Issues new jwt token and refresh token to user
   async loginHandler(req, res) {
     const { username, password } = req?.body;
+    if (!username || !password) {
+      throw new Error("Controller received invalid username and password");
+    }
     const { jwt, refreshToken, jwtExpiresAt, refreshTokenExpiresAt } =
       await userService.signInUser({ username, plaintextPassword: password });
     return res
@@ -49,6 +57,9 @@ class UserController {
   // Looks up a user
   async lookupUser(req, res) {
     const targetUsername = req?.query?.targetUsername;
+    if (!targetUsername) {
+      throw new Error("Controller received invalid target username");
+    }
     const { username, avatarImage } = await userService.searchUser({
       targetUsername,
     });
@@ -64,7 +75,24 @@ class UserController {
   }
 
   // Sends a friend request to target user
-  async addUser(req, res) {}
+  async addUser(req, res) {
+    const { username } = req?.body;
+    const decodedJwtTokenUserId = req?.user?.id;
+
+    if (!username || !decodedJwtTokenUserId) {
+      throw new Error(
+        "Controller received invalid username and decoded jwt token"
+      );
+    }
+    await userService.addUser({
+      currentUserId: decodedJwtTokenUserId,
+      targetUsername: username,
+    });
+    console.log("Friend request entry made");
+    return res.status(200).json({
+      success: true,
+    });
+  }
 }
 
 const userController = new UserController();

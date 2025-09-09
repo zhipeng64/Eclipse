@@ -17,4 +17,12 @@ function logWithDate(document) {
   }
 }
 
-export { logWithDate };
+// Sort by ObjectId strings in a locale-sensitive format
+function sortByObjectIds(objectIdA, objectIdB) {
+  const [A, B] = [objectIdA, objectIdB].sort((a, b) =>
+    a.toString().localeCompare(b.toString())
+  );
+  return [A, B];
+}
+
+export { logWithDate, sortByObjectIds };

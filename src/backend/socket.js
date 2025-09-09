@@ -40,7 +40,9 @@ function initializeSocket(httpsServer) {
         refreshToken,
         null
       );
-      console.log(decodedJwtToken);
+
+      // Statefully track socket in Map
+      socketMap.set(decodedJwtToken.id, socket);
     } catch (error) {
       console.warn("Socket auth failed", {
         socketId: socket.id,
@@ -53,7 +55,7 @@ function initializeSocket(httpsServer) {
   });
 }
 
-// Return the socketio server if present, otherwise throw an error
+// Returns the socketio server if present, otherwise throw an error
 function getIO() {
   if (!io) {
     throw new Error("Socket.IO not initialized!");
@@ -61,4 +63,12 @@ function getIO() {
   return io;
 }
 
-export { initializeSocket, getIO };
+// Returns all tracked sockets
+function getMap() {
+  if (!getMap) {
+    throw new Error("Socket map not initializde");
+  }
+  return socketMap;
+}
+
+export { initializeSocket, getIO, getMap };

@@ -7,7 +7,7 @@ function MainPanel() {
   const { isLoading, isAuthenticated } = useAuthenticationChecks();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return null;
   }
 
   if (isAuthenticated) {

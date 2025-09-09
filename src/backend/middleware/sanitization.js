@@ -28,7 +28,7 @@ const loginSanitizer = [sanitizeText("username")];
 const userLookupSanitizer = [sanitizeQueryText("username")];
 
 // Friend request form
-const friendRequestSanitizer = [sanitizeText("targetUsername")];
+const friendRequestSanitizer = [sanitizeText("username")];
 export {
   registrationSanitizer,
   loginSanitizer,
