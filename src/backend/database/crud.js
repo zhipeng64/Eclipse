@@ -3,6 +3,26 @@ import { connectToMongo } from "./connection.js";
 import { ALLOWED_COLLECTIONS } from "../schemas/database.js";
 import { logWithDate } from "./util.js";
 
+const getAllEntry = async (query, collection) => {
+  try {
+    if (
+      !query ||
+      Object.keys(query).length === 0 ||
+      !ALLOWED_COLLECTIONS.includes(collection)
+    ) {
+      throw new Error("Failed to get entry: invalid query or collection");
+    }
+
+    const db = await connectToMongo();
+    const result = await db.collection(collection).find(query);
+    // logWithDate(result);
+
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const getEntry = async (query, collection) => {
   try {
     if (
@@ -49,8 +69,7 @@ const updateEntry = async (query, update, options, collection) => {
     Object.keys(query).length === 0 ||
     !ALLOWED_COLLECTIONS.includes(collection) ||
     !update ||
-    Object.keys(update).length === 0 ||
-    !options
+    Object.keys(update).length === 0
   ) {
     console.log("Invalid input to updateEntry:", {
       query,
@@ -65,13 +84,18 @@ const updateEntry = async (query, update, options, collection) => {
 
   try {
     const db = await connectToMongo();
-    const result = await db
-      .collection(collection)
-      .updateOne(query, update, options);
+    var result;
+    if (options) {
+      result = await db
+        .collection(collection)
+        .updateOne(query, update, options);
+    } else {
+      result = await db.collection(collection).updateOne(query, update);
+    }
     return result;
   } catch (error) {
     throw error;
   }
 };
 
-export { getEntry, insertEntry, updateEntry };
+export { getEntry, getAllEntry, insertEntry, updateEntry };

@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
 import authService from "./services/authService.js";
-import { parseCookies } from "./utils/cookie.js";
+import { getTokens } from "./utils/socket.js";
+import userService from "./services/UserService.js";
 
 // Global variable that references the socketio server
 var io;
@@ -30,16 +31,21 @@ function initializeSocket(httpsServer) {
       console.log(`Client socket with socketId "${socket.id}" disconnected`);
     });
 
+    socket.on("pending-friend-requests", async () => {
+      // Get jwt token id
+      const cookieString = socket.handshake.headers.cookie;
+      const decodedJwtToken = await getTokens(cookieString);
+      const friendRequestList = await userService.getPendingFriendRequests({
+        currentUserId: decodedJwtToken.id,
+      });
+      socket.emit("pending-friend-requests", friendRequestList);
+    });
+
     console.log(`Client socket with socketId: "${socket.id}" connected`);
     try {
       // A connecting client socket must pass authentication checks
       const cookieString = socket.handshake.headers.cookie;
-      const { jwt, refreshToken } = parseCookies(cookieString);
-      const decodedJwtToken = await authService.validateTokens(
-        jwt,
-        refreshToken,
-        null
-      );
+      const decodedJwtToken = await getTokens(cookieString); // <-- add await
 
       // Statefully track socket in Map
       socketMap.set(decodedJwtToken.id, socket);

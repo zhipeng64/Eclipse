@@ -1,5 +1,32 @@
 @import "tailwindcss";
 
+/*
+  Colors
+  Primary: For primary background color and primary text color for headings.
+    * #141821 - background
+    * white - text
+  Secondary: For modal, surface, card, background color as well as non-heading text.
+    For non-text: #1d2436 (hue in the "middle" of the palette, so allowing for possibility for both 
+    hints and shades to stand out).
+      Tints
+      #2c3345
+      #3d4454
+      #4e5464
+      #606574 
+
+      Shades
+      #191f2f
+      #141a28
+      #101521
+      #0c101b
+
+    #d1d5dc and shades of gray (to establish hierarchy for text) - For non-heading text
+  Accent: Lighter colors for contrast
+    #90cdf4 - Primary
+    #b390f4 - Lighter buttons, highlights
+      #9059f6 - Heavier highlights, e.g., notification badge background
+*/
+
 /* Fonts */
 * {
   font-family: "Electrolize";
@@ -12,19 +39,37 @@ h3 {
   text-shadow: 0 0 12px rgba(144, 205, 244, 1);
 }
 
-/* Primary background */
-.primary-background {
-  background: linear-gradient(
-    to bottom right,
-    rgba(15, 26, 43, 1),
-    rgba(26, 42, 68, 0.9)
-  );
-  color: white;
+/* Base / primary background */
+.layer-0 {
+  background-color: #1d2436;
 }
 
-/* Primary container styling */
-.primary-container {
-  background-color: #0f0f1a;
+/* Tints */
+.layer-1 {
+  background-color: #2c3345;
+}
+.layer-2 {
+  background-color: #3d4454;
+}
+.layer-3 {
+  background-color: #4e5464;
+}
+.layer-4 {
+  background-color: #606574;
+}
+
+/* Shades */
+.dlayer-1 {
+  background-color: #191f2f;
+}
+.dlayer-2 {
+  background-color: #141a28;
+}
+.dlayer-3 {
+  background-color: #101521;
+}
+.dlayer-4 {
+  background-color: #0c101b;
 }
 
 .primary-container-border {
@@ -65,6 +110,11 @@ h3 {
 .standard-icon-container {
   color: #90cdf4;
   box-shadow: 0 0 5px 0px rgba(144, 205, 244, 0.6);
+}
+
+.purple-icon-container {
+  color: #b390f4;
+  box-shadow: 0 0 5px 0px rgba(179, 144, 244, 0.6);
 }
 
 .standard-icon {
@@ -134,10 +184,16 @@ h3 {
   transition: box-shadow 0.3s;
 }
 
+.neon-button-purple-animated:hover {
+  transition: box-shadow 0.3s;
+}
+
 .neon-button-animated:hover {
-  box-shadow:
-    0 0 1px 0.5px #90cdf4,
-    0 0 3px 1.5px white;
+  box-shadow: 0 0 1px 0.5px #90cdf4;
+}
+
+.neon-button-purple-animated:hover {
+  box-shadow: 0 0 1px 0.5px #b390f4;
 }
 
 .neon-button:focus {

@@ -1,17 +1,14 @@
 import { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 
-export default function SearchFriendModal({
-  isFriendSearchOpen,
-  friendModalRef,
-}) {
+export default function SearchFriendModal({ friendModalRef }) {
   // List of potential errors on user search
   const [searchErrors, setSearchErrors] = useState({
     searchError: "",
   });
 
   // Sent friend requests
-  const [friendRequestSent, setFriendRequestSent] = useState({});
+  const [friendRequestMessage, setFriendRequestMessage] = useState({});
 
   // List of potential errors on sending friend requests
   const [friendRequestErrors, setFriendRequestErrors] = useState({
@@ -92,14 +89,26 @@ export default function SearchFriendModal({
         }
         setFriendRequestErrors(newErrors);
       } else {
-        const friendRequestStatus = data.success;
-        console.log("Friend request sent successfully: ", friendRequestStatus);
-        if (friendRequestStatus) {
-          setFriendRequestSent((prev) => ({
-            ...prev,
-            [username]: true, // Use the variable's value as the key
-          }));
-        }
+        // const { friendRequestStatus, role } = data;
+        // switch (friendRequestStatus) {
+        //   case null:
+        //     setFriendRequestMessage("Friend request sent!");
+        //     break;
+        //   case "pending":
+        //     if (role === "requestor") {
+        //       setFriendRequestMessage("Pending"); // Non-clickable
+        //     } else if (role === "recipient") {
+        //       setFriendRequestMessage(
+        //         <button onClick={handleAccept}>Accept</button> // Clickable
+        //       );
+        //     }
+        //     break;
+        //   case "accepted":
+        //     setFriendRequestMessage("Friend");
+        //     break;
+        //   default:
+        //     setFriendRequestMessage("Unknown status");
+        // }
       }
     } catch (error) {
       console.log(error);
@@ -108,13 +117,11 @@ export default function SearchFriendModal({
 
   return (
     <>
-      <div
-        className={`${isFriendSearchOpen ? "flex" : "hidden"} justify-center modal-overlay`}
-      >
+      <div className={"flex justify-center modal-overlay"}>
         {/* overflow:auto creates scrollbar within container to contain elements */}
         <div
           id="search-friend-modal"
-          className="flex flex-col self-center p-5 w-full max-w-xl h-full min-h-100 md:min-h-120 max-h-[80vh] overflow-auto shadow-card rounded-card primary-container"
+          className="flex flex-col self-center p-5 w-full max-w-xl h-full min-h-100 md:min-h-120 max-h-[80vh] overflow-auto shadow-card rounded-card dlayer-4"
           ref={friendModalRef}
         >
           <h1 className="text-center pb-5">Search for users</h1>
@@ -135,7 +142,7 @@ export default function SearchFriendModal({
             </div>
             <button
               type="submit"
-              className="grow-1 neon-button neon-button-animated rounded-lg"
+              className="grow-1 neon-button-purple neon-button-purple-animated rounded-lg"
             >
               Search
             </button>
@@ -147,7 +154,7 @@ export default function SearchFriendModal({
           are constraints, not definitions. */}
           <div
             id="search-person-results-container"
-            className={`flex flex-col bg-gray-900 grow rounded-lg ${
+            className={`flex flex-col dlayer-1 grow rounded-lg ${
               usersSearched.length === 0 ? "items-center justify-center" : ""
             }`}
           >
@@ -155,10 +162,35 @@ export default function SearchFriendModal({
               <p>No users found with current username</p>
             ) : (
               usersSearched.map((user) => {
-                const sentFriendRequest = friendRequestSent[user.username];
+                const { username, avatarImage, friendshipData } = user;
+                let message;
+
+                if (!friendshipData) {
+                  message = null;
+                } else {
+                  const { status, role } = friendshipData;
+                  switch (status) {
+                    case null:
+                      message = "Friend request sent!";
+                      break;
+                    case "pending":
+                      if (role === "requestor") {
+                        message = "Pending";
+                      } else if (role === "recipient") {
+                        message = "Accept friend request";
+                      }
+                      break;
+                    case "accepted":
+                      message = "Friend";
+                      break;
+                    default:
+                      message = "Unknown";
+                  }
+                }
+
                 return (
                   <div
-                    key={user.username}
+                    key={username}
                     className="flex justify-between opac-shadow p-3"
                   >
                     <div className="flex items-center">
@@ -167,16 +199,14 @@ export default function SearchFriendModal({
                         alt="Avatar"
                         className="w-11 h-11 rounded-full mr-2"
                       />
-                      <p className="text-md">{user.username}</p>
+                      <p className="text-md">{username}</p>
                     </div>
                     <button
                       className="neon-button-purple neon-button-animated rounded-full p-3"
-                      onClick={() => handleFriendRequest(user.username)}
-                      disabled={sentFriendRequest}
+                      onClick={() => handleFriendRequest(username)}
+                      disabled={message === "pending" ? true : false}
                     >
-                      {sentFriendRequest
-                        ? "Friend request sent!"
-                        : "Send friend request"}
+                      {message}
                     </button>
                   </div>
                 );

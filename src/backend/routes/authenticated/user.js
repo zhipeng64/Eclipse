@@ -6,6 +6,7 @@ import {
   loginSanitizer,
   userLookupSanitizer,
   friendRequestSanitizer,
+  acceptFriendRequestSanitizer,
 } from "../../middleware/sanitization.js";
 import { validateResult } from "../../middleware/validateResult.js";
 
@@ -37,4 +38,12 @@ router.post(
   userController.addUser.bind(userController)
 );
 
+// Accept Friend Request Endpoint, /users/friend-requests/acceptance
+router.post(
+  "/friend-requests/acceptance",
+  authHandler,
+  acceptFriendRequestSanitizer,
+  validateResult,
+  userController.acceptFriendRequest.bind(userController)
+);
 export { router };

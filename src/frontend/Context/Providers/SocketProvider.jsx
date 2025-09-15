@@ -4,34 +4,54 @@ import { useAuthenticationChecks } from "../../utils/customHooks.jsx";
 import SocketContext from "../Socket.jsx";
 
 function SocketProvider({ children }) {
-  const socketRef = useRef(null);
+  const [socket, setSocket] = useState(null);
+  const pendingFriendRequestsLoadingRef = useRef(true);
+  const buffer = useRef([]);
+
   const { isLoading, isAuthenticated } = useAuthenticationChecks();
   const [newFriendRequest, setNewFriendRequest] = useState(false);
+  const [pendingFriendRequests, setPendingFriendRequests] = useState([]);
   const data = {
-    socket: socketRef.current,
+    socket: socket,
     newFriendRequest,
+    pendingFriendRequests,
   };
 
   // Creates a singleton socket
   useEffect(() => {
     if (!isAuthenticated) return;
     const serverUrl = `${import.meta.env.VITE_BACKEND_URL}`; // Automatically appends /socket.io pathname by default
-    socketRef.current = io(serverUrl, {
+    const newSocket = io(serverUrl, {
       withCredentials: true,
     });
 
+    setSocket(newSocket);
     // Register listeners
     // Receives a new friend request
-    socketRef.current.on("new-friend-request", (message, callback) => {
-      if (message) {
-        setNewFriendRequest(true);
+    newSocket.on("new-friend-request", (friendRequest, callback) => {
+      if (friendRequest) {
+        if (!pendingFriendRequestsLoadingRef.current) {
+          setNewFriendRequest(true);
+        } else {
+          buffer.current.push(friendRequest);
+        }
         callback("thanks backend!");
       }
     });
 
+    // Receives a list of all pending friend requests
+    newSocket.on("pending-friend-requests", (list) => {
+      console.log(list);
+      pendingFriendRequestsLoadingRef.current = true;
+      if (list) {
+        setPendingFriendRequests([...list, ...buffer.current]);
+      }
+      pendingFriendRequestsLoadingRef.current = false;
+    });
     return () => {
-      socketRef.current.removeAllListeners();
-      socketRef.current.disconnect();
+      newSocket.removeAllListeners();
+      newSocket.disconnect();
+      setSocket(null);
     };
   }, [isAuthenticated]);
 

@@ -2,11 +2,7 @@ import { useState } from "react";
 import { checkValidPassword } from "../utils/utils";
 import { FaEye } from "react-icons/fa";
 
-export default function RegisterModal({
-  isSignUp,
-  handleRegistrationSuccess,
-  modalRef,
-}) {
+export default function RegisterModal({ handleRegistrationSuccess, modalRef }) {
   // Detects onchanging password status and displays updated UI
   const [passwordStatus, setPasswordStatus] = useState({
     hasMinLength: false,
@@ -145,10 +141,10 @@ export default function RegisterModal({
 
   return (
     <>
-      <div className={`${isSignUp ? "flex" : "hidden"} modal-overlay`}>
+      <div className="flex modal-overlay">
         <div
           id="modal"
-          className="flex m-auto p-5 w-full max-w-md shadow-card rounded-card primary-container"
+          className="flex m-auto p-5 w-full max-w-md shadow-card rounded-card dlayer-1"
           ref={modalRef}
         >
           <form
@@ -284,7 +280,7 @@ export default function RegisterModal({
                 <input
                   type="submit"
                   name="submit"
-                  className="neon-button neon-button-animated rounded-lg py-2 px-4 mt-4"
+                  className="neon-button-purple neon-button-purple-animated rounded-lg py-2 px-4 mt-4"
                 ></input>
               </div>
             </div>

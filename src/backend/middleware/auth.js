@@ -6,6 +6,10 @@ import authService from "../services/authService.js";
 const authHandler = async (req, res, next) => {
   const jwtToken = req?.cookies?.jwt;
   const refreshToken = req?.cookies?.refreshToken;
+
+  if (!jwtToken && !refreshToken) {
+    throw new Error("Missing jwt and refresh tokens");
+  }
   const user = await authService.validateTokens(
     jwtToken,
     refreshToken,

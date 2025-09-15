@@ -12,11 +12,9 @@ function ChatPanel(chatData) {
   });
 
   return (
-    // To scale this component when used by another component,
-    // use width:full and height_full
     <div
       id="chat-panel"
-      className="text-white primary-container w-full max-w-5xl h-full flex flex-col rounded-lg opac-shadow"
+      className="text-white dlayer-3 w-auto h-full flex flex-col rounded-lg opac-shadow"
     >
       <div
         id="recipient"
@@ -102,7 +100,7 @@ function ChatPanel(chatData) {
 
       <div
         id="chat-input-box"
-        className="flex items-center px-2 bg-gray-800 rounded-lg"
+        className="flex items-center px-2 layer-1 rounded-lg"
       >
         <div className="flex items-center space-x-3 mr-3">
           <i>
@@ -115,7 +113,7 @@ function ChatPanel(chatData) {
         <textarea
           id="chat-input"
           placeholder="Type a message..."
-          className="w-full p-2 m-2 rounded-lg text-white min-h-1 bg-gray-900 resize-none hideScrollBar"
+          className="w-full p-2 m-2 rounded-lg text-white min-h-1 layer-2 resize-none hideScrollBar"
           rows={inputSettings.focus ? inputSettings.inputRowCount : 1}
           onFocus={(e) => {
             e.stopPropagation();

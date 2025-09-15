@@ -64,6 +64,9 @@ export class AuthService {
     var parsedJwtToken = null;
     var parsedRefreshToken = null;
     try {
+      if (!jwtToken && !refreshToken) {
+        throw new Error("Missing jwt and refresh tokens");
+      }
       // Jwt token present
       if (jwtToken) {
         parsedJwtToken = await this.decodeAndVerifyJwt(jwtToken);

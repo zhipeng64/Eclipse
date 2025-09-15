@@ -1,4 +1,4 @@
-import { getEntry, insertEntry } from "./crud.js";
+import { getEntry, insertEntry, getAllEntry, updateEntry } from "./crud.js";
 import { sortByObjectIds } from "./util.js";
 
 /*
@@ -46,6 +46,33 @@ class FriendRepository {
       createdAt: new Date(Date.now()),
     };
     await insertEntry(entry, this.collection);
+  }
+
+  async getFriendRequests({ currentUserId }) {
+    if (!currentUserId) {
+      throw new Error(
+        "Invalid parameters supplied when getting friend entries"
+      );
+    }
+
+    const query = {
+      recipientId: currentUserId,
+      status: "pending",
+    };
+    const friendRequests = await getAllEntry(query, this.collection);
+    return friendRequests;
+  }
+
+  async acceptFriendRequest(friendRequestId) {
+    if (!friendRequestId) {
+      throw new Error(
+        "Invalid friendRequestId supplied to acceptFriendRequest"
+      );
+    }
+    const query = { _id: friendRequestId };
+    const update = { $set: { status: "accepted" } };
+    const result = await updateEntry(query, update, null, this.collection);
+    return result;
   }
 }
 

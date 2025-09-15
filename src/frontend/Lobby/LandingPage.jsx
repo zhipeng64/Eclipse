@@ -15,15 +15,6 @@ export default function LandingPage() {
   const registrationModalRef = useRef(null);
   const loginModalRef = useRef(null);
 
-  // State updates
-  const toggleSignUp = () => {
-    setIsSignUp(!isSignUp);
-  };
-
-  const toggleLogin = () => {
-    setIsLogin(!isLogin);
-  };
-
   // Register event listeners
   useCloseOnClickOutside(registrationModalRef, isSignUp, () =>
     setIsSignUp(false)
@@ -37,15 +28,14 @@ export default function LandingPage() {
   return (
     <div
       id="landing-page"
-      className="min-h-screen flex flex-col w-auto bg-gradient-to-br from-[#0f1a2b]/100 to-[#1a2a44]/90 
-"
+      className="min-h-screen flex flex-col w-auto layer-0"
     >
       <NavigationBar />
       <div id="body" className="text-gray-200 flex-1 flex items-start">
         <div id="main-display" className="ml-45 mr-20 max-w-2xl">
-          <div className="flex flex-col space-y-5 w-full break-words p-20 shadow-card rounded-card hover-shadow primary-container">
-            <h1 className="heading text-6xl mb-6">Join the Community</h1>
-            <div className="text-gray-400 text-2xl font-medium space-y-2">
+          <div className="flex flex-col space-y-5 w-full break-words p-20 shadow-card rounded-card hover-shadow dlayer-1">
+            <h1 className="heading text-6xl mb-6 ">Join the Community</h1>
+            <div className="text-[#d1d5dc] text-2xl font-medium space-y-2">
               <p>
                 Welcome to Eclipse, a place to meet others and make longlasting
                 relationships.
@@ -61,9 +51,9 @@ export default function LandingPage() {
                 href="#"
                 onClick={(e) => {
                   e.stopPropagation();
-                  toggleLogin();
+                  setIsLogin(true);
                 }}
-                className="neon-button neon-button-animated rounded-lg py-3 px-6"
+                className="neon-button-purple neon-button-purple-animated rounded-lg py-3 px-6"
               >
                 Log In
               </button>
@@ -71,9 +61,9 @@ export default function LandingPage() {
                 href="#"
                 onClick={(e) => {
                   e.stopPropagation();
-                  toggleSignUp();
+                  setIsSignUp(true);
                 }}
-                className="neon-button neon-button-animated rounded-lg py-3 px-6"
+                className="neon-button-purple neon-button-purple-animated rounded-lg py-3 px-6"
               >
                 Sign Up
               </button>
@@ -82,7 +72,7 @@ export default function LandingPage() {
         </div>
         <div
           id="feature-section"
-          className="flex flex-col px-15 pb-15 self-center max-w-2xl"
+          className="flex flex-col px-15 pb-15 self-center max-w-2xl "
         >
           <h1 className="font-bold text-5xl mb-6 text-shadow-[0_0_12px_rgba(144,205,244,0.6)]">
             Features
@@ -94,19 +84,22 @@ export default function LandingPage() {
           </ul>
         </div>
       </div>
-      <RegisterModal
-        isSignUp={isSignUp}
-        handleRegistrationSuccess={handleRegistrationSuccess}
-        modalRef={registrationModalRef}
-      />
-      <LoginModal
-        isLogin={isLogin}
-        modalRef={loginModalRef}
-        forgotPasswordCallback={() => {
-          toggleLogin();
-          toggleSignUp();
-        }}
-      />
+      {isSignUp && (
+        <RegisterModal
+          handleRegistrationSuccess={handleRegistrationSuccess}
+          modalRef={registrationModalRef}
+        />
+      )}
+
+      {isLogin && (
+        <LoginModal
+          modalRef={loginModalRef}
+          forgotPasswordCallback={() => {
+            setIsSignUp(!isSignUp);
+            setIsLogin(!isLogin);
+          }}
+        />
+      )}
       <Footer />
     </div>
   );

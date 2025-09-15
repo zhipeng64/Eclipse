@@ -3,11 +3,7 @@ import { useNavigate } from "react-router-dom";
 // Icons
 import { FaUser, FaLock } from "react-icons/fa";
 
-export default function LoginModal({
-  isLogin,
-  modalRef,
-  forgotPasswordCallback,
-}) {
+export default function LoginModal({ modalRef, forgotPasswordCallback }) {
   const navigate = useNavigate();
   const handleForm = async (event) => {
     event.stopPropagation();
@@ -41,9 +37,9 @@ export default function LoginModal({
   };
   return (
     <>
-      <div className={`${isLogin ? "flex" : "hidden"} modal-overlay`}>
+      <div className={"flex modal-overlay"}>
         <div
-          className="m-auto w-full max-w-xs pt-3 px-1 text-[#F5F5F5] shadow-card rounded-card primary-container"
+          className="m-auto w-full max-w-xs pt-3 px-1 text-[#F5F5F5] shadow-card rounded-card dlayer-1"
           ref={modalRef}
         >
           <form className="flex flex-col pb-5 space-y-4" onSubmit={handleForm}>
@@ -76,7 +72,7 @@ export default function LoginModal({
             <div className="flex flex-col">
               <div className="flex justify-center">
                 <input
-                  className="w-[90%] font-semibold p-1.5 rounded-lg neon-button neon-button-animated"
+                  className="w-[90%] font-semibold p-1.5 rounded-lg neon-button-purple neon-button-purple-animated"
                   type="submit"
                   value="Login"
                 ></input>

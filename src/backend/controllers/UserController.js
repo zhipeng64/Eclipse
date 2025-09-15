@@ -57,17 +57,24 @@ class UserController {
   // Looks up a user
   async lookupUser(req, res) {
     const targetUsername = req?.query?.targetUsername;
-    if (!targetUsername) {
-      throw new Error("Controller received invalid target username");
+    const decodedJwtTokenUserId = req?.user?.id;
+
+    if (!targetUsername || !decodedJwtTokenUserId) {
+      throw new Error(
+        "Controller received invalid username and decoded jwt token"
+      );
     }
-    const { username, avatarImage } = await userService.searchUser({
-      targetUsername,
-    });
+    const { username, avatarImage, friendshipData } =
+      await userService.searchUser({
+        currentUserId: decodedJwtTokenUserId,
+        targetUsername,
+      });
     return res.status(200).json({
       searchResults: [
         {
           username,
           avatarImage,
+          friendshipData,
         },
       ],
       success: true,
@@ -89,6 +96,27 @@ class UserController {
       targetUsername: username,
     });
     console.log("Friend request entry made");
+    return res.status(200).json({
+      success: true,
+    });
+  }
+
+  // Accepts a friend request
+  async acceptFriendRequest(req, res) {
+    const { username } = req?.body;
+    const decodedJwtTokenUserId = req?.user?.id;
+
+    console.log("received request to accept friend request");
+    if (!username || !decodedJwtTokenUserId) {
+      throw new Error(
+        "Controller received invalid username and decoded jwt token"
+      );
+    }
+    await userService.acceptFriendRequest({
+      currentUserId: decodedJwtTokenUserId,
+      targetUsername: username,
+    });
+    console.log("Friend request accepted");
     return res.status(200).json({
       success: true,
     });

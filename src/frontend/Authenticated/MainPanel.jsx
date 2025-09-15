@@ -2,9 +2,16 @@ import { Navigation } from "./Navigation";
 import { ChatOption } from "./ChatOption";
 import { ChatPanel } from "./ChatPanel";
 import { useAuthenticationChecks } from "../utils/customHooks";
+import { useState } from "react";
+import { HomeOption } from "./HomeOption";
 
 function MainPanel() {
   const { isLoading, isAuthenticated } = useAuthenticationChecks();
+  const [optionSelected, setOptionSelected] = useState({
+    homeOption: false,
+    chatOption: true,
+    settingsOption: false,
+  });
 
   if (isLoading) {
     return null;
@@ -14,21 +21,39 @@ function MainPanel() {
     return (
       <div
         id="main-panel"
-        className="flex flex-col w-full h-screen primary-background"
+        className="flex flex-col w-full pb-3 h-screen layer-0"
       >
         {/* Navigation */}
-        <Navigation />
+        <Navigation
+          optionSelected={optionSelected}
+          setOptionSelected={setOptionSelected}
+        />
 
         {/* Main content area */}
-        <div id="content" className="flex grow space-x-5">
-          <div className="flex justify-end w-full max-w-md ml-30 rounded-lg mb-5">
-            <ChatOption />
+        {optionSelected.chatOption && (
+          <div className="flex grow gap-1 pl-40 self-start justify-center">
+            <div className="w-120 shrink-0">
+              <ChatOption />
+            </div>
+            <div className="">
+              <ChatPanel />
+            </div>
           </div>
+        )}
 
-          <div className="mb-5">
-            <ChatPanel />
-          </div>
-        </div>
+        {/* {optionSelected.homeOption && (
+              <>
+                <div>
+                  <HomeOption />
+                </div>
+              </>
+            )}
+
+            {optionSelected.settingsOption && (
+              <>
+                <div> Placeholder </div>
+              </>
+            )} */}
       </div>
     );
   }
