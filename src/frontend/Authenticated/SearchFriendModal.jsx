@@ -89,26 +89,12 @@ export default function SearchFriendModal({ friendModalRef }) {
         }
         setFriendRequestErrors(newErrors);
       } else {
-        // const { friendRequestStatus, role } = data;
-        // switch (friendRequestStatus) {
-        //   case null:
-        //     setFriendRequestMessage("Friend request sent!");
-        //     break;
-        //   case "pending":
-        //     if (role === "requestor") {
-        //       setFriendRequestMessage("Pending"); // Non-clickable
-        //     } else if (role === "recipient") {
-        //       setFriendRequestMessage(
-        //         <button onClick={handleAccept}>Accept</button> // Clickable
-        //       );
-        //     }
-        //     break;
-        //   case "accepted":
-        //     setFriendRequestMessage("Friend");
-        //     break;
-        //   default:
-        //     setFriendRequestMessage("Unknown status");
-        // }
+        const { username } = data;
+        var message = "Friend request sent!";
+        setFriendRequestMessage({
+          ...friendRequestMessage,
+          [username]: message,
+        });
       }
     } catch (error) {
       console.log(error);
@@ -166,13 +152,10 @@ export default function SearchFriendModal({ friendModalRef }) {
                 let message;
 
                 if (!friendshipData) {
-                  message = null;
+                  message = "Send friend request";
                 } else {
                   const { status, role } = friendshipData;
                   switch (status) {
-                    case null:
-                      message = "Friend request sent!";
-                      break;
                     case "pending":
                       if (role === "requestor") {
                         message = "Pending";
@@ -203,10 +186,14 @@ export default function SearchFriendModal({ friendModalRef }) {
                     </div>
                     <button
                       className="neon-button-purple neon-button-animated rounded-full p-3"
-                      onClick={() => handleFriendRequest(username)}
+                      onClick={
+                        message === "Send friend request"
+                          ? () => handleFriendRequest(username)
+                          : null
+                      }
                       disabled={message === "pending" ? true : false}
                     >
-                      {message}
+                      {friendRequestMessage[username] || message}
                     </button>
                   </div>
                 );

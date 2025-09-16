@@ -11,7 +11,7 @@ function Navigation({ optionSelected, setOptionSelected }) {
       id="top-nav"
       className="flex flex-row px-3 py-5 justify-center items-center space-x-15 text-white"
     >
-      <div
+      {/* <div
         id="home-option"
         className={`flex flex-col items-center cursor-pointer p-2 rounded-lg ${optionSelected.homeOption ? "layer-2" : ""}`}
         onClick={() =>
@@ -26,7 +26,7 @@ function Navigation({ optionSelected, setOptionSelected }) {
           <FaHome className="text-[1.4rem]" />
         </i>
         <h2 className="text-lg">Home</h2>
-      </div>
+      </div> */}
 
       {/* 'right' places the right edge of pseudo element certain pixels 
       from the right edge of its container for absolute positioning*/}
@@ -41,7 +41,7 @@ function Navigation({ optionSelected, setOptionSelected }) {
         `}
         onClick={() =>
           setOptionSelected({
-            homeOption: false,
+            // homeOption: false,
             chatOption: true,
             settingsOption: false,
           })
@@ -59,7 +59,7 @@ function Navigation({ optionSelected, setOptionSelected }) {
         className={`flex flex-col items-center cursor-pointer p-2 rounded-lg ${optionSelected.settingsOption ? "bg-gray-700" : ""}`}
         onClick={() =>
           setOptionSelected({
-            homeOption: false,
+            // homeOption: false,
             chatOption: false,
             settingsOption: true,
           })

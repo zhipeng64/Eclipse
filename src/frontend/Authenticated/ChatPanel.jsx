@@ -5,12 +5,23 @@ import { IoSettingsSharp } from "react-icons/io5";
 import { FaPlus } from "react-icons/fa";
 import { MdEmojiEmotions } from "react-icons/md";
 
-function ChatPanel(chatData) {
+function ChatPanel({ chatData, chatPanelSelectionState }) {
   const [inputSettings, setInputSettings] = useState({
     inputRowCount: 1,
     focus: false,
   });
 
+  if (chatPanelSelectionState === null) {
+    // Render everything below but with placeholder
+    return (
+      <div
+        id="chat-panel"
+        className="justify-center items-center text-gray-400 dlayer-3 w-auto h-full flex flex-col rounded-lg opac-shadow"
+      >
+        Select a friend to chat with on the left panel
+      </div>
+    );
+  }
   return (
     <div
       id="chat-panel"

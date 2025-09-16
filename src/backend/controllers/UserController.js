@@ -97,6 +97,7 @@ class UserController {
     });
     console.log("Friend request entry made");
     return res.status(200).json({
+      username: username,
       success: true,
     });
   }

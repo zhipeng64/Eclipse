@@ -18,13 +18,14 @@ class FriendRepository {
         "Invalid userId or targetUserId supplied when querying friend entry"
       );
     }
-    const [user1, user2] = sortByObjectIds(userId, targetUserId);
-    // Sorting gives us fast friendship lookups
+
+    // Checks if a friendship already exists between two users by checking users array
     const query = {
-      user1,
-      user2,
+      users: { $all: [userId, targetUserId] },
     };
     const friendEntry = await getEntry(query, this.collection);
+    console.log("friend entry from db:");
+    console.log(friendEntry);
     return friendEntry;
   }
 
@@ -36,12 +37,10 @@ class FriendRepository {
       );
     }
 
-    const [user1, user2] = sortByObjectIds(userId, targetUserId);
     const entry = {
-      user1,
-      user2,
       requestorId: userId,
       recipientId: targetUserId,
+      users: [userId, targetUserId],
       status: "pending",
       createdAt: new Date(Date.now()),
     };
@@ -73,6 +72,21 @@ class FriendRepository {
     const update = { $set: { status: "accepted" } };
     const result = await updateEntry(query, update, null, this.collection);
     return result;
+  }
+
+  // Gets all friends for current user (accepted friendships only)
+  async getFriendsList({ currentUserId }) {
+    if (!currentUserId) {
+      throw new Error("Invalid parameters supplied when getting friends list");
+    }
+
+    // Find all friendships current user has and display the friend's user info
+    const query = {
+      users: currentUserId,
+      status: "accepted",
+    };
+    var friendsList = await getAllEntry(query, this.collection);
+    return friendsList;
   }
 }
 

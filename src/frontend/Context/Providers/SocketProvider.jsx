@@ -11,10 +11,12 @@ function SocketProvider({ children }) {
   const { isLoading, isAuthenticated } = useAuthenticationChecks();
   const [newFriendRequest, setNewFriendRequest] = useState(false);
   const [pendingFriendRequests, setPendingFriendRequests] = useState([]);
+  const [friends, setFriends] = useState([]);
   const data = {
     socket: socket,
     newFriendRequest,
     pendingFriendRequests,
+    friends,
   };
 
   // Creates a singleton socket
@@ -25,17 +27,18 @@ function SocketProvider({ children }) {
       withCredentials: true,
     });
 
-    setSocket(newSocket);
     // Register listeners
     // Receives a new friend request
-    newSocket.on("new-friend-request", (friendRequest, callback) => {
+    // This must come after pending requests are loaded
+    newSocket.on("new-friend-request", (friendRequest) => {
+      console.log("Received new friend request:");
+      console.log(friendRequest);
       if (friendRequest) {
         if (!pendingFriendRequestsLoadingRef.current) {
           setNewFriendRequest(true);
         } else {
           buffer.current.push(friendRequest);
         }
-        callback("thanks backend!");
       }
     });
 
@@ -48,6 +51,20 @@ function SocketProvider({ children }) {
       }
       pendingFriendRequestsLoadingRef.current = false;
     });
+
+    // Receives a list of all friends
+    newSocket.on("friends-list", (list) => {
+      if (list) {
+        setFriends(list);
+      }
+    });
+
+    setSocket(newSocket);
+    // Emit event to fetch all pending friend requests
+    newSocket.emit("pending-friend-requests");
+
+    // Emit event to fetch all friends
+    newSocket.emit("friends-list");
     return () => {
       newSocket.removeAllListeners();
       newSocket.disconnect();

@@ -3,14 +3,17 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import bcrypt from "bcrypt";
 import { hashPassword } from "../utils/auth.js";
-import { userRepository } from "../database/UserDb.js";
 import { refreshTokenRepository } from "../database/RefreshTokenDb.js";
 import { AuthService } from "./authService.js";
 import { AppError } from "../utils/AppError.js";
-import friendRepository from "../database/FriendDb.js";
 import { ObjectId } from "mongodb";
-import { getIO, getMap } from "../socket.js";
-import { get } from "http";
+import { getMap } from "../socket.js";
+import {
+  normalizeFriendRequests,
+  normalizeFriendsList,
+} from "./friendHelper.js";
+import userRepository from "../database/UserDb.js";
+import friendRepository from "../database/FriendDb.js";
 
 class UserService {
   // Registers user if no duplicate user is found
@@ -260,6 +263,7 @@ class UserService {
         );
       }
 
+      console.log("Checking if friend request entry exists");
       // Check if friend request entry exists, if not create it
       const friendRequest = await friendRepository.getFriendEntry({
         userId: currentUser._id,
@@ -278,16 +282,14 @@ class UserService {
       // Notify the recipient, if the user is currently online (has a socket session)
       const map = getMap();
 
-      // User is online
+      // If recipient is online, emit an event over
       const userSocket = map.get(targetUserId.toHexString());
-      console.log(userSocket);
+      //   console.log("userSocket: ");
+      //   console.log(userSocket);
       if (userSocket) {
         userSocket.emit(
           "new-friend-request",
-          "You have received a new friend request!",
-          (clientResponse) => {
-            console.log(clientResponse);
-          }
+          "You have received a new friend request!"
         );
       }
     } catch (error) {
@@ -300,23 +302,14 @@ class UserService {
     if (!currentUserId) {
       throw new Error("Invalid userId supplied");
     }
-    var pendingFriendEntries = await (
+    const pendingFriendEntries = await (
       await friendRepository.getFriendRequests({
         currentUserId: new ObjectId(currentUserId),
       })
     )?.toArray(); // Returns a Cursor instance
 
-    // Populate user info on each friend request entry
-    const populatedResults = await Promise.all(
-      pendingFriendEntries.map(async (req) => {
-        const user = await userRepository.getUserById(req?.requestorId);
-        return {
-          username: user?.account?.username,
-          avatar: user?.profile?.avatarImage,
-        };
-      })
-    );
-    return populatedResults;
+    // Use the utility to normalize friend requests
+    return await normalizeFriendRequests(pendingFriendEntries);
   }
 
   async acceptFriendRequest({ currentUserId, targetUsername }) {
@@ -376,9 +369,42 @@ class UserService {
         const updatedPendingRequests = await this.getPendingFriendRequests({
           currentUserId: targetUserId.toHexString(),
         });
-        console.log("new pending requests");
-        console.log(updatedPendingRequests);
+        // Update new pending requests for the recipient
         userSocket.emit("pending-friend-requests", updatedPendingRequests);
+
+        // Update new friends list for current user
+        var updatedFriendsList = await (
+          await friendRepository.getFriendsList({
+            currentUserId: currentUser._id,
+          })
+        ).toArray();
+        updatedFriendsList = await normalizeFriendsList(
+          updatedFriendsList,
+          currentUser._id
+        );
+        console.log("updated friends list: ", updatedFriendsList);
+        userSocket.emit(
+          "friends-list",
+          await normalizeFriendRequests(updatedFriendsList)
+        );
+      }
+
+      // Update new friends list for requestor if online
+      const requestorSocket = map.get(targetUserId.toHexString());
+      if (requestorSocket) {
+        var requestorUpdatedFriendsList = await (
+          await friendRepository.getFriendsList({
+            currentUserId: targetUserId,
+          })
+        ).toArray();
+        requestorUpdatedFriendsList = await normalizeFriendsList(
+          requestorUpdatedFriendsList,
+          targetUserId
+        );
+        requestorSocket.emit(
+          "friends-list",
+          await normalizeFriendRequests(requestorUpdatedFriendsList)
+        );
       }
     } catch (error) {
       throw error;

@@ -1,8 +1,12 @@
 import { Server } from "socket.io";
-import authService from "./services/authService.js";
 import { getTokens } from "./utils/socket.js";
 import userService from "./services/UserService.js";
-
+import {
+  normalizeFriendRequests,
+  normalizeFriendsList,
+} from "./services/friendHelper.js";
+import friendRepository from "./database/FriendDb.js";
+import { ObjectId } from "mongodb";
 // Global variable that references the socketio server
 var io;
 
@@ -39,6 +43,22 @@ function initializeSocket(httpsServer) {
         currentUserId: decodedJwtToken.id,
       });
       socket.emit("pending-friend-requests", friendRequestList);
+    });
+
+    socket.on("friends-list", async () => {
+      // Get jwt token id
+      const cookieString = socket.handshake.headers.cookie;
+      const decodedJwtToken = await getTokens(cookieString);
+      var friendsList = await (
+        await friendRepository.getFriendsList({
+          currentUserId: new ObjectId(decodedJwtToken.id),
+        })
+      ).toArray();
+      friendsList = await normalizeFriendsList(
+        friendsList,
+        new ObjectId(decodedJwtToken.id)
+      );
+      socket.emit("friends-list", friendsList);
     });
 
     console.log(`Client socket with socketId: "${socket.id}" connected`);
