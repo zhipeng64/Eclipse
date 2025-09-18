@@ -3,6 +3,8 @@ import SocketContext from "../Context/Socket";
 function InboxModal({ inboxModalRef }) {
   console.log("Inbox opened");
   const { pendingFriendRequests } = useContext(SocketContext);
+  console.log(pendingFriendRequests);
+  console.log(pendingFriendRequests.length);
 
   const handleAcceptFriendRequest = async (username) => {
     // Post request
@@ -30,22 +32,24 @@ function InboxModal({ inboxModalRef }) {
   };
 
   return (
-    <div className="flex modal-overlay justify-center">
+    <div className="flex flex-col modal-overlay justify-center">
       <div
         id="inbox-modal"
-        className="flex flex-col self-center p-5 w-full max-w-xl h-full min-h-100 md:min-h-120 max-h-[80vh] overflow-auto shadow-card rounded-card dlayer-4"
+        className="flex flex-col grow self-center p-5 w-full max-w-xl max-h-[80vh] shadow-card rounded-card dlayer-4"
         ref={inboxModalRef}
       >
         <h1 className="text-center pb-5">Incoming Friend Requests</h1>
-        {pendingFriendRequests.length > 0 &&
-          pendingFriendRequests.map((request) => {
-            return (
-              <div
-                key={request?.username}
-                id="pending-friend-requests"
-                className="dlayer-1 grow"
-              >
-                <div className="flex justify-between p-3 opac-shadow">
+        <div
+          id="pending-friend-requests-container"
+          className="grow dlayer-1 rounded-lg overflow-auto"
+        >
+          {pendingFriendRequests.length > 0 &&
+            pendingFriendRequests.map((request) => {
+              return (
+                <div
+                  className="flex justify-between p-3 opac-shadow"
+                  key={request?.username}
+                >
                   <div className="flex items-center">
                     <img
                       src={
@@ -76,9 +80,9 @@ function InboxModal({ inboxModalRef }) {
                 </button> */}
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+        </div>
       </div>
     </div>
   );

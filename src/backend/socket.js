@@ -1,12 +1,9 @@
 import { Server } from "socket.io";
 import { getTokens } from "./utils/socket.js";
-import userService from "./services/UserService.js";
-import {
-  normalizeFriendRequests,
-  normalizeFriendsList,
-} from "./services/friendHelper.js";
+import { getFriendRequestUserInfoList } from "./services/friendHelper.js";
 import friendRepository from "./database/FriendDb.js";
 import { ObjectId } from "mongodb";
+import friendService from "./services/FriendService.js";
 // Global variable that references the socketio server
 var io;
 
@@ -39,22 +36,24 @@ function initializeSocket(httpsServer) {
       // Get jwt token id
       const cookieString = socket.handshake.headers.cookie;
       const decodedJwtToken = await getTokens(cookieString);
-      const friendRequestList = await userService.getPendingFriendRequests({
-        currentUserId: decodedJwtToken.id,
+      const friendRequestList = await friendService.getPendingFriendRequests({
+        userId: decodedJwtToken.id,
       });
-      socket.emit("pending-friend-requests", friendRequestList);
+      socket.emit(
+        "pending-friend-requests",
+        friendRequestList,
+        process.env.EVENT_STATUS_INITIALIZE
+      );
     });
 
     socket.on("friends-list", async () => {
       // Get jwt token id
       const cookieString = socket.handshake.headers.cookie;
       const decodedJwtToken = await getTokens(cookieString);
-      var friendsList = await (
-        await friendRepository.getFriendsList({
-          currentUserId: new ObjectId(decodedJwtToken.id),
-        })
-      ).toArray();
-      friendsList = await normalizeFriendsList(
+      var friendsList = await await friendRepository.getFriendsList({
+        currentUserId: new ObjectId(decodedJwtToken.id),
+      });
+      friendsList = await getFriendRequestUserInfoList(
         friendsList,
         new ObjectId(decodedJwtToken.id)
       );

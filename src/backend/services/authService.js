@@ -63,59 +63,62 @@ export class AuthService {
   async validateTokens(jwtToken, refreshToken, jwtCallback = null) {
     var parsedJwtToken = null;
     var parsedRefreshToken = null;
-    try {
-      if (!jwtToken && !refreshToken) {
-        throw new Error("Missing jwt and refresh tokens");
-      }
-      // Jwt token present
-      if (jwtToken) {
-        parsedJwtToken = await this.decodeAndVerifyJwt(jwtToken);
-        return parsedJwtToken;
-      }
+    if (!jwtToken && !refreshToken) {
+      // Use AppError for user-facing error
+      throw new AppError({
+        originalErrorMessage: "MissingTokens",
+        errorDescription: "Missing jwt and refresh tokens",
+        statusCode: 401,
+        clientResponse: {
+          errors: [
+            {
+              field: "customError",
+              msg: "Authentication required",
+            },
+          ],
+        },
+      });
+    }
+    // Jwt token present
+    if (jwtToken) {
+      parsedJwtToken = await this.decodeAndVerifyJwt(jwtToken);
+      return parsedJwtToken;
+    }
 
-      // Refresh token present
-      if (refreshToken) {
-        parsedRefreshToken =
-          await this.decodeAndVerifyRefreshToken(refreshToken);
+    // Refresh token present
+    if (refreshToken) {
+      parsedRefreshToken = await this.decodeAndVerifyRefreshToken(refreshToken);
 
-        // Get the userId associated with the refresh token
-        const userId = parsedRefreshToken.userId;
-        const newJwtToken = AuthService.createJwtToken(userId);
-        const duration = AuthService.getJwtTokenDuration();
-        parsedJwtToken = await this.decodeAndVerifyJwt(newJwtToken);
+      // Get the userId associated with the refresh token
+      const userId = parsedRefreshToken.userId;
+      const newJwtToken = AuthService.createJwtToken(userId);
+      const duration = AuthService.getJwtTokenDuration();
+      parsedJwtToken = await this.decodeAndVerifyJwt(newJwtToken);
 
-        // Optional callback to set jwt cookie for middleware
-        if (jwtCallback) {
-          jwtCallback(newJwtToken, duration);
-        }
-        return parsedJwtToken;
+      // Optional callback to set jwt cookie for middleware
+      if (jwtCallback) {
+        jwtCallback(newJwtToken, duration);
       }
-    } catch (error) {
-      throw error;
+      return parsedJwtToken;
     }
   }
 
   // Verifies refresh token validity
   async decodeAndVerifyRefreshToken(refreshToken) {
     if (!refreshToken) {
-      throw new Error("Refresh token is a falsy value");
-    }
-    if (authValidator.isRefreshTokenFormatInvalid(refreshToken)) {
-      throw new Error("Refresh token format is invalid");
-    }
-
-    try {
-      const dbRefreshToken =
-        await refreshTokenRepository.getRefreshToken(refreshToken);
-
-      if (!dbRefreshToken) {
-        throw new Error("Database refresh token not found");
-      }
-      return dbRefreshToken;
-    } catch (error) {
-      console.log(error);
       return null;
     }
+    if (authValidator.isRefreshTokenFormatInvalid(refreshToken)) {
+      return null;
+    }
+
+    const dbRefreshToken =
+      await refreshTokenRepository.getRefreshToken(refreshToken);
+
+    if (!dbRefreshToken) {
+      throw new Error("Database refresh token not found");
+    }
+    return dbRefreshToken;
   }
 
   // Returns decoded JWT if valid, null if not

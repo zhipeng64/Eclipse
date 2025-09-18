@@ -22,6 +22,7 @@ export default function SearchFriendModal({ friendModalRef }) {
     event.stopPropagation();
     event.preventDefault();
     const { username } = Object.fromEntries(new FormData(event.target));
+    setSearchErrors({ searchError: "" }); // reset errors
     try {
       const url = `${import.meta.env.VITE_BACKEND_URL}/users/lookup`;
       // Query parameters represented with URLSearchParams
@@ -44,7 +45,8 @@ export default function SearchFriendModal({ friendModalRef }) {
           if (field === "searchError") {
             newErrors.searchError = msg;
           } else {
-            throw new Error("An unknown error has occurred during user lookup");
+            newErrors.searchError =
+              "An unknown error has occurred during user lookup";
           }
         }
         setSearchErrors(newErrors);
@@ -56,11 +58,12 @@ export default function SearchFriendModal({ friendModalRef }) {
         setUsersSearched(users);
       }
     } catch (error) {
-      console.log(error);
+      setSearchErrors({ searchError: "Network error. Please try again." });
     }
   };
 
   const handleFriendRequest = async (username) => {
+    setFriendRequestErrors({ friendRequestError: "" }); // reset errors
     try {
       const url = `${import.meta.env.VITE_BACKEND_URL}/users/friend-requests`;
       const postData = {
@@ -77,14 +80,13 @@ export default function SearchFriendModal({ friendModalRef }) {
       const data = await response.json();
       if (!response.ok) {
         const errors = data.errors || [];
-        const newErrors = { friendRequestErrors: "" };
+        const newErrors = { friendRequestError: "" };
         for (const { field, msg } of errors) {
           if (field === "customError") {
-            newErrors.friendRequestErrors = msg;
+            newErrors.friendRequestError = msg;
           } else {
-            throw new Error(
-              "An unknown error has occurred when sending friend request to user"
-            );
+            newErrors.friendRequestError =
+              "An unknown error has occurred when sending friend request to user";
           }
         }
         setFriendRequestErrors(newErrors);
@@ -97,7 +99,9 @@ export default function SearchFriendModal({ friendModalRef }) {
         });
       }
     } catch (error) {
-      console.log(error);
+      setFriendRequestErrors({
+        friendRequestError: "Network error. Please try again.",
+      });
     }
   };
 

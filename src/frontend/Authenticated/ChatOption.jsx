@@ -5,14 +5,17 @@ import { CiMail } from "react-icons/ci";
 import SearchFriendModal from "./SearchFriendModal";
 import { useCloseOnClickOutside } from "../utils/customHooks.jsx";
 import InboxModal from "./InboxModal.jsx";
-import SocketContext from "../Context/Socket.jsx";
 
-function ChatOption({ chatData }) {
-  const { socket, pendingFriendRequests, friends } = useContext(SocketContext);
+function ChatOption({ pendingFriendRequests, friends, setSelectedChat }) {
+  // Modal states
   const [isFriendSearchOpen, setIsFriendSearchOpen] = useState(false);
   const [isInboxOpen, setIsInboxOpen] = useState(false);
+
+  /// Refs for modals
   const friendModalRef = useRef(null);
   const inboxModalRef = useRef(null);
+
+  console.log(setSelectedChat);
 
   // Register event listeners
   useCloseOnClickOutside(friendModalRef, isFriendSearchOpen, () =>
@@ -80,7 +83,7 @@ function ChatOption({ chatData }) {
         {friends.length > 0 ? (
           friends.map((friend) => (
             <div
-              className="flex flex-col items-center justify-center space-y-1"
+              className="flex flex-col items-center justify-center space-y-1 cursor-pointer"
               key={friend.username}
             >
               <img
@@ -104,8 +107,9 @@ function ChatOption({ chatData }) {
         {friends.length > 0 ? (
           friends.map((friend) => (
             <div
-              className="flex w-full py-2 px-4 opac-shadow"
+              className="flex w-full py-2 px-4 opac-shadow cursor-pointer hover:bg-[#2c3345]"
               key={friend.username}
+              onClick={() => setSelectedChat(friend)}
             >
               <img
                 src={"../assets/sunrise2.jpg"}

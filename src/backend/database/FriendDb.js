@@ -10,10 +10,8 @@ class FriendRepository {
     this.collection = process.env.DB_FRIEND_COLLECTION;
   }
 
-  async getFriendEntry({ userId, targetUserId }) {
-    console.log("printing ids");
-    console.log(userId, targetUserId);
-    if (!userId || !targetUserId) {
+  async getFriendEntry({ userOne, userTwo }) {
+    if (!userOne || !userTwo) {
       throw new Error(
         "Invalid userId or targetUserId supplied when querying friend entry"
       );
@@ -21,7 +19,7 @@ class FriendRepository {
 
     // Checks if a friendship already exists between two users by checking users array
     const query = {
-      users: { $all: [userId, targetUserId] },
+      users: { $all: [userOne, userTwo] },
     };
     const friendEntry = await getEntry(query, this.collection);
     console.log("friend entry from db:");
@@ -44,7 +42,8 @@ class FriendRepository {
       status: "pending",
       createdAt: new Date(Date.now()),
     };
-    await insertEntry(entry, this.collection);
+    const id = await insertEntry(entry, this.collection);
+    return id;
   }
 
   async getFriendRequests({ currentUserId }) {

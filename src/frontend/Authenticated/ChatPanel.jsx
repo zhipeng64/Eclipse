@@ -5,13 +5,14 @@ import { IoSettingsSharp } from "react-icons/io5";
 import { FaPlus } from "react-icons/fa";
 import { MdEmojiEmotions } from "react-icons/md";
 
-function ChatPanel({ chatData, chatPanelSelectionState }) {
+function ChatPanel({ selectedChat }) {
   const [inputSettings, setInputSettings] = useState({
     inputRowCount: 1,
     focus: false,
   });
 
-  if (chatPanelSelectionState === null) {
+  console.log("fwiends: ", selectedChat);
+  if (selectedChat === null) {
     // Render everything below but with placeholder
     return (
       <div
@@ -37,7 +38,9 @@ function ChatPanel({ chatData, chatPanelSelectionState }) {
             alt="Avatar"
             className="w-11 h-11 rounded-full mr-2"
           />
-          <p className="text-md">John Zena</p>
+          <p className="text-md">
+            {selectedChat ? selectedChat.username : "Unknown"}
+          </p>
         </div>
         <div className="flex space-x-7 text-gray-200 pr-2">
           <i className="standard-icon-container p-1">
@@ -124,7 +127,7 @@ function ChatPanel({ chatData, chatPanelSelectionState }) {
         <textarea
           id="chat-input"
           placeholder="Type a message..."
-          className="w-full p-2 m-2 rounded-lg text-white min-h-1 layer-2 resize-none hideScrollBar"
+          className="w-full p-2 m-2 rounded-lg text-white min-h-1 layer-2 resize-none hideScrollBar outline-none"
           rows={inputSettings.focus ? inputSettings.inputRowCount : 1}
           onFocus={(e) => {
             e.stopPropagation();

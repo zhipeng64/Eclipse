@@ -1,11 +1,24 @@
 import { FaHome } from "react-icons/fa";
 import { IoMdChatboxes } from "react-icons/io";
 import { IoSettings } from "react-icons/io5";
-import { useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import SocketContext from "../Context/Socket";
 
 function Navigation({ optionSelected, setOptionSelected }) {
+  const [showToast, setShowToast] = useState(false);
   const { newFriendRequest } = useContext(SocketContext);
+
+  // Show the toast upon a new friend request
+  useEffect(() => {
+    if (!newFriendRequest) return;
+    const showMessage = () => {
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+      }, 10000); // Hide after 10 seconds
+    };
+    showMessage();
+  }, [newFriendRequest]);
   return (
     <nav
       id="top-nav"
@@ -33,12 +46,7 @@ function Navigation({ optionSelected, setOptionSelected }) {
       <div
         id="chat-option"
         className={`relative flex flex-col items-center cursor-pointer p-2 rounded-lg ${optionSelected.chatOption ? "layer-2" : ""}
-        ${
-          newFriendRequest
-            ? "after:content-[''] after:absolute after:rounded-lg after:top-1 after:right-3 after:w-3 after:h-3 after:bg-[#b390f4]"
-            : ""
-        }
-        `}
+  `}
         onClick={() =>
           setOptionSelected({
             // homeOption: false,
@@ -51,7 +59,7 @@ function Navigation({ optionSelected, setOptionSelected }) {
           <IoMdChatboxes className="text-[1.4rem] " />
         </i>
         <h2 className="text-lg">Chat</h2>
-        {newFriendRequest && <p>You have a new friend request!</p>}
+        {showToast && <p>You have a new friend request!</p>}
       </div>
 
       <div

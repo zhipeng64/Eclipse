@@ -2,6 +2,7 @@ import { io } from "socket.io-client";
 import { useEffect, useRef, useState } from "react";
 import { useAuthenticationChecks } from "../../utils/customHooks.jsx";
 import SocketContext from "../Socket.jsx";
+import env from "../../config.js";
 
 function SocketProvider({ children }) {
   const [socket, setSocket] = useState(null);
@@ -22,7 +23,7 @@ function SocketProvider({ children }) {
   // Creates a singleton socket
   useEffect(() => {
     if (!isAuthenticated) return;
-    const serverUrl = `${import.meta.env.VITE_BACKEND_URL}`; // Automatically appends /socket.io pathname by default
+    const serverUrl = env.VITE_BACKEND_URL; // Automatically appends /socket.io pathname by default
     const newSocket = io(serverUrl, {
       withCredentials: true,
     });
@@ -32,7 +33,6 @@ function SocketProvider({ children }) {
     // This must come after pending requests are loaded
     newSocket.on("new-friend-request", (friendRequest) => {
       console.log("Received new friend request:");
-      console.log(friendRequest);
       if (friendRequest) {
         if (!pendingFriendRequestsLoadingRef.current) {
           setNewFriendRequest(true);
@@ -42,12 +42,17 @@ function SocketProvider({ children }) {
       }
     });
 
-    // Receives a list of all pending friend requests
-    newSocket.on("pending-friend-requests", (list) => {
-      console.log(list);
+    // Manages pending friend requests
+    newSocket.on("pending-friend-requests", (list, status) => {
       pendingFriendRequestsLoadingRef.current = true;
+
+      console.log("Received pending friend requests:", list, status);
       if (list) {
-        setPendingFriendRequests([...list, ...buffer.current]);
+        if (status === env.VITE_EVENT_STATUS_INITIALIZE) {
+          setPendingFriendRequests([...list, ...buffer.current]);
+        } else if (status === env.VITE_EVENT_STATUS_PUSH) {
+          setPendingFriendRequests((prev) => [...prev, ...list]);
+        }
       }
       pendingFriendRequestsLoadingRef.current = false;
     });

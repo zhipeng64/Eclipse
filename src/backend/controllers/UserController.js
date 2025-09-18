@@ -1,6 +1,9 @@
 import { createCookieOptions } from "../utils/cookie.js";
 import authService from "../services/authService.js";
 import userService from "../services/UserService.js";
+import { AppError } from "../utils/AppError.js";
+import friendService from "../services/FriendService.js";
+
 class UserController {
   constructor() {
     this.authService = authService;
@@ -11,9 +14,20 @@ class UserController {
     console.log("inside registration handler");
     const { username, email, password } = req?.body;
     if (!username || !email || !password) {
-      throw new Error(
-        "Controller received invalid username or email or password"
-      );
+      throw new AppError({
+        originalErrorMessage: "InvalidInput",
+        errorDescription:
+          "Controller received invalid username or email or password",
+        statusCode: 400,
+        clientResponse: {
+          errors: [
+            {
+              field: "customError",
+              msg: "Invalid username, email, or password",
+            },
+          ],
+        },
+      });
     }
 
     // Register user if not already exists
@@ -39,7 +53,19 @@ class UserController {
   async loginHandler(req, res) {
     const { username, password } = req?.body;
     if (!username || !password) {
-      throw new Error("Controller received invalid username and password");
+      throw new AppError({
+        originalErrorMessage: "InvalidInput",
+        errorDescription: "Controller received invalid username and password",
+        statusCode: 400,
+        clientResponse: {
+          errors: [
+            {
+              field: "customError",
+              msg: "Invalid username or password",
+            },
+          ],
+        },
+      });
     }
     const { jwt, refreshToken, jwtExpiresAt, refreshTokenExpiresAt } =
       await userService.signInUser({ username, plaintextPassword: password });
@@ -60,9 +86,20 @@ class UserController {
     const decodedJwtTokenUserId = req?.user?.id;
 
     if (!targetUsername || !decodedJwtTokenUserId) {
-      throw new Error(
-        "Controller received invalid username and decoded jwt token"
-      );
+      throw new AppError({
+        originalErrorMessage: "InvalidInput",
+        errorDescription:
+          "Controller received invalid username and decoded jwt token",
+        statusCode: 400,
+        clientResponse: {
+          errors: [
+            {
+              field: "customError",
+              msg: "Invalid username or authentication",
+            },
+          ],
+        },
+      });
     }
     const { username, avatarImage, friendshipData } =
       await userService.searchUser({
@@ -87,11 +124,22 @@ class UserController {
     const decodedJwtTokenUserId = req?.user?.id;
 
     if (!username || !decodedJwtTokenUserId) {
-      throw new Error(
-        "Controller received invalid username and decoded jwt token"
-      );
+      throw new AppError({
+        originalErrorMessage: "InvalidInput",
+        errorDescription:
+          "Controller received invalid username and decoded jwt token",
+        statusCode: 400,
+        clientResponse: {
+          errors: [
+            {
+              field: "customError",
+              msg: "Invalid username or authentication",
+            },
+          ],
+        },
+      });
     }
-    await userService.addUser({
+    await friendService.addUser({
       currentUserId: decodedJwtTokenUserId,
       targetUsername: username,
     });
@@ -109,13 +157,24 @@ class UserController {
 
     console.log("received request to accept friend request");
     if (!username || !decodedJwtTokenUserId) {
-      throw new Error(
-        "Controller received invalid username and decoded jwt token"
-      );
+      throw new AppError({
+        originalErrorMessage: "InvalidInput",
+        errorDescription:
+          "Controller received invalid username and decoded jwt token",
+        statusCode: 400,
+        clientResponse: {
+          errors: [
+            {
+              field: "customError",
+              msg: "Invalid username or authentication",
+            },
+          ],
+        },
+      });
     }
-    await userService.acceptFriendRequest({
-      currentUserId: decodedJwtTokenUserId,
-      targetUsername: username,
+    await friendService.acceptFriendRequest({
+      recipientToken: decodedJwtTokenUserId,
+      requestorUsername: username,
     });
     console.log("Friend request accepted");
     return res.status(200).json({

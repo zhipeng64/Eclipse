@@ -2,18 +2,20 @@ import { Navigation } from "./Navigation";
 import { ChatOption } from "./ChatOption";
 import { ChatPanel } from "./ChatPanel";
 import { useAuthenticationChecks } from "../utils/customHooks";
-import { useState } from "react";
+import { useState, useContext } from "react";
+import SocketContext from "../Context/Socket.jsx";
 import { HomeOption } from "./HomeOption";
 
 function MainPanel() {
   const { isLoading, isAuthenticated } = useAuthenticationChecks();
+  // Access socket context for real-time updates
+  const { pendingFriendRequests, friends } = useContext(SocketContext);
+  const [selectedChat, setSelectedChat] = useState(null);
   const [optionSelected, setOptionSelected] = useState({
     // homeOption: false,
     chatOption: true,
     settingsOption: false,
   });
-  const [chatPanelSelectionState, setChatPanelSelectionState] = useState(null);
-
   if (isLoading) {
     return null;
   }
@@ -34,10 +36,14 @@ function MainPanel() {
         {/* Main content area */}
         <div className="flex flex-col md:flex-row grow px-2 pb-1 self-stretch gap-2">
           <div className="md:flex-[0.40] rounded-lg min-w-[220px] max-w-full">
-            <ChatOption />
+            <ChatOption
+              pendingFriendRequests={pendingFriendRequests}
+              friends={friends}
+              setSelectedChat={(chat) => setSelectedChat(chat)}
+            />
           </div>
           <div className="md:flex-[0.60] rounded-lg min-w-[260px] max-w-full">
-            <ChatPanel chatPanelSelectionState={chatPanelSelectionState} />
+            <ChatPanel selectedChat={selectedChat} />
           </div>
         </div>
 
