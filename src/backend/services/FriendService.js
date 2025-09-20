@@ -1,4 +1,3 @@
-import { ObjectId } from "mongodb";
 import friendRepository from "../database/FriendDb.js";
 import userRepository from "../database/UserDb.js";
 import { getFriendRequestUserInfoList } from "./friendHelper.js";
@@ -27,15 +26,12 @@ class FriendService {
         },
       });
     }
-    const pendingFriendEntries = await friendRepository.getFriendRequests({
-      currentUserId: new ObjectId(userId),
-    });
+    const pendingFriendEntries =
+      await friendRepository.getFriendRequests(userId);
 
-    return await getFriendRequestUserInfoList(
-      pendingFriendEntries,
-      new ObjectId(userId),
-      { type: "recipient" }
-    );
+    return await getFriendRequestUserInfoList(pendingFriendEntries, userId, {
+      type: "recipient",
+    });
   }
 
   async addUser({ currentUserId, targetUsername }) {
@@ -55,9 +51,7 @@ class FriendService {
       });
     }
 
-    const currentUser = await userRepository.getUserById(
-      new ObjectId(currentUserId)
-    );
+    const currentUser = await userRepository.getUserById(currentUserId);
     if (!currentUser) {
       throw new Error("Failed to get current user by id in addUser");
     }
@@ -67,7 +61,7 @@ class FriendService {
       throw new Error("Failed to find target user id in addUser");
     }
 
-    if (currentUser._id.toHexString() === targetUserId.toHexString()) {
+    if (currentUser._id === targetUserId) {
       throw new AppError({
         originalErrorMessage: "SelfAdd",
         errorDescription: "Cannot add yourself as a friend",
@@ -83,10 +77,10 @@ class FriendService {
       });
     }
 
-    const friendRequest = await friendRepository.getFriendEntry({
-      userOne: currentUser._id,
-      userTwo: targetUserId,
-    });
+    const friendRequest = await friendRepository.getFriendEntry(
+      currentUser._id,
+      targetUserId
+    );
 
     if (friendRequest) {
       throw new AppError({
@@ -104,22 +98,22 @@ class FriendService {
       });
     }
 
-    const friendRequestId = await friendRepository.insertFriendEntry({
-      userId: currentUser._id,
-      targetUserId,
-    });
+    const friendRequestId = await friendRepository.insertFriendEntry(
+      currentUser._id,
+      targetUserId
+    );
 
     if (!friendRequestId) {
       throw new Error("Failed to insert friend request entry");
     }
 
     // Notify recipient if online
-    const userSocket = getMap().get(targetUserId.toHexString());
+    const userSocket = getMap().get(targetUserId);
 
-    const friendEntry = await friendRepository.getFriendEntry({
-      userOne: currentUser._id,
-      userTwo: targetUserId,
-    });
+    const friendEntry = await friendRepository.getFriendEntry(
+      currentUser._id,
+      targetUserId
+    );
     const parsedEntry = await getFriendRequestUserInfoList(
       friendEntry,
       targetUserId
@@ -156,9 +150,7 @@ class FriendService {
       });
     }
 
-    const recipientId = (
-      await userRepository.getUserById(new ObjectId(recipientToken))
-    )?._id;
+    const recipientId = (await userRepository.getUserById(recipientToken))?._id;
     if (!recipientId) {
       throw new Error(
         "Failed to get current user by id in acceptFriendRequest"
@@ -170,7 +162,7 @@ class FriendService {
       throw new Error("Failed to find target user id in acceptFriendRequest");
     }
 
-    if (recipientId.equals(requestorId)) {
+    if (recipientId === requestorId) {
       throw new AppError({
         originalErrorMessage: "SelfAccept",
         errorDescription: "You cannot accept your own friend request",
@@ -186,12 +178,12 @@ class FriendService {
       });
     }
 
-    const { friendRequest, friendRequestId, friendRequestStatus } =
-      await friendRepository.getFriendEntry({
-        userOne: recipientId,
-        userTwo: requestorId,
-      });
-
+    const friendRequest = await friendRepository.getFriendEntry(
+      recipientId,
+      requestorId
+    );
+    const friendRequestId = friendRequest?._id;
+    const friendRequestStatus = friendRequest?.status;
     if (!friendRequest) {
       throw new Error("No friend request entry found");
     }
@@ -204,50 +196,72 @@ class FriendService {
       throw new Error("Updating friend request to accepted failed");
     }
 
+    console.log("Friend request accepted successfully");
     // Check if checkroom exists
+
     const chatRoomExists = await this.chatRoomService.getDMChatroom({
-        userId1: recipientId.toHexString(),
-        userId2: requestorId.toHexString()
-    })
+      userId1: recipientId,
+      userId2: requestorId,
+    });
 
     // Should not exist before users became friends
     if (chatRoomExists) {
-        throw new Error("Chatroom already exists between two users")
+      throw new Error("Chatroom already exists between two users");
     }
+
     const newChatRoomId = await this.chatRoomService.insertDMChatroom({
-        userId1: recipientId.toHexstring(),
-        userId2: requestorId.toHexString()
-    })
-    console.log("New chatroom created with id: " = newChatRoomId)
+      userId1: recipientId,
+      userId2: requestorId,
+    });
+    console.log("New chatroom created with id: ", newChatRoomId);
 
     // Notify recipieint if online the new list of pending friend requests
     await notifyUser({
       userId: recipientId,
       eventName: "pending-friend-requests",
-      eventStatus: process.env.EVENT_STATUS_PUSH,
+      eventStatus: process.env.EVENT_STATUS_INITIALIZE,
       callback: async () =>
-        this.getPendingFriendRequests({ userId: recipientId.toHexString() }),
+        this.getPendingFriendRequests({ userId: recipientId }),
     });
 
     // Notify both users to update their friends list
-    await this._notifyFriendsList(recipientId);
-    await this._notifyFriendsList(requestorId);
+    await this.notifyFriendsList({ userId: recipientId });
+    await this.notifyFriendsList({ userId: requestorId });
   }
 
-  async _notifyFriendsList(userId) {
+  // Gets the friend list for userId, appends chatroom data, and
+  // notifies the socket for userId to update their friends list
+  async notifyFriendsList({ userId }) {
     await notifyUser({
       userId,
       eventName: "friends-list",
-      eventStatus: process.env.EVENT_STATUS_PUSH,
+      eventStatus: process.env.EVENT_STATUS_INITIALIZE,
       callback: async () => {
-        let updatedFriendsList = await (
-          await friendRepository.getFriendsList({ currentUserId: userId })
-        ).toArray();
-        updatedFriendsList = await getFriendRequestUserInfoList(
-          updatedFriendsList,
+        const rawFriendsList = await friendRepository.getFriendsList(userId);
+        console.log("Raw friends list:", rawFriendsList);
+        const updatedFriendsList = await getFriendRequestUserInfoList(
+          rawFriendsList,
           userId
         );
-        return updatedFriendsList;
+
+        // For each friend, get the DM chatroom and append chatroomId
+        return Promise.all(
+          updatedFriendsList.map(async (friend, index) => {
+            const friendId =
+              rawFriendsList[index]?.users[0] === userId
+                ? rawFriendsList[index]?.users[1]
+                : rawFriendsList[index]?.users[0];
+            const chatroom = await this.chatRoomService.getDMChatroom({
+              userId1: userId,
+              userId2: friendId,
+            });
+            const chatroomId = chatroom ? chatroom._id : null;
+            return {
+              ...friend,
+              chatroomId,
+            };
+          })
+        );
       },
     });
   }

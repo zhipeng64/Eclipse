@@ -1,7 +1,8 @@
 // Low-level, generic CRUD operations
 import { connectToMongo } from "./connection.js";
 import { ALLOWED_COLLECTIONS } from "../schemas/database.js";
-import { logWithDate } from "./util.js";
+import { convertObjectIds, logWithDate } from "./util.js";
+import { ObjectId } from "mongodb";
 
 const getAllEntry = async (query, collection) => {
   try {
@@ -15,9 +16,11 @@ const getAllEntry = async (query, collection) => {
 
     const db = await connectToMongo();
     const result = await db.collection(collection).find(query);
+    const resultArray = await result.toArray();
     // logWithDate(result);
 
-    return result;
+    // result is a Cursor object, convert to array
+    return convertObjectIds(resultArray, ObjectId);
   } catch (error) {
     throw error;
   }
@@ -37,7 +40,7 @@ const getEntry = async (query, collection) => {
     const result = await db.collection(collection).findOne(query);
     // logWithDate(result);
 
-    return result;
+    return convertObjectIds(result, ObjectId);
   } catch (error) {
     throw error;
   }
@@ -57,7 +60,7 @@ const insertEntry = async (query, collection) => {
     const db = await connectToMongo();
     const result = await db.collection(collection).insertOne(query);
     console.log("Entry inserted successfully");
-    return result;
+    return convertObjectIds(result, ObjectId);
   } catch (error) {
     throw error;
   }
@@ -92,7 +95,7 @@ const updateEntry = async (query, update, options, collection) => {
     } else {
       result = await db.collection(collection).updateOne(query, update);
     }
-    return result;
+    return convertObjectIds(result, ObjectId);
   } catch (error) {
     throw error;
   }

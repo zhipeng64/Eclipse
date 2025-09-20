@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { getEntry, getAllEntry, insertEntry, updateEntry } from "./crud.js";
+import { convertObjectIds } from "./util.js";
 
 class ChatroomRepository {
   constructor() {
@@ -9,34 +10,33 @@ class ChatroomRepository {
   /**
    * Finds a DM chatroom between two users
    */
-  async getDMChatroom({ userId1, userId2 }) {
+  async getDMChatroom(userId1, userId2) {
     if (!userId1 || !userId2) {
       throw new Error("Invalid user IDs supplied to getDMChatroom");
     }
-
-    const sortedParticipants = [userId1, userId2].sort((a, b) =>
-      a.toString().localeCompare(b.toString())
-    );
-
+    // Convert hex ids to ObjectId instances
+    const participants = [new ObjectId(userId1), new ObjectId(userId2)];
     const query = {
-      is_group: false,
-      participants: { $all: sortedParticipants, $size: 2 },
+      isGroup: false,
+      participants: { $all: participants, $size: 2 },
     };
 
-    return await getEntry(query, this.collection);
+    const result = await getEntry(query, this.collection);
+    return convertObjectIds(result, ObjectId);
   }
 
   /**
    * Inserts a new DM chatroom
    */
-  async insertDMChatroom({ userId1, userId2 }) {
+  async insertDMChatroom(userId1, userId2) {
     if (!userId1 || !userId2) {
       throw new Error("Invalid user IDs supplied to insertDMChatroom");
     }
 
-    const sortedParticipants = [userId1, userId2].sort((a, b) =>
-      a.toString().localeCompare(b.toString())
-    );
+    const sortedParticipants = [
+      new ObjectId(userId1),
+      new ObjectId(userId2),
+    ].sort((a, b) => a.toString().localeCompare(b.toString()));
 
     const newChatroom = {
       isGroup: false,
@@ -45,8 +45,8 @@ class ChatroomRepository {
       createdAt: new Date(),
     };
 
-    const insertedId = await insertEntry(newChatroom, this.collection);
-    return insertedId;
+    const result = await insertEntry(newChatroom, this.collection);
+    return convertObjectIds(result?.insertedId, ObjectId);
   }
 
   /**
@@ -58,10 +58,11 @@ class ChatroomRepository {
     }
 
     const query = {
-      participants: userId,
+      participants: new ObjectId(userId),
     };
 
-    return await getAllEntry(query, this.collection);
+    const cursor = await getAllEntry(query, this.collection);
+    return cursor;
   }
 
   /**
@@ -76,7 +77,8 @@ class ChatroomRepository {
       _id: new ObjectId(chatroomId),
     };
 
-    return await getEntry(query, this.collection);
+    const result = await getEntry(query, this.collection);
+    return convertObjectIds(result, ObjectId);
   }
 
   /**

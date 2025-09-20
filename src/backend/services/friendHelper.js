@@ -13,20 +13,23 @@ async function getFriendRequestUserInfoList(
 
   // Normalize to array: cursor -> array, array -> array, object -> [object]
   var friendRequestsList = [];
-  if (typeof friendRequests?.toArray === "function") {
-    friendRequestsList = await friendRequests.toArray();
-  } else if (Array.isArray(friendRequests)) {
+  // Array of documents
+  if (Array.isArray(friendRequests)) {
     friendRequestsList = friendRequests;
-  } else if (typeof friendRequests === "object") {
+  }
+  // Single document
+  else if (typeof friendRequests === "object") {
     friendRequestsList = [friendRequests];
   }
 
-  console.log("Friend Requests IDs (raw):", friendRequestsList);
   if (!options) {
     friendRequestsList = friendRequestsList.map((friendRequestEntry) => {
-      let friendId = friendRequestEntry?.users[0].equals(currentUserId)
-        ? friendRequestEntry?.users[1]
-        : friendRequestEntry?.users[0];
+      // users array contains hex string ids
+      const friendId =
+        friendRequestEntry?.users[0] === currentUserId
+          ? friendRequestEntry?.users[1]
+          : friendRequestEntry?.users[0];
+      console.log("Friend ID:", friendId);
       return friendId;
     });
   } else {

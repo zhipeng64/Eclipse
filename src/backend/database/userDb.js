@@ -1,4 +1,6 @@
 import { getEntry, insertEntry } from "./crud.js";
+import { ObjectId } from "mongodb";
+import { convertObjectIds } from "./util.js";
 
 class UserRepository {
   constructor() {
@@ -26,13 +28,14 @@ class UserRepository {
     if (!userId) {
       throw new Error("Failed to get user by id");
     }
-    const query = { _id: userId };
+    const query = { _id: new ObjectId(userId) };
     const user = await getEntry(query, this.collection);
+    // Convert any ObjectId fields to hex strings before returning
     return user;
   }
 
   // Insert
-  async insertUser({ account, profile }) {
+  async insertUser(account, profile) {
     if (!account || !profile)
       throw new Error(
         "Invalid parameters given when inserting user to database"

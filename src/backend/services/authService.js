@@ -37,8 +37,6 @@ export class AuthService {
 
   // Creates a signed JWT token
   static createJwtToken(userId) {
-    console.log("Received user id: ");
-    console.log(userId);
     // Options specified are implictly inserted into the jwt token payload by jsonwebtoken
     // Note: Payload data is serialized with JSON.stringify
     const jwt = createJWT(
@@ -131,8 +129,6 @@ export class AuthService {
     try {
       // Decode and verify the token
       const decodedJwt = jwt.verify(jwtToken, process.env.JWT_SECRET);
-
-      console.log(decodedJwt);
       if (authValidator.isJwtFormatInvalid(decodedJwt)) {
         console.log("JWT token format is invalid");
         return null;

@@ -6,7 +6,6 @@ import { hashPassword } from "../utils/auth.js";
 import { refreshTokenRepository } from "../database/RefreshTokenDb.js";
 import { AuthService } from "./authService.js";
 import { AppError } from "../utils/AppError.js";
-import { ObjectId } from "mongodb";
 import userRepository from "../database/UserDb.js";
 import friendRepository from "../database/FriendDb.js";
 import { encodeBase64 } from "../utils/encodings.js";
@@ -72,13 +71,14 @@ class UserService {
       },
     };
 
-    const result = await userRepository.insertUser(accountEntry);
-    if (!result) {
-      throw new Error(
-        "Failed to retrieve truthy return value after inserting user"
-      );
+    const insertedIdHex = await userRepository.insertUser(
+      accountEntry.account,
+      accountEntry.profile
+    );
+    if (!insertedIdHex) {
+      throw new Error("Failed to retrieve inserted id after inserting user");
     }
-    const userId = result.insertedId;
+    const userId = insertedIdHex; // hex string
 
     // JWT Payload
     const jwt = AuthService.createJwtToken(userId);
@@ -93,6 +93,18 @@ class UserService {
       jwtExpiresAt: AuthService.getJwtTokenDuration(),
       refreshTokenExpiresAt: AuthService.getRefreshTokenDuration(),
     };
+  }
+
+  // Gets a user by ID
+  async getUserById({ userId }) {
+    const user = await userRepository.getUserById(userId);
+    return user;
+  }
+
+  // Gets a user by username
+  async getUser({ username }) {
+    const user = await userRepository.getUser(username);
+    return user;
   }
 
   // Logs in the user and assigns the user jwt and refresh tokens
@@ -221,9 +233,7 @@ class UserService {
       });
     }
 
-    const currentUser = await userRepository.getUserById(
-      new ObjectId(currentUserId)
-    );
+    const currentUser = await userRepository.getUserById(currentUserId);
     if (!currentUser) {
       throw new Error("No user matched lookup criteria (current user)");
     }
@@ -233,7 +243,7 @@ class UserService {
       throw new Error("No user matched lookup criteria (target user)");
     }
 
-    if (currentUser._id.toHexString() === user._id.toHexString()) {
+    if (currentUser._id === user._id) {
       throw new AppError({
         originalErrorMessage: "SelfLookup",
         originalErrorStackTrace: new Error().stack,
@@ -258,17 +268,18 @@ class UserService {
     }
 
     // Check friendship (friendRepository still here, it's not friend-logic extraction)
-    const friendship = await friendRepository.getFriendEntry({
-      userOne: currentUser._id,
-      userTwo: user._id,
-    });
+    const friendship = await friendRepository.getFriendEntry(
+      currentUser._id,
+      user._id
+    );
 
     const friendshipData = friendship
       ? {
           status: friendship.status || null,
-          role: currentUser._id.equals(friendship.recipientId)
-            ? "recipient"
-            : "requestor",
+          role:
+            currentUser._id === friendship.recipientId
+              ? "recipient"
+              : "requestor",
         }
       : null;
 

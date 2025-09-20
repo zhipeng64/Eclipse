@@ -1,6 +1,8 @@
 import { getEntry, insertEntry, updateEntry } from "./crud.js";
 import { hashString } from "../utils/auth.js";
 import { AuthService } from "../services/authService.js";
+import { ObjectId } from "mongodb";
+import { convertObjectIds } from "./util.js";
 
 class RefreshTokenRepository {
   constructor() {
@@ -14,11 +16,12 @@ class RefreshTokenRepository {
         "Invalid parameters given when inserting refresh token to database"
       );
     const entry = {
-      userId: userId,
+      userId: new ObjectId(userId),
       token: hashString(refreshToken), // Stores the sha-256 hashed version of refresh token into database
       expiresAt: new Date(AuthService.getRefreshTokenExpiration()),
     };
-    await insertEntry(entry, this.collection);
+    const result = await insertEntry(entry, this.collection);
+    return result;
   }
 
   async getRefreshToken(refreshToken) {
@@ -29,7 +32,8 @@ class RefreshTokenRepository {
     const query = {
       token: hashString(refreshToken),
     };
-    return await getEntry(query, this.collection);
+    const result = await getEntry(query, this.collection);
+    return result;
   }
 
   async updateRefreshToken(userId, newRefreshToken) {
@@ -37,9 +41,9 @@ class RefreshTokenRepository {
       throw new Error(
         "Invalid parameters given when updating refresh token to database"
       );
-    // Filter to match documents
+    // Filter to match documents (userId supplied as hex string)
     const query = {
-      userId: userId,
+      userId: new ObjectId(userId),
     };
 
     // The properties you specify that will be updated (unspecified ones remain unchanged)

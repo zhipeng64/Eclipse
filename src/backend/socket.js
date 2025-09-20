@@ -1,16 +1,15 @@
 import { Server } from "socket.io";
 import { getTokens } from "./utils/socket.js";
-import { getFriendRequestUserInfoList } from "./services/friendHelper.js";
-import friendRepository from "./database/FriendDb.js";
-import { ObjectId } from "mongodb";
 import friendService from "./services/FriendService.js";
-// Global variable that references the socketio server
-var io;
+import chatRoomService from "./services/ChatRoomService.js";
+import userService from "./services/UserService.js";
+import registerListeners from "./services/socketHandlers/socketListeners.js";
 
-// Stateful tracking of connected sockets, keyed by _id, value is the client socket object
-var socketMap = new Map();
+// Socket.IO instance and socket map
+let io;
+const socketMap = new Map();
 
-// Initializes the socketio server and centralizes all listeners
+// Initializes the socket server
 function initializeSocket(httpsServer) {
   const corsConfiguration = {
     origin: process.env.CORS_ALLOW_LIST.split(","),
@@ -18,69 +17,43 @@ function initializeSocket(httpsServer) {
     credentials: true,
   };
 
-  // Socket IO Server
-  const io = new Server(httpsServer, {
-    cors: corsConfiguration, // Need separate CORS configuration for SocketIO, not shared with ExpressJS
+  io = new Server(httpsServer, {
+    cors: corsConfiguration,
   });
 
-  // Accept incoming socket connections
-  // Since a function, async or not, has its own local callstack when invoked,
-  // any local variables and function arguments will have their own values, so
-  // we can have many users connecting concurrently without race conditions.
+  /*
+    Accept incoming socket connections.
+    Since a function, async or not, has its own local callstack when invoked, 
+    any local variables and function arguments will have their own values, so 
+    we can have many users connecting concurrently without race conditions.
+  */
   io.on("connection", async (socket) => {
-    socket.on("disconnect", () => {
-      console.log(`Client socket with socketId "${socket.id}" disconnected`);
-    });
-
-    socket.on("pending-friend-requests", async () => {
-      // Get jwt token id
-      const cookieString = socket.handshake.headers.cookie;
-      const decodedJwtToken = await getTokens(cookieString);
-      const friendRequestList = await friendService.getPendingFriendRequests({
-        userId: decodedJwtToken.id,
-      });
-      socket.emit(
-        "pending-friend-requests",
-        friendRequestList,
-        process.env.EVENT_STATUS_INITIALIZE
-      );
-    });
-
-    socket.on("friends-list", async () => {
-      // Get jwt token id
-      const cookieString = socket.handshake.headers.cookie;
-      const decodedJwtToken = await getTokens(cookieString);
-      var friendsList = await await friendRepository.getFriendsList({
-        currentUserId: new ObjectId(decodedJwtToken.id),
-      });
-      friendsList = await getFriendRequestUserInfoList(
-        friendsList,
-        new ObjectId(decodedJwtToken.id)
-      );
-      socket.emit("friends-list", friendsList);
-    });
-
-    console.log(`Client socket with socketId: "${socket.id}" connected`);
+    console.log(`Client socket with socketId "${socket.id}" connected`);
     try {
-      // A connecting client socket must pass authentication checks
+      // Authenticate and extract user ID from cookies
       const cookieString = socket.handshake.headers.cookie;
-      const decodedJwtToken = await getTokens(cookieString); // <-- add await
+      const decodedJwtToken = await getTokens(cookieString);
+      const userId = decodedJwtToken.id;
 
-      // Statefully track socket in Map
-      socketMap.set(decodedJwtToken.id, socket);
+      // Track the connected socket
+      socketMap.set(userId, socket);
+
+      // Register all socket event listeners for this user
+      registerListeners({ socket, userId });
     } catch (error) {
       console.warn("Socket auth failed", {
         socketId: socket.id,
         ip: socket.handshake.address,
         error: error.message,
       });
-      // On error, disconnect the socket
+
+      // Disconnect unauthorized socket
       socket.disconnect();
     }
   });
 }
 
-// Returns the socketio server if present, otherwise throw an error
+// Returns the initialized socket.io instance
 function getIO() {
   if (!io) {
     throw new Error("Socket.IO not initialized!");
@@ -88,11 +61,8 @@ function getIO() {
   return io;
 }
 
-// Returns all tracked sockets
+// Returns the socket map for real-time operations
 function getMap() {
-  if (!getMap) {
-    throw new Error("Socket map not initializde");
-  }
   return socketMap;
 }
 

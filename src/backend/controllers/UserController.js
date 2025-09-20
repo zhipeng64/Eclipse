@@ -11,7 +11,6 @@ class UserController {
   }
 
   async register(req, res) {
-    console.log("inside registration handler");
     const { username, email, password } = req?.body;
     if (!username || !email || !password) {
       throw new AppError({
