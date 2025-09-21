@@ -1,25 +1,19 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import NavigationBar from "../utils/NavigationBar";
 import Footer from "../utils/Footer";
 import RegisterModal from "../AccountRegistration/RegisterModal";
 import LoginModal from "../AccountLogin/LoginModal";
 
 // Utility functions
-import { useCloseOnClickOutside } from "../utils/modules";
+import { useCloseOnClickOutside } from "../utils/customHooks";
 
 export default function LandingPage() {
+  const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
   const registrationModalRef = useRef(null);
   const loginModalRef = useRef(null);
-
-  const toggleSignUp = () => {
-    setIsSignUp(!isSignUp);
-  };
-
-  const toggleLogin = () => {
-    setIsLogin(!isLogin);
-  };
 
   // Register event listeners
   useCloseOnClickOutside(registrationModalRef, isSignUp, () =>
@@ -27,44 +21,85 @@ export default function LandingPage() {
   );
   useCloseOnClickOutside(loginModalRef, isLogin, () => setIsLogin(false));
 
+  // Callbacks
+  const handleRegistrationSuccess = () => {
+    navigate("/main-lobby");
+  };
   return (
-    <div id="landing-page" className="min-h-screen flex flex-col">
-      <NavigationBar toggleSignUp={toggleSignUp} toggleLogin={toggleLogin} />
-      <div
-        id="body"
-        className="text-[#F5F5F5] bg-[#0F0F1A] bg-opacity-70 flex-1 flex"
-      >
-        <div id="main-display" className="flex-1 flex">
-          <div className="mt-20 ml-55 flex flex-col space-y-5 w-1/3">
-            <h1 className="font-bold text-6xl">Feeling Lonely?</h1>
-            <p className="font-semibold">
-              Welcome to Eclipse, a place to meet others and make longlasting
-              relationships
-            </p>
-            <p className="font-semibold">
-              <span className="text-[#b5d4eb]">
-                Register now to get 100 vbucks or $10 Amazon Giftcard
-              </span>
-            </p>
-          </div>
+    <div
+      id="landing-page"
+      className="min-h-screen flex flex-col w-auto layer-0"
+    >
+      <NavigationBar />
+      <div id="body" className="text-gray-200 flex-1 flex items-start">
+        <div id="main-display" className="ml-45 mr-20 max-w-2xl">
+          <div className="flex flex-col space-y-5 w-full break-words p-20 shadow-card rounded-card hover-shadow dlayer-1">
+            <h1 className="heading text-6xl mb-6 ">Join the Community</h1>
+            <div className="text-[#d1d5dc] text-2xl font-medium space-y-2">
+              <p>
+                Welcome to Eclipse, a place to meet others and make longlasting
+                relationships.
+              </p>
+              <p>
+                Get access to emotes, real-time video chats, and an
+                unforgettable memory.
+              </p>
+            </div>
 
-          <div className="w-1/2 p-4">
-            <img
-              src="../assets/sunrise.jpg"
-              className="w-full h-auto max-h-120 mt-10"
-            ></img>
+            <div className="text-lg font-bold sm:space-x-7 sm:text-base mt-4">
+              <button
+                href="#"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsLogin(true);
+                }}
+                className="neon-button-purple neon-button-purple-animated rounded-lg py-3 px-6"
+              >
+                Log In
+              </button>
+              <button
+                href="#"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsSignUp(true);
+                }}
+                className="neon-button-purple neon-button-purple-animated rounded-lg py-3 px-6"
+              >
+                Sign Up
+              </button>
+            </div>
           </div>
         </div>
+        <div
+          id="feature-section"
+          className="flex flex-col px-15 pb-15 self-center max-w-2xl "
+        >
+          <h1 className="font-bold text-5xl mb-6 text-shadow-[0_0_12px_rgba(144,205,244,0.6)]">
+            Features
+          </h1>
+          <ul className="text-gray-300 font-medium space-y-3 text-xl list-disc list-inside marker:text-[#90cdf4]">
+            <li>Supports up to 1GB file uploads</li>
+            <li>Real-time video chats</li>
+            <li>AI Chat Assistant</li>
+          </ul>
+        </div>
       </div>
-      <RegisterModal isSignUp={isSignUp} modalRef={registrationModalRef} />
-      <LoginModal
-        isLogin={isLogin}
-        modalRef={loginModalRef}
-        forgotPasswordCallback={() => {
-          toggleLogin();
-          toggleSignUp();
-        }}
-      />
+      {isSignUp && (
+        <RegisterModal
+          handleRegistrationSuccess={handleRegistrationSuccess}
+          modalRef={registrationModalRef}
+        />
+      )}
+
+      {isLogin && (
+        <LoginModal
+          modalRef={loginModalRef}
+          forgotPasswordCallback={() => {
+            setIsSignUp(!isSignUp);
+            setIsLogin(!isLogin);
+          }}
+        />
+      )}
       <Footer />
     </div>
   );

@@ -1,0 +1,29 @@
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import crypto from "crypto";
+
+import { SALT_ROUNDS } from "../schemas/password.js";
+
+const createJWT = (payload, options = {}) => {
+  return jwt.sign(payload, process.env.JWT_SECRET, options);
+};
+
+const createRefreshToken = () => {
+  const refreshToken = crypto.randomBytes(64).toString("hex");
+  return refreshToken;
+};
+
+const hashString = (inputString) => {
+  const hashedString = crypto
+    .createHash("sha256")
+    .update(inputString)
+    .digest("hex");
+  return hashedString;
+};
+
+const hashPassword = async (password) => {
+  const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+  return hashedPassword;
+};
+
+export { createJWT, createRefreshToken, hashPassword, hashString };
