@@ -2,7 +2,6 @@ import { getEntry, insertEntry, updateEntry } from "./crud.js";
 import { hashString } from "../utils/auth.js";
 import { AuthService } from "../services/authService.js";
 import { ObjectId } from "mongodb";
-import { convertObjectIds } from "./util.js";
 
 class RefreshTokenRepository {
   constructor() {
@@ -21,7 +20,7 @@ class RefreshTokenRepository {
       expiresAt: new Date(AuthService.getRefreshTokenExpiration()),
     };
     const result = await insertEntry(entry, this.collection);
-    return result;
+    return result.insertedId;
   }
 
   async getRefreshToken(refreshToken) {

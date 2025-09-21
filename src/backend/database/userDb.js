@@ -1,6 +1,5 @@
 import { getEntry, insertEntry } from "./crud.js";
 import { ObjectId } from "mongodb";
-import { convertObjectIds } from "./util.js";
 
 class UserRepository {
   constructor() {
@@ -46,7 +45,7 @@ class UserRepository {
     };
     const collection = this.collection;
     const result = await insertEntry(entry, collection);
-    return result;
+    return result.insertedId;
   }
 }
 

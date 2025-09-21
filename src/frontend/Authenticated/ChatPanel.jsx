@@ -1,17 +1,19 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { IoVideocam } from "react-icons/io5";
 import { IoMic } from "react-icons/io5";
 import { IoSettingsSharp } from "react-icons/io5";
 import { FaPlus } from "react-icons/fa";
 import { MdEmojiEmotions } from "react-icons/md";
+import SocketContext from "../Context/Socket.jsx";
 
-function ChatPanel({ selectedChat }) {
+function ChatPanel() {
+  // Get the socket and selectedChat from context
+  const { socket, selectedChat } = useContext(SocketContext);
   const [inputSettings, setInputSettings] = useState({
     inputRowCount: 1,
     focus: false,
   });
 
-  console.log("fwiends: ", selectedChat);
   if (selectedChat === null) {
     // Render everything below but with placeholder
     return (
@@ -34,7 +36,7 @@ function ChatPanel({ selectedChat }) {
       >
         <div className="flex items-center">
           <img
-            src="../assets/sunrise2.jpg"
+            src="data"
             alt="Avatar"
             className="w-11 h-11 rounded-full mr-2"
           />
@@ -140,14 +142,30 @@ function ChatPanel({ selectedChat }) {
           onKeyDown={(e) => {
             e.stopPropagation();
 
-            // Handle Enter key to increase row count
-            if (e.key === "Enter") {
+            // If Shift + Enter, allow newline without increasing row count
+            if (e.key === "Enter" && e.shiftKey) {
               // Set limit of rows to 6
               if (inputSettings.inputRowCount >= 6) return;
               setInputSettings((prevSettings) => ({
                 ...prevSettings,
                 inputRowCount: prevSettings.inputRowCount + 1,
               }));
+            }
+            // If Enter (without Shift), send message
+            else if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault(); // Prevent newline insertion
+              if (socket) {
+                socket.emit(
+                  "send-message",
+                  selectedChat?.chatroomId,
+                  e.target.value
+                );
+                e.target.value = "";
+                setInputSettings((prevSettings) => ({
+                  ...prevSettings,
+                  inputRowCount: 1,
+                }));
+              }
             }
             // Handle backspace to decrease row count if at the end of a line
             // This works by checking if the cursor is at the end of the last line (\n)

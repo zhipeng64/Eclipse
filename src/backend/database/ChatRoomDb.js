@@ -1,6 +1,5 @@
 import { ObjectId } from "mongodb";
 import { getEntry, getAllEntry, insertEntry, updateEntry } from "./crud.js";
-import { convertObjectIds } from "./util.js";
 
 class ChatroomRepository {
   constructor() {
@@ -22,7 +21,7 @@ class ChatroomRepository {
     };
 
     const result = await getEntry(query, this.collection);
-    return convertObjectIds(result, ObjectId);
+    return result;
   }
 
   /**
@@ -46,7 +45,7 @@ class ChatroomRepository {
     };
 
     const result = await insertEntry(newChatroom, this.collection);
-    return convertObjectIds(result?.insertedId, ObjectId);
+    return result.insertedId;
   }
 
   /**
@@ -78,7 +77,7 @@ class ChatroomRepository {
     };
 
     const result = await getEntry(query, this.collection);
-    return convertObjectIds(result, ObjectId);
+    return result;
   }
 
   /**

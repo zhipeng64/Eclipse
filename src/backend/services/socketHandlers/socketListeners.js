@@ -1,8 +1,12 @@
 import friendService from "../FriendService.js";
 import chatRoomService from "../ChatRoomService.js";
 import userService from "../UserService.js";
+import { roomIdSchema } from "../../validators/zodValidators.js";
+import { sanitizedStringSchema } from "../../sanitizers/zodSanitizers.js";
+import registerMessageListeners from "./messageListeners.js";
 
-export default function registerListeners({ socket, userId }) {
+export default function registerListeners({ io, socket, userId }) {
+  registerMessageListeners({ io, socket, userId });
   // Handle disconnect event
   socket.on("disconnect", () => {
     console.log(`Client socket with socketId "${socket.id}" disconnected`);
@@ -28,15 +32,10 @@ export default function registerListeners({ socket, userId }) {
   // Handle request for full friends list (including chatrooms)
   socket.on("friends-list", async () => {
     try {
-      const friendsList = await friendService.notifyFriendsList({
+      await friendService.notifyFriendsList({
         userId,
+        eventStatus: process.env.EVENT_STATUS_INITIALIZE,
       });
-
-      socket.emit(
-        "friends-list",
-        friendsList,
-        process.env.EVENT_STATUS_INITIALIZE
-      );
     } catch (err) {
       console.error("Error in friends-list:", err.message);
       console.error(err.stack);
@@ -44,34 +43,46 @@ export default function registerListeners({ socket, userId }) {
   });
 
   // Handles a client socket joining a DM chat room
-  socket.on("join-chatroom", async (roomId, otherUsername) => {
-    console.log("join-chatroom event received:", { roomId, otherUsername });
-    if (!roomId || !otherUsername) {
-      throw new Error("Invalid parameters supplied to join-chatroom");
-    }
+  socket.on("join-chatroom", async (roomId) => {
+    try {
+      console.log("join-chatroom event received:", { roomId });
+      if (!roomId) {
+        throw new Error("Invalid parameters supplied to join-chatroom");
+      }
 
-    // Check current user and other user are valid
-    console.log("UserId and otherUsername:", { userId, otherUsername });
-    const currentUser = await userService.getUserById({ userId });
-    const otherUser = await userService.getUser({ username: otherUsername });
-    if (!currentUser || !otherUser) {
-      throw new Error("Failed to fetch users");
-    }
+      // Validate the roomId
+      const isValidRoomId = roomIdSchema.safeParse(roomId);
+      if (!isValidRoomId.success) {
+        throw new Error("Invalid roomId format supplied to join-chatroom");
+      }
 
-    const otherUserId = otherUser?._id;
-    // Check that the room is valid
-    const chatRoom = await chatRoomService.getDMChatroom({
-      userId1: userId,
-      userId2: otherUserId,
-    });
-    console.log("Chatroom fetched:", chatRoom);
-    if (!chatRoom || chatRoom._id !== roomId) {
-      throw new Error(
-        "Failed to fetch chatroom or supplied roomId does not match database chatroom id"
-      );
+      // Sanitize the roomId
+      const sanitizedRoomId = sanitizedStringSchema.parse(roomId);
+      console.log("Sanitized roomId:", sanitizedRoomId);
+
+      // Check current user is valid
+      const currentUser = await userService.getUserById({ userId });
+      if (!currentUser) {
+        throw new Error("Failed to fetch current user");
+      }
+
+      // Check that the room is valid
+      const chatRoom = await chatRoomService.getDMChatroomById({
+        chatroomId: sanitizedRoomId,
+      });
+      if (!chatRoom || chatRoom._id !== sanitizedRoomId) {
+        throw new Error(
+          "Failed to fetch chatroom or supplied roomId does not match database chatroom id"
+        );
+      }
+      socket.join(sanitizedRoomId);
+      console.log("SOCKET HAS JOINED ROOM:", sanitizedRoomId);
+      socket
+        .to(sanitizedRoomId)
+        .emit("join-chatroom", "A new user has joined the chatroom");
+    } catch (err) {
+      console.error("Error in join-chatroom:", err.message);
+      console.error(err.stack);
     }
-    socket.join(roomId);
-    // socket.to(roomId).emit("join-chatroom", "A new user has joined the chatroom");
-    socket.emit("join-chatroom", `Successfully joined chatroom: ${roomId}`);
   });
 }

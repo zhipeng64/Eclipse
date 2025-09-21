@@ -76,4 +76,44 @@ function useAuthenticationChecks() {
   };
 }
 
-export { useCloseOnClickOutside, useAuthenticationChecks };
+/*
+ Inserts element into the provided useState array, if it does not already exist.
+*/
+const useInsertIfNotExists = (
+  arraySetter,
+  comparator = (a, b) => a === b,
+  elementsToInsert
+) => {
+  // Filter elements to insert, keeping only those not already in the array
+  arraySetter((prev) => {
+    const filteredElements = elementsToInsert.filter((newElement) => {
+      return !prev.some((existingElement) =>
+        comparator(existingElement, newElement)
+      );
+    });
+    return [...prev, ...filteredElements];
+  });
+};
+
+// Removes elements from the provided useState array, if it exists.
+const useRemoveIfExists = (
+  arraySetter,
+  comparator = (a, b) => a === b,
+  elementsToRemove
+) => {
+  arraySetter((prev) => {
+    return prev.filter((existingElement) => {
+      // Keep elements that are not in the elementsToRemove list
+      return !elementsToRemove.some((elementToRemove) =>
+        comparator(existingElement, elementToRemove)
+      );
+    });
+  });
+};
+
+export {
+  useCloseOnClickOutside,
+  useAuthenticationChecks,
+  useInsertIfNotExists,
+  useRemoveIfExists,
+};

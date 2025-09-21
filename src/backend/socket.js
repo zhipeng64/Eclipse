@@ -1,8 +1,5 @@
 import { Server } from "socket.io";
 import { getTokens } from "./utils/socket.js";
-import friendService from "./services/FriendService.js";
-import chatRoomService from "./services/ChatRoomService.js";
-import userService from "./services/UserService.js";
 import registerListeners from "./services/socketHandlers/socketListeners.js";
 
 // Socket.IO instance and socket map
@@ -39,7 +36,7 @@ function initializeSocket(httpsServer) {
       socketMap.set(userId, socket);
 
       // Register all socket event listeners for this user
-      registerListeners({ socket, userId });
+      registerListeners({ io, socket, userId });
     } catch (error) {
       console.warn("Socket auth failed", {
         socketId: socket.id,

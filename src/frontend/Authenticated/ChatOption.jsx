@@ -5,8 +5,9 @@ import { CiMail } from "react-icons/ci";
 import SearchFriendModal from "./SearchFriendModal";
 import { useCloseOnClickOutside } from "../utils/customHooks.jsx";
 import InboxModal from "./InboxModal.jsx";
+import SocketContext from "../Context/Socket.jsx";
 
-function ChatOption({ pendingFriendRequests, friends, setSelectedChat }) {
+function ChatOption({ pendingFriendRequests, friends }) {
   // Modal states
   const [isFriendSearchOpen, setIsFriendSearchOpen] = useState(false);
   const [isInboxOpen, setIsInboxOpen] = useState(false);
@@ -15,7 +16,8 @@ function ChatOption({ pendingFriendRequests, friends, setSelectedChat }) {
   const friendModalRef = useRef(null);
   const inboxModalRef = useRef(null);
 
-  console.log(setSelectedChat);
+  // Get etSelectedChat from context
+  const { setSelectedChat } = useContext(SocketContext);
 
   // Register event listeners
   useCloseOnClickOutside(friendModalRef, isFriendSearchOpen, () =>
@@ -25,13 +27,8 @@ function ChatOption({ pendingFriendRequests, friends, setSelectedChat }) {
     setIsInboxOpen(false);
   });
 
-  if (pendingFriendRequests.length > 0) {
-    console.log(pendingFriendRequests);
-  }
-
-  if (friends.length > 0) {
-    console.log(friends);
-  }
+  // Optionally, you can log selectedChat for debugging
+  // console.log(selectedChat);
   return (
     // h-full works because parent has resolved height via flex-grow
     <div

@@ -1,8 +1,14 @@
 import { io } from "socket.io-client";
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { useAuthenticationChecks } from "../../utils/customHooks.jsx";
+import {
+  useInsertIfNotExists,
+  useRemoveIfExists,
+} from "../../utils/customHooks.jsx";
 import SocketContext from "../Socket.jsx";
+import { joinRoom } from "../../utils/socket.js";
 import env from "../../config.js";
+import { set } from "zod";
 
 function SocketProvider({ children }) {
   // State to hold the socket instance
@@ -22,13 +28,27 @@ function SocketProvider({ children }) {
   const [pendingFriendRequests, setPendingFriendRequests] = useState([]);
   const [friends, setFriends] = useState([]);
 
+  // Chat-related state
+  const [conversationHistory, setConversationHistory] = useState([]); // Depends on selectedChat
+  const [recentMessages, setRecentMessages] = useState(new Map()); // Stores recent message per chatroom
+
+  // Chat selection state (moved from ChatPanel)
+  const [selectedChat, setSelectedChat] = useState(null);
+  const selectedChatRef = useRef(selectedChat); // Ref to keep track of selectedChat without stale closure
+
   // Context value to be shared with children components
   const data = {
     socket,
     newFriendRequest,
     pendingFriendRequests,
     friends,
+    selectedChat,
+    setSelectedChat,
   };
+
+  useEffect(() => {
+    selectedChatRef.current = selectedChat;
+  }, [selectedChat]);
 
   useEffect(() => {
     // Only initialize socket if user is authenticated
@@ -58,18 +78,24 @@ function SocketProvider({ children }) {
       pendingFriendRequestsLoadingRef.current = true;
 
       if (!list) return;
-
-      setPendingFriendRequests((prev) => {
-        if (status === env.VITE_EVENT_STATUS_INITIALIZE) {
-          // First-time load: merge list and buffered items
-          return [...list, ...buffer.current];
-        }
-        if (status === env.VITE_EVENT_STATUS_PUSH) {
-          // New requests pushed from server
-          return [...prev, ...list];
-        }
-        return prev;
-      });
+      var comparator = (a, b) => a.username === b.username;
+      switch (status) {
+        // Initial load of pending friend requests
+        case env.VITE_EVENT_STATUS_INITIALIZE:
+          useInsertIfNotExists(setPendingFriendRequests, comparator, [
+            ...list,
+            ...buffer.current,
+          ]);
+          break;
+        // Incremental addition (push) of new friend requests
+        case env.VITE_EVENT_STATUS_PUSH:
+          useInsertIfNotExists(setPendingFriendRequests, comparator, [...list]);
+          break;
+        // Removal of friend requests (e.g., upon acceptance or rejection)
+        case env.VITE_EVENT_STATUS_DELETE:
+          useRemoveIfExists(setPendingFriendRequests, comparator, [...list]);
+          break;
+      }
 
       pendingFriendRequestsLoadingRef.current = false;
     };
@@ -80,15 +106,86 @@ function SocketProvider({ children }) {
     };
 
     // Listener for full friends list
-    const handleFriendsList = (list) => {
+    const handleFriendsList = (list, status) => {
       console.log("Received friends list:", list);
-      if (list) {
-        setFriends(list);
-        // Join chatrooms after friends list have been loaded
-        list.forEach((friend) => {
-          const chatroomId = friend?.chatroomId || null;
-          newSocket.emit("join-chatroom", chatroomId, friend.username);
-        });
+      if (!list) return;
+
+      console.log("FRIENDS LIST: ", list, status);
+      if (!Array.isArray(list)) {
+        console.error(
+          "Expected 'list' to be an array, but got:",
+          typeof list,
+          list
+        );
+      }
+
+      // Do the same as above
+      var comparator = (a, b) => a.username === b.username;
+      switch (status) {
+        case env.VITE_EVENT_STATUS_INITIALIZE:
+          useInsertIfNotExists(setFriends, comparator, [...list]);
+          list.map((friend) =>
+            joinRoom(newSocket, "join-chatroom", friend.chatroomId)
+          );
+          break;
+        case env.VITE_EVENT_STATUS_PUSH:
+          useInsertIfNotExists(setFriends, comparator, [...list]);
+          list.map((friend) =>
+            joinRoom(newSocket, "join-chatroom", friend.chatroomId)
+          );
+          break;
+        case env.VITE_EVENT_STATUS_DELETE:
+          useRemoveIfExists(setFriends, comparator, [...list]);
+          break;
+      }
+    };
+
+    // Gets the conversation history from the server
+    const handleConversation = (list, status) => {
+      if (!list) return;
+      console.log("NEW MESSAGE: ", list, status);
+      switch (status) {
+        case env.VITE_EVENT_STATUS_INITIALIZE:
+          // Check if selectedChat matches the chatroomId of the messages received
+          if (
+            selectedChatRef.current &&
+            list.chatroomId === selectedChatRef.current.chatroomId
+          ) {
+            setConversationHistory(list);
+          }
+          break;
+        case env.VITE_EVENT_STATUS_PUSH:
+          // Insert to existing conversation history if it matches selectedChat
+          if (
+            selectedChatRef.current &&
+            list.chatroomId === selectedChatRef.current.chatroomId
+          ) {
+            setConversationHistory((prev) => [...prev, ...list]);
+          }
+          break;
+      }
+    };
+
+    // Gets the recent message received from server
+    const handleRecentMessage = (list, status) => {
+      if (!list) return;
+      switch (status) {
+        case env.VITE_EVENT_STATUS_INITIALIZE:
+          // Update recentMessages map with the new message
+          setRecentMessages((prev) => {
+            const updated = new Map(prev);
+            updated.set(list.chatroomId, list);
+            return updated;
+          });
+          break;
+        case env.VITE_EVENT_STATUS_PUSH:
+          // Update recentMessages map with the new message
+          setRecentMessages((prev) => {
+            const updated = new Map(prev);
+            updated.set(list.chatroomId, list);
+            return updated;
+          });
+          break;
       }
     };
 
@@ -97,6 +194,8 @@ function SocketProvider({ children }) {
     newSocket.on("pending-friend-requests", handlePendingFriendRequests);
     newSocket.on("friends-list", handleFriendsList);
     newSocket.on("join-chatroom", handleJoinChatRoom);
+    newSocket.on("conversation", handleConversation);
+    newSocket.on("recent-message", handleRecentMessage);
 
     // Save socket instance in state
     setSocket(newSocket);

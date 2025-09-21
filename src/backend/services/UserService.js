@@ -75,6 +75,8 @@ class UserService {
       accountEntry.account,
       accountEntry.profile
     );
+    console.log("insertUser returned:", insertedIdHex, typeof insertedIdHex); // <-- add this
+
     if (!insertedIdHex) {
       throw new Error("Failed to retrieve inserted id after inserting user");
     }

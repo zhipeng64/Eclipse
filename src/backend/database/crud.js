@@ -16,10 +16,9 @@ const getAllEntry = async (query, collection) => {
 
     const db = await connectToMongo();
     const result = await db.collection(collection).find(query);
-    const resultArray = await result.toArray();
-    // logWithDate(result);
-
     // result is a Cursor object, convert to array
+    const resultArray = await result.toArray();
+
     return convertObjectIds(resultArray, ObjectId);
   } catch (error) {
     throw error;

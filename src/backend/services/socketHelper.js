@@ -11,9 +11,16 @@ const notifyUser = async ({
   // userId is expected to be a hex string at service/socket layers
   const userSocket = map.get(userId);
   if (userSocket) {
+    // result must be an array of objects for socket emission
     const result = callback ? await callback(...params) : null;
-    userSocket.emit(eventName, result, eventStatus);
+    const formattedPayload = formatSocketPayload({ data: result });
+    userSocket.emit(eventName, formattedPayload, eventStatus);
   }
 };
 
-export { notifyUser };
+// Socket always return an array of objects
+function formatSocketPayload({ data = [] }) {
+  return Array.isArray(data) ? data : [data];
+}
+
+export { notifyUser, formatSocketPayload };

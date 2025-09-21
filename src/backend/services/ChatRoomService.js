@@ -1,6 +1,11 @@
 import chatroomRepository from "../database/ChatRoomDb.js";
+import messageService from "./MessageService.js";
 
 class ChatRoomService {
+  constructor(messageService) {
+    this.messageService = messageService;
+  }
+
   async getDMChatroom({ userId1, userId2 }) {
     if (!userId1 || !userId2) {
       throw new Error("Invalid user IDs supplied to getDMChatroom");
@@ -21,6 +26,15 @@ class ChatRoomService {
       return existingChatroom;
     }
   }
+
+  async getDMChatroomById({ chatroomId }) {
+    if (!chatroomId) {
+      throw new Error("Invalid chatroomId supplied to getDMChatroomById");
+    }
+    const chatroom = await chatroomRepository.getChatroomById(chatroomId);
+    return chatroom;
+  }
+
   async insertDMChatroom({ userId1, userId2 }) {
     if (!userId1 || !userId2) {
       throw new Error("Invalid user IDs supplied to insertDMChatroom");
@@ -39,5 +53,5 @@ class ChatRoomService {
   }
 }
 
-const chatRoomService = new ChatRoomService();
+const chatRoomService = new ChatRoomService(messageService);
 export default chatRoomService;

@@ -1,5 +1,4 @@
 import { getEntry, insertEntry, getAllEntry, updateEntry } from "./crud.js";
-import { convertObjectIds } from "./util.js";
 import { ObjectId } from "mongodb";
 
 class FriendRepository {

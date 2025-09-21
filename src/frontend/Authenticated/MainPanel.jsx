@@ -2,7 +2,7 @@ import { Navigation } from "./Navigation";
 import { ChatOption } from "./ChatOption";
 import { ChatPanel } from "./ChatPanel";
 import { useAuthenticationChecks } from "../utils/customHooks";
-import { useState, useContext } from "react";
+import { useContext, useState } from "react";
 import SocketContext from "../Context/Socket.jsx";
 import { HomeOption } from "./HomeOption";
 
@@ -10,7 +10,6 @@ function MainPanel() {
   const { isLoading, isAuthenticated } = useAuthenticationChecks();
   // Access socket context for real-time updates
   const { pendingFriendRequests, friends } = useContext(SocketContext);
-  const [selectedChat, setSelectedChat] = useState(null);
   const [optionSelected, setOptionSelected] = useState({
     // homeOption: false,
     chatOption: true,
@@ -39,11 +38,10 @@ function MainPanel() {
             <ChatOption
               pendingFriendRequests={pendingFriendRequests}
               friends={friends}
-              setSelectedChat={(chat) => setSelectedChat(chat)}
             />
           </div>
           <div className="md:flex-[0.60] rounded-lg min-w-[260px] max-w-full">
-            <ChatPanel selectedChat={selectedChat} />
+            <ChatPanel />
           </div>
         </div>
 
