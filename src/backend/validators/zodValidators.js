@@ -8,4 +8,10 @@ const roomIdSchema = z
   .regex(/^[a-fA-F0-9]+$/, "Must be a valid hex string")
   .length(24, "Must be exactly 24 hex characters");
 
-export { roomIdSchema };
+// Message content validation: max 500 characters per message
+const messageContentSchema = z
+  .string()
+  .min(1, "Message cannot be empty")
+  .max(500, "Message cannot exceed 500 characters");
+
+export { roomIdSchema, messageContentSchema };

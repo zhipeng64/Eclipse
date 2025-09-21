@@ -30,6 +30,7 @@
 /* Fonts */
 * {
   font-family: "Electrolize";
+  box-sizing: border-box;
 }
 
 h1,

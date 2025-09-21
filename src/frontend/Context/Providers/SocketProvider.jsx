@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
-import { use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuthenticationChecks } from "../../utils/customHooks.jsx";
 import {
   useInsertIfNotExists,
@@ -44,6 +44,9 @@ function SocketProvider({ children }) {
     friends,
     selectedChat,
     setSelectedChat,
+    conversationHistory,
+    setConversationHistory,
+    recentMessages,
   };
 
   useEffect(() => {
@@ -143,25 +146,25 @@ function SocketProvider({ children }) {
     // Gets the conversation history from the server
     const handleConversation = (list, status) => {
       if (!list) return;
+      const messageInChatroom = list.filter(
+        (message) =>
+          selectedChatRef.current &&
+          message.chatroomId === selectedChatRef.current.chatroomId
+      );
+
+      if (messageInChatroom.length === 0) return; // No messages for the selected chatroom
       console.log("NEW MESSAGE: ", list, status);
+      console.log("Selected Chat Ref:", selectedChatRef.current);
+      console.log("Message in Chatroom:", messageInChatroom);
       switch (status) {
         case env.VITE_EVENT_STATUS_INITIALIZE:
           // Check if selectedChat matches the chatroomId of the messages received
-          if (
-            selectedChatRef.current &&
-            list.chatroomId === selectedChatRef.current.chatroomId
-          ) {
-            setConversationHistory(list);
-          }
+          setConversationHistory(messageInChatroom);
+
           break;
         case env.VITE_EVENT_STATUS_PUSH:
           // Insert to existing conversation history if it matches selectedChat
-          if (
-            selectedChatRef.current &&
-            list.chatroomId === selectedChatRef.current.chatroomId
-          ) {
-            setConversationHistory((prev) => [...prev, ...list]);
-          }
+          setConversationHistory((prev) => [...prev, ...messageInChatroom]);
           break;
       }
     };

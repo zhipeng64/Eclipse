@@ -16,8 +16,8 @@ function ChatOption({ pendingFriendRequests, friends }) {
   const friendModalRef = useRef(null);
   const inboxModalRef = useRef(null);
 
-  // Get etSelectedChat from context
-  const { setSelectedChat } = useContext(SocketContext);
+  // Get setSelectedChat from context
+  const { selectedChat, setSelectedChat } = useContext(SocketContext);
 
   // Register event listeners
   useCloseOnClickOutside(friendModalRef, isFriendSearchOpen, () =>
@@ -33,7 +33,7 @@ function ChatOption({ pendingFriendRequests, friends }) {
     // h-full works because parent has resolved height via flex-grow
     <div
       id="chat-option"
-      className="text-white dlayer-4 w-auto h-full flex flex-col rounded-lg opac-shadow"
+      className="text-white dlayer-4 w-auto h-full max-h-full flex flex-col rounded-lg opac-shadow"
     >
       {isFriendSearchOpen && (
         <SearchFriendModal friendModalRef={friendModalRef} />
@@ -75,7 +75,7 @@ function ChatOption({ pendingFriendRequests, friends }) {
       </div>
       <div
         id="status-bar"
-        className={`flex items-center gap-5 ${friends.length > 0 ? "" : "min-h-[10%]"} px-4 py-2 opac-shadow`}
+        className={`flex items-center gap-5 ${friends.length > 0 ? "" : "min-h-[10%]"} px-4 py-2 opac-shadow overflow-auto`}
       >
         {friends.length > 0 ? (
           friends.map((friend) => (
@@ -99,12 +99,12 @@ function ChatOption({ pendingFriendRequests, friends }) {
       </div>
       <div
         id="recent-chats"
-        className="flex flex-col items-start space-y-0 grow"
+        className="flex flex-col items-start space-y-0 grow overflow-auto"
       >
         {friends.length > 0 ? (
           friends.map((friend) => (
             <div
-              className="flex w-full py-2 px-4 opac-shadow cursor-pointer hover:bg-[#2c3345]"
+              className={`flex w-full py-2 px-4 opac-shadow cursor-pointer ${selectedChat?.username === friend.username ? "bg-gray-700" : "hover:bg-gray-800 "}`}
               key={friend.username}
               onClick={() => setSelectedChat(friend)}
             >
