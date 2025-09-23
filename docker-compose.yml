@@ -1,0 +1,64 @@
+# Docker Compose is a YAML file that defines configurations and runs multi-container Docker applications.
+# It helps streamline the process of managing multiple services by allowing them to be defined in a single file,
+# instead of manually running individual docker commands and options for each container.
+
+# "docker compose" command should be used when managing docker containers
+# automatically using this file, such as injecting environment variables from a .env file.
+# because "docker run" has no knowledge of this file.
+
+# Define the services (containers) that make up the application
+services:
+  # Name of the service (anything logical)
+  nginx:
+    # Build the Docker image for this service using the specified context and Dockerfile
+    build:
+      # Specify the build context and Dockerfile location
+      # Dockerfile can only access files in the directory (and its subdirectories)
+      # specified in the build context, so cannot do "../" which will be outside the context
+      context: ./
+      # Path to the Dockerfile relative to the context
+      dockerfile: ./docker/nginx-reverse-proxy/Dockerfile
+      # Pass build-time secrets to the build process so they can be used in the Dockerfile
+      secrets:
+        - ssl_cert
+        - ssl_key
+    # Image and tag name
+    image: eclipse-nginx:stable-perl
+    container_name: Eclipse-nginx
+    # Map port 8080 on the host to port 8080 in the container
+    ports:
+      - "8080:8080"
+
+  backend:
+    build:
+      context: ./
+      dockerfile: ./docker/backend/Dockerfile
+    image: eclipse-backend:v1.0
+    container_name: Eclipse-backend
+    # Injects environment variables from a .env file into the container at runtime
+    # Docker Compose automatically loads variables from a .env file in the same directory
+    # as the docker-compose.yml file
+    environment:
+      - BACKEND_IP=${BACKEND_IP}
+      - BACKEND_PORT=${BACKEND_PORT}
+      - CORS_ALLOW_LIST=${CORS_ALLOW_LIST}
+      - DB_APPNAME=${DB_APPNAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_USER_COLLECTION=${DB_USER_COLLECTION}
+      - DB_REFRESH_TOKEN_COLLECTION=${DB_REFRESH_TOKEN_COLLECTION}
+      - DB_FRIEND_COLLECTION=${DB_FRIEND_COLLECTION}
+      - DB_CHATROOM_COLLECTION=${DB_CHATROOM_COLLECTION}
+      - DB_MESSAGE_COLLECTION=${DB_MESSAGE_COLLECTION}
+      - JWT_SECRET=${JWT_SECRET}
+      - NODE_ENV=${NODE_ENV}
+      - EVENT_STATUS_INITIALIZE=${EVENT_STATUS_INITIALIZE}
+      - EVENT_STATUS_PUSH=${EVENT_STATUS_PUSH}
+      - EVENT_STATUS_DELETE=${EVENT_STATUS_DELETE}
+
+# Secret files must exist locally and must not be committed to version control for security reasons.
+secrets:
+  ssl_cert:
+    file: ./certs/Eclipse_SSL_cert.pem
+  ssl_key:
+    file: ./certs/Eclipse_dev_private-key.pem
