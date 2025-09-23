@@ -1,6 +1,6 @@
 // Middleware to validate JWT Tokens and Refresh Tokens
 import { createCookieOptions } from "../utils/cookie.js";
-import authService from "../services/authService.js";
+import authService from "../services/AuthService.js";
 import { AppError } from "../utils/AppError.js";
 
 // Authentication middleware

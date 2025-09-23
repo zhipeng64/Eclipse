@@ -4,7 +4,7 @@ import { dirname } from "path";
 import bcrypt from "bcrypt";
 import { hashPassword } from "../utils/auth.js";
 import { refreshTokenRepository } from "../database/RefreshTokenDb.js";
-import { AuthService } from "./authService.js";
+import { AuthService } from "./AuthService.js";
 import { AppError } from "../utils/AppError.js";
 import userRepository from "../database/UserDb.js";
 import friendRepository from "../database/FriendDb.js";
