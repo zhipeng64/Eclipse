@@ -6,7 +6,6 @@ import {
   REFRESH_TOKEN_LIFESPAN_DAYS,
 } from "../schemas/auth.js";
 import { createJWT, createRefreshToken } from "../utils/auth.js";
-import { ref } from "process";
 export class AuthService {
   // Gets JWT token duration in milliseconds
   static getJwtTokenDuration() {

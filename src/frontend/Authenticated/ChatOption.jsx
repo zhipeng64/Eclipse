@@ -6,6 +6,7 @@ import SearchFriendModal from "./SearchFriendModal";
 import { useCloseOnClickOutside } from "../utils/customHooks.jsx";
 import InboxModal from "./InboxModal.jsx";
 import SocketContext from "../Context/Socket.jsx";
+import defaultImage from "../assets/sunrise2.jpg";
 
 function ChatOption({ pendingFriendRequests, friends }) {
   // Modal states
@@ -75,7 +76,7 @@ function ChatOption({ pendingFriendRequests, friends }) {
       </div>
       <div
         id="status-bar"
-        className={`flex items-center gap-5 ${friends.length > 0 ? "" : "min-h-[10%]"} px-4 py-2 opac-shadow overflow-auto`}
+        className={`flex items-center gap-5 ${friends.length > 0 ? "" : "min-h-[10%]"} px-4 py-2 opac-shado w overflow-auto`}
       >
         {friends.length > 0 ? (
           friends.map((friend) => (
@@ -84,7 +85,7 @@ function ChatOption({ pendingFriendRequests, friends }) {
               key={friend.username}
             >
               <img
-                src={"../assets/sunrise2.jpg"}
+                src={defaultImage}
                 alt="Avatar"
                 className="w-11 h-11 rounded-full"
               />
@@ -109,7 +110,7 @@ function ChatOption({ pendingFriendRequests, friends }) {
               onClick={() => setSelectedChat(friend)}
             >
               <img
-                src={"../assets/sunrise2.jpg"}
+                src={defaultImage}
                 alt="Avatar"
                 className="w-11 h-11 rounded-full mr-3.5"
               />

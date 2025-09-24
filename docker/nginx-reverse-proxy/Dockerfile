@@ -5,6 +5,8 @@ FROM nginx:stable-perl
 EXPOSE 8080
 
 COPY ./docker/nginx-reverse-proxy/nginx.conf /etc/nginx/nginx.conf
+COPY ./docker/nginx-reverse-proxy/assets/ /var/www/html/assets/
+COPY ./docker/nginx-reverse-proxy/index.html /var/www/html/index.html
 
 # Build-time secrets will only be available within the temporary container 
 # for a RUN command that uses the --mount=type=secret flag.

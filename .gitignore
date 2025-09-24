@@ -8,5 +8,7 @@ package-lock.json
 /dist
 /temp
 /node_modules
+/docker/nginx-reverse-proxy/assets
+/docker/nginx-reverse-proxy/index.html
 **/tester.js
 

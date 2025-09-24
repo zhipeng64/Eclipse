@@ -42,19 +42,23 @@ const corsConfiguration = {
 const httpServer = http.createServer(app);
 
 // Initialize all route configuration and parser middlewares
-app.use(cors(corsConfiguration)); // Cors settings applied to all imported public  routes
+// Enable CORS only in non-production environments. In production the reverse
+// proxy (nginx) should be responsible for CORS and origin restrictions.
+if (process.env.NODE_ENV !== "production") {
+  app.use(cors(corsConfiguration)); // Cors settings applied to all imported public routes
+}
 app.use(express.json()); // Accepts incoming JSON data in HTTP requests
 app.use(cookieParser()); // For parsing cookies from a client
 
 // Check server status
-app.get("/", (req, res) => {
+app.get("/api", (req, res) => {
   return res.status(200).json({ status: "Welcome to Eclipse" });
 });
 
 // Modular routing
-app.use("/authentication", authRouter);
-app.use("/registration", registerRouter);
-app.use("/users", userRouter);
+app.use("/api/authentication", authRouter);
+app.use("/api/registration", registerRouter);
+app.use("/api/users", userRouter);
 
 // Initialize signal handlers
 initializeGracefulShutdown();

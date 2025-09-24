@@ -58,8 +58,11 @@ function SocketProvider({ children }) {
     if (!isAuthenticated) return;
 
     // Initialize socket connection
-    const serverUrl = env.VITE_BACKEND_URL;
-    const newSocket = io(serverUrl, { withCredentials: true });
+    const serverUrl = "/"; // Root namespace
+    const newSocket = io(serverUrl, {
+      path: "/socket.io/",
+      withCredentials: true,
+    });
 
     // Listener for new incoming friend requests
     const handleNewFriendRequest = (friendRequest) => {
@@ -199,7 +202,22 @@ function SocketProvider({ children }) {
     newSocket.on("join-chatroom", handleJoinChatRoom);
     newSocket.on("conversation", handleConversation);
     newSocket.on("recent-message", handleRecentMessage);
-
+    newSocket.on("connect_error", (err) => {
+      console.error("Socket.IO connect_error:", err.message);
+      console.error("Error description:", err.description);
+      console.error("Error context:", err.context);
+    });
+    newSocket.on("disconnect", (reason, details) => {
+      console.warn("Socket disconnected:", reason);
+      if (details) {
+        console.warn(
+          "Disconnect details:",
+          details.message,
+          details.description,
+          details.context
+        );
+      }
+    });
     // Save socket instance in state
     setSocket(newSocket);
 
