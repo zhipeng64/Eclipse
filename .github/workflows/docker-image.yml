@@ -23,5 +23,24 @@ jobs:
       - name: Checkout repository where docker-compose.yml is located
         uses: actions/checkout@main
 
+      - name: Set up Docker Compose environment variables
+        run: |
+          echo "BACKEND_IP=${{ secrets.BACKEND_IP }}" >> .env 
+          echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}" >> .env
+          echo "CORS_ALLOW_LIST=${{ secrets.CORS_ALLOW_LIST }}" >> .env
+          echo "DB_APPNAME=${{ secrets.DB_APPNAME }}" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_USER_COLLECTION=${{ secrets.DB_USER_COLLECTION }}" >> .env
+          echo "DB_REFRESH_TOKEN_COLLECTION=${{ secrets.DB_REFRESH_TOKEN_COLLECTION }}" >> .env
+          echo "DB_FRIEND_COLLECTION=${{ secrets.DB_FRIEND_COLLECTION }}" >> .env
+          echo "DB_CHATROOM_COLLECTION=${{ secrets.DB_CHATROOM_COLLECTION }}" >> .env
+          echo "DB_MESSAGE_COLLECTION=${{ secrets.DB_MESSAGE_COLLECTION }}" >> .env
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> .env
+          echo "EVENT_STATUS_INITIALIZE=${{ vars.EVENT_STATUS_INITIALIZE }}" >> .env
+          echo "EVENT_STATUS_PUSH=${{ vars.EVENT_STATUS_PUSH }}" >> .env
+          echo "EVENT_STATUS_DELETE=${{ vars.EVENT_STATUS_DELETE }}" >> .env
+
       - name: Run the docker-compose command to build images
         run: docker compose build
