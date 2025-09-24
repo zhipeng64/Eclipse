@@ -20,14 +20,20 @@ class MessagesDb {
 
   // Fetch messages for a chatroom with pagination, sorted by timestamp ascending
   async getMessages(chatroom_id, limit = 50, skip = 0) {
-    const db = await getDb();
-    return db
-      .collection(COLLECTION)
-      .find({ chatroom_id: new ObjectId(chatroom_id) })
-      .sort({ timestamp: 1 })
-      .skip(skip)
-      .limit(limit)
-      .toArray();
+    // const db = await getDb();
+    // return db
+    //   .collection(COLLECTION)
+    //   .find({ chatroom_id: new ObjectId(chatroom_id) })
+    //   .sort({ timestamp: 1 })
+    //   .skip(skip)
+    //   .limit(limit)
+    //   .toArray();
+    if (!chatroom_id) {
+      throw new Error("Invalid chatroom_id supplied to getMessages");
+    }
+    const query = { chatroom_id: new ObjectId(chatroom_id) };
+    const result = await getAllEntry(query, this.collection);
+    return result;
   }
 
   // Fetch a single message by its ID

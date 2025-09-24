@@ -4,12 +4,12 @@ import messageRepository from "../database/MessagesDb.js";
 class MessageService {
   async fetchConversation({ chatroom_id, limit = 50, skip = 0 }) {
     try {
-      const messages = await MessagesDb.getMessages({
+      const messages = await messageRepository.getMessages(
         chatroom_id,
         limit,
-        skip,
-      });
-      return await enrichMessagesWithUserData(messages);
+        skip
+      );
+      return await this._enrichMessagesWithUserData(messages);
     } catch (error) {
       throw new Error(`Failed to fetch conversation: ${error.message}`);
     }
@@ -60,13 +60,13 @@ class MessageService {
         return await userRepository.getUserById(id);
       })
     );
-    const userMap = Object.fromEntries(users.map((u) => [u._id.toString(), u]));
-    return messages.map((msg) => ({
-      ...msg,
-      user: {
-        username: userMap[msg.sentBy?.toString?.()]?.account?.username,
-        avatar: userMap[msg.sentBy?.toString?.()]?.profile?.avatar,
-      },
+    return messages.map((msg, index) => ({
+      messageId: msg._id,
+      chatroomId: msg.chatroom_id,
+      sentBy: users[index]?.account?.username,
+      avatar: users[index]?.profile?.avatarImage,
+      message: msg?.message,
+      timestamp: msg?.timestamp,
     }));
   }
 }

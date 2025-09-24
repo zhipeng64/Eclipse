@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { IoVideocam } from "react-icons/io5";
 import { IoMic } from "react-icons/io5";
 import { IoSettingsSharp } from "react-icons/io5";
@@ -8,18 +8,27 @@ import SocketContext from "../Context/Socket.jsx";
 
 function ChatPanel() {
   // Get the socket and selectedChat from context
-  const { socket, selectedChat } = useContext(SocketContext);
+  const { socket, selectedChat, conversationHistory, setConversationHistory } =
+    useContext(SocketContext);
   const [inputSettings, setInputSettings] = useState({
     inputRowCount: 1,
     focus: false,
   });
 
+  // Clears previous conversation history and fetches new history when selectedChat changes
+  useEffect(() => {
+    if (selectedChat && socket) {
+      setConversationHistory([]);
+      socket.emit("conversation", selectedChat.chatroomId);
+    }
+  }, [selectedChat, socket]);
+  console.log("Conversation History in ChatPanel:", conversationHistory);
   if (selectedChat === null) {
     // Render everything below but with placeholder
     return (
       <div
         id="chat-panel"
-        className="justify-center items-center text-gray-400 dlayer-3 w-auto h-full flex flex-col rounded-lg opac-shadow"
+        className="justify-center items-center text-gray-400 dlayer-3 w-auto h-full max-h-full flex flex-col rounded-lg opac-shadow"
       >
         Select a friend to chat with on the left panel
       </div>
@@ -28,15 +37,15 @@ function ChatPanel() {
   return (
     <div
       id="chat-panel"
-      className="text-white dlayer-3 w-auto h-full flex flex-col rounded-lg opac-shadow"
+      className="text-white dlayer-3 w-auto h-full max-h-full flex flex-col rounded-lg opac-shadow"
     >
       <div
         id="recipient"
-        className="flex items-center justify-between px-5 py-2 mb-5 opac-shadow"
+        className="flex items-center justify-between px-5 py-2 opac-shadow"
       >
         <div className="flex items-center">
           <img
-            src="data"
+            src={`data:image/jpg;base64,${selectedChat?.avatar}`}
             alt="Avatar"
             className="w-11 h-11 rounded-full mr-2"
           />
@@ -58,60 +67,35 @@ function ChatPanel() {
       </div>
       <div
         id="chat-messages"
-        className="text-gray-200 flex flex-col space-y-6 grow-1"
+        className="text-gray-200 flex flex-col space-y-6 my-3 flex-1 overflow-auto"
       >
-        <div className="chat-message ml-6 rounded-md">
-          <div className="flex items-start space-x-3">
-            {/* Avatar */}
-            <img
-              src="../assets/sunrise2.jpg"
-              alt="Avatar"
-              className="w-11 h-11 rounded-full"
-            />
-
-            {/* Right side: Name, Timestamp, Message */}
-            <div>
-              <div className="flex items-center space-x-2">
-                <p className="text-md">John Zena</p>
-                <span className="text-gray-400/70 text-xs font-semibold">
-                  6/20/2025 18:30:50 PM EST
-                </span>
+        {/* Chat messages go here */}
+        {conversationHistory &&
+          conversationHistory.map((msg) => (
+            <div className="chat-message ml-6 rounded-md" key={msg.messageId}>
+              <div className="flex items-start space-x-3">
+                {/* Avatar */}
+                <img
+                  src={`data:image/jpg;base64,${msg.avatar}`}
+                  alt="Avatar"
+                  className="w-11 h-11 rounded-full"
+                />
+                {/* Right side: Name, Timestamp, Message */}
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <p className="text-md">{msg.sentBy || "Unknown"}</p>
+                    <span className="text-gray-400/70 text-xs font-semibold">
+                      {new Date(msg.timestamp).toLocaleString() || "Unknown"}
+                    </span>
+                  </div>
+                  {/* Uses block element alignment rather than flex-col */}
+                  <p className="text-gray-300 max-w-3xl break-words">
+                    {msg.message || ""}
+                  </p>
+                </div>
               </div>
-
-              {/* Uses block element alignment rather than flex-col */}
-              <p className="text-gray-300 max-w-3xl break-words">
-                Hey, we need to get some coffee and dumplings too. Huh? Those
-                two are such a strange combination, don't you think?.
-              </p>
             </div>
-          </div>
-        </div>
-
-        <div className="chat-message ml-6 rounded-md">
-          <div className="flex items-start space-x-3">
-            {/* Avatar */}
-            <img
-              src="../assets/sunrise.jpg"
-              alt="Avatar"
-              className="w-11 h-11 rounded-full"
-            />
-
-            {/* Right side: Name, Timestamp, Message */}
-            <div>
-              <div className="flex items-center space-x-2">
-                <p className="text-md">Stewart</p>
-                <span className="text-gray-400/70 text-xs font-semibold">
-                  6/21/2025 12:10:10 PM EST
-                </span>
-              </div>
-
-              {/* Uses block element alignment rather than flex-col */}
-              <p className="text-gray-300 max-w-3xl break-words">
-                Dumplings? I prefer something else, like a burgar or pizza.
-              </p>
-            </div>
-          </div>
-        </div>
+          ))}
       </div>
 
       <div

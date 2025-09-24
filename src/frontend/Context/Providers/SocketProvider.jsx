@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
-import { use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuthenticationChecks } from "../../utils/customHooks.jsx";
 import {
   useInsertIfNotExists,
@@ -44,6 +44,9 @@ function SocketProvider({ children }) {
     friends,
     selectedChat,
     setSelectedChat,
+    conversationHistory,
+    setConversationHistory,
+    recentMessages,
   };
 
   useEffect(() => {
@@ -55,8 +58,11 @@ function SocketProvider({ children }) {
     if (!isAuthenticated) return;
 
     // Initialize socket connection
-    const serverUrl = env.VITE_BACKEND_URL;
-    const newSocket = io(serverUrl, { withCredentials: true });
+    const serverUrl = "/"; // Root namespace
+    const newSocket = io(serverUrl, {
+      path: "/socket.io/",
+      withCredentials: true,
+    });
 
     // Listener for new incoming friend requests
     const handleNewFriendRequest = (friendRequest) => {
@@ -143,25 +149,25 @@ function SocketProvider({ children }) {
     // Gets the conversation history from the server
     const handleConversation = (list, status) => {
       if (!list) return;
+      const messageInChatroom = list.filter(
+        (message) =>
+          selectedChatRef.current &&
+          message.chatroomId === selectedChatRef.current.chatroomId
+      );
+
+      if (messageInChatroom.length === 0) return; // No messages for the selected chatroom
       console.log("NEW MESSAGE: ", list, status);
+      console.log("Selected Chat Ref:", selectedChatRef.current);
+      console.log("Message in Chatroom:", messageInChatroom);
       switch (status) {
         case env.VITE_EVENT_STATUS_INITIALIZE:
           // Check if selectedChat matches the chatroomId of the messages received
-          if (
-            selectedChatRef.current &&
-            list.chatroomId === selectedChatRef.current.chatroomId
-          ) {
-            setConversationHistory(list);
-          }
+          setConversationHistory(messageInChatroom);
+
           break;
         case env.VITE_EVENT_STATUS_PUSH:
           // Insert to existing conversation history if it matches selectedChat
-          if (
-            selectedChatRef.current &&
-            list.chatroomId === selectedChatRef.current.chatroomId
-          ) {
-            setConversationHistory((prev) => [...prev, ...list]);
-          }
+          setConversationHistory((prev) => [...prev, ...messageInChatroom]);
           break;
       }
     };
@@ -196,7 +202,22 @@ function SocketProvider({ children }) {
     newSocket.on("join-chatroom", handleJoinChatRoom);
     newSocket.on("conversation", handleConversation);
     newSocket.on("recent-message", handleRecentMessage);
-
+    newSocket.on("connect_error", (err) => {
+      console.error("Socket.IO connect_error:", err.message);
+      console.error("Error description:", err.description);
+      console.error("Error context:", err.context);
+    });
+    newSocket.on("disconnect", (reason, details) => {
+      console.warn("Socket disconnected:", reason);
+      if (details) {
+        console.warn(
+          "Disconnect details:",
+          details.message,
+          details.description,
+          details.context
+        );
+      }
+    });
     // Save socket instance in state
     setSocket(newSocket);
 

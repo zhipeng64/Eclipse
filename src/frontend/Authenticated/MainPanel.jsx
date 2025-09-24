@@ -33,14 +33,14 @@ function MainPanel() {
           />
         </div>
         {/* Main content area */}
-        <div className="flex flex-col md:flex-row grow px-2 pb-1 self-stretch gap-2">
-          <div className="md:flex-[0.40] rounded-lg min-w-[220px] max-w-full">
+        <div className="flex flex-col md:flex-row flex-1 min-h-0 px-2 pb-1 self-stretch gap-2">
+          <div className="md:flex-[0.40] rounded-lg min-w-[220px] max-w-full h-full max-h-full">
             <ChatOption
               pendingFriendRequests={pendingFriendRequests}
               friends={friends}
             />
           </div>
-          <div className="md:flex-[0.60] rounded-lg min-w-[260px] max-w-full">
+          <div className="md:flex-[0.60] rounded-lg min-w-[260px] max-w-full h-full max-h-full">
             <ChatPanel />
           </div>
         </div>
