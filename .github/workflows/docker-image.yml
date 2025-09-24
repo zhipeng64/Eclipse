@@ -1,0 +1,28 @@
+name: Build docker images 
+on:
+  push:
+    branches:
+      - main
+    # Filter to only trigger the workflow when below files 
+    # are changed
+    paths:
+      - 'docker/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/docker-image.yml'
+      - 'src/backend/**'
+      - 'src/frontend/**'
+      - 'package.json'
+      - 'package-lock.json'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository where docker-compose.yml is located
+        uses: actions/checkout@main 
+      
+      - name: Run the docker-compose command to build images
+        run: docker compose build 
+      
+      
