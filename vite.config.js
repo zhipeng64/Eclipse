@@ -7,7 +7,8 @@ dotenv.config();
 export default defineConfig({
   plugins: [tailwindcss(), react()],
   root: "./src/frontend",
+  // For production build, output to ./dist
   build: {
-    outDir: "../../docker/nginx-reverse-proxy/",
+    outDir: "./dist",
   },
 });
