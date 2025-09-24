@@ -14,9 +14,21 @@ function initializeSocket(httpsServer) {
     credentials: true,
   };
 
-  io = new Server(httpsServer, {
-    cors: corsConfiguration,
-  });
+  if (process.env.NODE_ENV !== "production") {
+    io = new Server(httpsServer, {
+      cors: corsConfiguration,
+      path: "/socket.io/",
+    });
+  } else {
+    io = new Server(httpsServer, {
+      path: "/socket.io/",
+      cors: {
+        origin: "*", // Allow all origins
+        methods: ["GET", "POST"],
+        credentials: false, // Set to false when using wildcard origin
+      },
+    });
+  }
 
   /*
     Accept incoming socket connections.
@@ -25,6 +37,9 @@ function initializeSocket(httpsServer) {
     we can have many users connecting concurrently without race conditions.
   */
   io.on("connection", async (socket) => {
+    io.engine.on("initial_headers", (headers) => {
+      console.log("Initial headers:", headers);
+    });
     console.log(`Client socket with socketId "${socket.id}" connected`);
     try {
       // Authenticate and extract user ID from cookies

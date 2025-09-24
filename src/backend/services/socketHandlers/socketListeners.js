@@ -7,6 +7,10 @@ import registerMessageListeners from "./messageListeners.js";
 
 export default function registerListeners({ io, socket, userId }) {
   registerMessageListeners({ io, socket, userId });
+  socket.on("error", (err) => {
+    console.error(`Socket error on ${socket.id}:`, err);
+  });
+
   // Handle disconnect event
   socket.on("disconnect", () => {
     console.log(`Client socket with socketId "${socket.id}" disconnected`);
