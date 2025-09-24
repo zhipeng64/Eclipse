@@ -23,6 +23,9 @@ jobs:
       - name: Checkout repository where docker-compose.yml is located
         uses: actions/checkout@main
 
+      - name: Creates secrets directory
+        run: mkdir -p certs
+
       - name: Set up Docker Compose environment variables
         run: |
           echo "BACKEND_IP=${{ secrets.BACKEND_IP }}" >> .env 
@@ -41,6 +44,8 @@ jobs:
           echo "EVENT_STATUS_INITIALIZE=${{ vars.EVENT_STATUS_INITIALIZE }}" >> .env
           echo "EVENT_STATUS_PUSH=${{ vars.EVENT_STATUS_PUSH }}" >> .env
           echo "EVENT_STATUS_DELETE=${{ vars.EVENT_STATUS_DELETE }}" >> .env
+          echo "${{ secrets.SSL_CERT_PEM }}" > certs/Eclipse_SSL_cert.pem
+          echo "${{ secrets.SSL_KEY_PEM }}" > certs/Eclipse_dev_private-key.pem
 
       - name: Run the docker-compose command to build images
         run: docker compose build
