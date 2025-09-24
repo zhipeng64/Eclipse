@@ -1,18 +1,19 @@
-name: Build docker images 
+name: Build docker images
 on:
   push:
     branches:
       - main
-    # Filter to only trigger the workflow when below files 
+      - zhipeng64-workflow
+    # Filter to only trigger the workflow when below files
     # are changed
     paths:
-      - 'docker/**'
-      - 'docker-compose.yml'
-      - '.github/workflows/docker-image.yml'
-      - 'src/backend/**'
-      - 'src/frontend/**'
-      - 'package.json'
-      - 'package-lock.json'
+      - "docker/**"
+      - "docker-compose.yml"
+      - ".github/workflows/docker-image.yml"
+      - "src/backend/**"
+      - "src/frontend/**"
+      - "package.json"
+      - "package-lock.json"
 
 jobs:
   build:
@@ -20,9 +21,7 @@ jobs:
 
     steps:
       - name: Checkout repository where docker-compose.yml is located
-        uses: actions/checkout@main 
-      
+        uses: actions/checkout@main
+
       - name: Run the docker-compose command to build images
-        run: docker compose build 
-      
-      
+        run: docker compose build
