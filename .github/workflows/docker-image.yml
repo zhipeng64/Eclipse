@@ -74,11 +74,11 @@ jobs:
         with:
           region: ${{ env.AWS_REGION }}
           local-image: ${{ env.BACKEND_IMAGE }}
-          image: ${{ secrets.ECR_CONTAINER_REGISTRY }}:v1.0
+          image: ${{ secrets.ECR_CONTAINER_REGISTRY }}:backend-v1.0
 
       - name: Push nginx image to ECR
         uses: jwalton/gh-ecr-push@v2
         with:
           region: ${{ env.AWS_REGION }}
           local-image: ${{ env.NGINX_IMAGE }}
-          image: ${{ secrets.ECR_CONTAINER_REGISTRY }}:v1.0
+          image: ${{ secrets.ECR_CONTAINER_REGISTRY }}:nginx-v1.0
