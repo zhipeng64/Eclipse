@@ -15,16 +15,33 @@ on:
       - "package.json"
       - "package-lock.json"
 
+env:
+  AWS_REGION: us-east-1
+  BACKEND_IMAGE: eclipse-backend:v1.0
+  NGINX_IMAGE: eclipse-nginx:stable-perl
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    # For AWS OIDC
+    # https://github.com/aws-actions/configure-aws-credentials?tab=readme-ov-file#oidc-configuration
+    permissions:
+      id-token: write
 
     steps:
       - name: Checkout repository where docker-compose.yml is located
         uses: actions/checkout@main
 
       - name: Creates secrets directory
-        run: mkdir -p certs
+        run: mkdir certs
+
+      - name: Configure AWS credentials (uses OIDC for authentication + authorization for AWS)
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: samplerolesession
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Set up Docker Compose environment variables
         run: |
@@ -49,3 +66,15 @@ jobs:
 
       - name: Run the docker-compose command to build images
         run: docker compose build
+
+      - name: Push backend image to Amazon Elastic Container Registry (ECR)
+        uses: jwalton/gh-ecr-push@v2
+        with:
+          region: ${{ env.AWS_REGION }}
+          image: ${{ env.BACKEND_IMAGE }}
+
+      - name: Push nginx image to ECR
+        uses: jwalton/gh-ecr-push@v2
+        with:
+          region: ${{ env.AWS_REGION }}
+          image: ${{ env.NGINX_IMAGE }}
