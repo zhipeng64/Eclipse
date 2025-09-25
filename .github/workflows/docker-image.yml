@@ -32,6 +32,9 @@ jobs:
     steps:
       - name: Checkout repository where docker-compose.yml is located
         uses: actions/checkout@v5
+        with:
+          submodules: true
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
       - name: Creates secrets directory
         run: mkdir certs
