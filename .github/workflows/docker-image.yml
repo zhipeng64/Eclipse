@@ -26,6 +26,7 @@ jobs:
 
     # For AWS OIDC
     # https://github.com/aws-actions/configure-aws-credentials?tab=readme-ov-file#oidc-configuration
+    # Specifies the ONLY permissions granted to the GITHUB_TOKEN for the job
     permissions:
       id-token: write
       contents: read
@@ -72,10 +73,12 @@ jobs:
         uses: jwalton/gh-ecr-push@v2
         with:
           region: ${{ env.AWS_REGION }}
-          image: ${{ env.BACKEND_IMAGE }}
+          local-image: ${{ env.BACKEND_IMAGE }}
+          image: ${{ secrets.ECR_CONTAINER_REGISTRY }}:v1.0
 
       - name: Push nginx image to ECR
         uses: jwalton/gh-ecr-push@v2
         with:
           region: ${{ env.AWS_REGION }}
-          image: ${{ env.NGINX_IMAGE }}
+          local-image: ${{ env.NGINX_IMAGE }}
+          image: ${{ secrets.ECR_CONTAINER_REGISTRY }}:v1.0
