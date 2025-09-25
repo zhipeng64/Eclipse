@@ -31,7 +31,7 @@ jobs:
 
     steps:
       - name: Checkout repository where docker-compose.yml is located
-        uses: actions/checkout@main
+        uses: actions/checkout@v5
 
       - name: Creates secrets directory
         run: mkdir certs
