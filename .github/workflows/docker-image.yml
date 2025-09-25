@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - name: Checkout repository where docker-compose.yml is located
-        uses: actions/checkout@zhipeng64-workflow
+        uses: actions/checkout@v4
         with:
           submodules: recursive
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
