@@ -27,15 +27,12 @@ jobs:
     # For AWS OIDC
     # https://github.com/aws-actions/configure-aws-credentials?tab=readme-ov-file#oidc-configuration
     permissions:
-      contents: write
       id-token: write
+      contents: read
 
     steps:
       - name: Checkout repository where docker-compose.yml is located
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
       - name: Creates secrets directory
         run: mkdir certs
