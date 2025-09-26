@@ -1,9 +1,10 @@
 // Authorization and Authentication requests to backend for access
 // to particular routes
+import env from "../config.js";
 
 // Requests backend to check validity of JWT and Refresh tokens
 async function isAuthenticated() {
-  const url = `${import.meta.env.VITE_BACKEND_URL}/authentication`;
+  const url = `${env.VITE_BACKEND_URL}/authentication`;
   const options = {
     method: "GET",
     credentials: "include",

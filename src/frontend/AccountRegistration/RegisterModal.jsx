@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { checkValidPassword } from "../utils/utils";
 import { FaEye } from "react-icons/fa";
+import env from "../config.js";
 
 export default function RegisterModal({ handleRegistrationSuccess, modalRef }) {
   // Detects onchanging password status and displays updated UI
@@ -74,7 +75,7 @@ export default function RegisterModal({ handleRegistrationSuccess, modalRef }) {
     const { username, password, confirmPassword, email } =
       Object.fromEntries(formData);
 
-    const url = `${import.meta.env.VITE_BACKEND_URL}/registration`;
+    const url = `${env.VITE_BACKEND_URL}/registration`;
     const postData = {
       username: username,
       email: email,
