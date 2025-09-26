@@ -23,11 +23,6 @@ import { initializeSocket } from "./socket.js";
 // https://expressjs.com/en/resources/middleware/cors.html
 // https://treblle.com/blog/setup-cors-rest-api#heading-how-to-configure-cors-for-your-rest-api
 const app = express();
-const corsConfiguration = {
-  origin: process.env.CORS_ALLOW_LIST.split(","),
-  methods: ["GET", "POST"],
-  credentials: true,
-};
 
 // Initialize an HTTPS server
 // const privateKey = fs.readFileSync(process.env.CERT_PRIVATE_KEY_PATH);
@@ -45,6 +40,11 @@ const httpServer = http.createServer(app);
 // Enable CORS only in non-production environments. In production the reverse
 // proxy (nginx) should be responsible for CORS and origin restrictions.
 if (process.env.NODE_ENV !== "production") {
+  const corsConfiguration = {
+    origin: process.env.CORS_ALLOW_LIST.split(","),
+    methods: ["GET", "POST"],
+    credentials: true,
+  };
   app.use(cors(corsConfiguration)); // Cors settings applied to all imported public routes
 }
 app.use(express.json()); // Accepts incoming JSON data in HTTP requests
