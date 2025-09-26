@@ -9,6 +9,14 @@ import SocketContext from "../Context/Socket.jsx";
 import defaultImage from "../assets/sunrise2.jpg";
 
 function ChatOption({ pendingFriendRequests, friends }) {
+  // Debug: Log received props
+  console.log(
+    "ChatOption - Received friends prop:",
+    friends,
+    "Length:",
+    friends.length
+  );
+
   // Modal states
   const [isFriendSearchOpen, setIsFriendSearchOpen] = useState(false);
   const [isInboxOpen, setIsInboxOpen] = useState(false);

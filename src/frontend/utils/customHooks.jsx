@@ -76,38 +76,44 @@ function useAuthenticationChecks() {
   };
 }
 
-/**
- * Utility functions for array manipulation in state updates
- * These are NOT hooks - they're utility functions to be used inside state setters
- */
-const insertIfNotExists = (
-  prevArray,
-  elementsToInsert,
-  comparator = (a, b) => a === b
+/*
+ Inserts element into the provided useState array, if it does not already exist.
+*/
+const useInsertIfNotExists = (
+  arraySetter,
+  comparator = (a, b) => a === b,
+  elementsToInsert
 ) => {
-  const filteredElements = elementsToInsert.filter((newElement) => {
-    return !prevArray.some((existingElement) =>
-      comparator(existingElement, newElement)
-    );
+  // Filter elements to insert, keeping only those not already in the array
+  arraySetter((prev) => {
+    const filteredElements = elementsToInsert.filter((newElement) => {
+      return !prev.some((existingElement) =>
+        comparator(existingElement, newElement)
+      );
+    });
+    return [...prev, ...filteredElements];
   });
-  return [...prevArray, ...filteredElements];
 };
 
-const removeIfExists = (
-  prevArray,
-  elementsToRemove,
-  comparator = (a, b) => a === b
+// Removes elements from the provided useState array, if it exists.
+const useRemoveIfExists = (
+  arraySetter,
+  comparator = (a, b) => a === b,
+  elementsToRemove
 ) => {
-  return prevArray.filter((existingElement) => {
-    return !elementsToRemove.some((elementToRemove) =>
-      comparator(existingElement, elementToRemove)
-    );
+  arraySetter((prev) => {
+    return prev.filter((existingElement) => {
+      // Keep elements that are not in the elementsToRemove list
+      return !elementsToRemove.some((elementToRemove) =>
+        comparator(existingElement, elementToRemove)
+      );
+    });
   });
 };
 
 export {
   useCloseOnClickOutside,
   useAuthenticationChecks,
-  insertIfNotExists,
-  removeIfExists,
+  useInsertIfNotExists,
+  useRemoveIfExists,
 };

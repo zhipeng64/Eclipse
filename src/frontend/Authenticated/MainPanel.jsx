@@ -10,6 +10,14 @@ function MainPanel() {
   const { isLoading, isAuthenticated } = useAuthenticationChecks();
   // Access socket context for real-time updates
   const { pendingFriendRequests, friends } = useContext(SocketContext);
+
+  // Debug: Log friends changes in MainPanel
+  console.log(
+    "MainPanel - Friends from context:",
+    friends,
+    "Length:",
+    friends.length
+  );
   const [optionSelected, setOptionSelected] = useState({
     // homeOption: false,
     chatOption: true,
