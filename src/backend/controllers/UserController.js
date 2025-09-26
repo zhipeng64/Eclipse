@@ -1,5 +1,5 @@
 import { createCookieOptions } from "../utils/cookie.js";
-import authService from "../services/AuthService.js";
+import authService from "../services/authService.js";
 import userService from "../services/UserService.js";
 import { AppError } from "../utils/AppError.js";
 import friendService from "../services/FriendService.js";

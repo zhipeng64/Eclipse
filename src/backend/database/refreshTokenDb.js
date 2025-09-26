@@ -1,6 +1,6 @@
 import { getEntry, insertEntry, updateEntry } from "./crud.js";
 import { hashString } from "../utils/auth.js";
-import { AuthService } from "../services/AuthService.js";
+import { AuthService } from "../services/authService.js";
 import { ObjectId } from "mongodb";
 
 class RefreshTokenRepository {
