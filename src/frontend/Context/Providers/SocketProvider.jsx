@@ -84,12 +84,24 @@ function SocketProvider({ children }) {
 
     // Listener for pending friend requests list
     const handlePendingFriendRequests = (list, status) => {
-      console.log("Received pending friend requests:", list, status);
+      console.log(
+        "Received pending friend requests:",
+        list,
+        "STATUS:",
+        status,
+        "TYPE:",
+        typeof status
+      );
       pendingFriendRequestsLoadingRef.current = true;
 
       if (!list) return;
       var comparator = (a, b) => a.username === b.username;
-      switch (status) {
+
+      // Fallback: if status is missing, assume initialize
+      const actualStatus = status || env.VITE_EVENT_STATUS_INITIALIZE;
+      console.log("Using pending requests status:", actualStatus);
+
+      switch (actualStatus) {
         // Initial load of pending friend requests
         case env.VITE_EVENT_STATUS_INITIALIZE:
           console.log("Setting pending requests (INITIALIZE):", [
@@ -144,10 +156,27 @@ function SocketProvider({ children }) {
 
     // Listener for full friends list
     const handleFriendsList = (list, status) => {
-      console.log("Received friends list:", list);
+      console.log(
+        "Received friends list:",
+        list,
+        "STATUS:",
+        status,
+        "TYPE:",
+        typeof status
+      );
       if (!list) return;
 
       console.log("FRIENDS LIST: ", list, status);
+      console.log(
+        "Comparing status:",
+        status,
+        "vs expected:",
+        env.VITE_EVENT_STATUS_INITIALIZE
+      );
+      console.log(
+        "Status comparison result:",
+        status === env.VITE_EVENT_STATUS_INITIALIZE
+      );
       if (!Array.isArray(list)) {
         console.error(
           "Expected 'list' to be an array, but got:",
@@ -158,7 +187,12 @@ function SocketProvider({ children }) {
 
       // Do the same as above
       var comparator = (a, b) => a.username === b.username;
-      switch (status) {
+
+      // Fallback: if status is missing, assume initialize
+      const actualStatus = status || env.VITE_EVENT_STATUS_INITIALIZE;
+      console.log("Using status:", actualStatus);
+
+      switch (actualStatus) {
         case env.VITE_EVENT_STATUS_INITIALIZE:
           console.log("Setting friends (INITIALIZE):", list);
           setFriends((prevFriends) => {
