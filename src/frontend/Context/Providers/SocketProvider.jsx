@@ -98,7 +98,10 @@ function SocketProvider({ children }) {
       var comparator = (a, b) => a.username === b.username;
 
       // Fallback: if status is missing, assume initialize
-      const actualStatus = status || env.VITE_EVENT_STATUS_INITIALIZE;
+      // Normalize status to lowercase to handle case sensitivity
+      const actualStatus = (
+        status || env.VITE_EVENT_STATUS_INITIALIZE
+      ).toLowerCase();
       console.log("Using pending requests status:", actualStatus);
 
       switch (actualStatus) {
@@ -189,7 +192,10 @@ function SocketProvider({ children }) {
       var comparator = (a, b) => a.username === b.username;
 
       // Fallback: if status is missing, assume initialize
-      const actualStatus = status || env.VITE_EVENT_STATUS_INITIALIZE;
+      // Normalize status to lowercase to handle case sensitivity
+      const actualStatus = (
+        status || env.VITE_EVENT_STATUS_INITIALIZE
+      ).toLowerCase();
       console.log("Using status:", actualStatus);
 
       switch (actualStatus) {
