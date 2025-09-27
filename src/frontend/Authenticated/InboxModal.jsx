@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import SocketContext from "../Context/Socket";
+import env from "../config.js";
 function InboxModal({ inboxModalRef }) {
   console.log("Inbox opened");
   const { pendingFriendRequests } = useContext(SocketContext);
@@ -8,7 +9,7 @@ function InboxModal({ inboxModalRef }) {
 
   const handleAcceptFriendRequest = async (username) => {
     // Post request
-    const apiUrl = `${import.meta.env.VITE_BACKEND_URL}/users/friend-requests/acceptance`;
+    const apiUrl = `${env.VITE_BACKEND_URL}/users/friend-requests/acceptance`;
     const postData = {
       username: username,
     };

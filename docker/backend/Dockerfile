@@ -7,7 +7,7 @@ COPY package*.json ./
 # Removes dev dependencies to reduce image size
 RUN npm install --production
 COPY ./src/backend ./src
-
+        
 # runtime stage, use a lighter image to run the application since 
 # build artifacts are obtained in the previous stage.
 # Note that Docker will only keep the image in the last stage
@@ -16,5 +16,4 @@ FROM node:24-slim
 WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/src ./src
-EXPOSE 8080
 CMD ["node","src/app.js"]
