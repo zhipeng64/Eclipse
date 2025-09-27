@@ -8,15 +8,13 @@ const socketMap = new Map();
 
 // Initializes the socket server
 function initializeSocket(httpsServer) {
-  const corsConfiguration = {
-    origin: process.env.CORS_ALLOW_LIST.split(","),
-    methods: ["GET", "POST"],
-    credentials: true,
-  };
-
   if (process.env.NODE_ENV !== "production") {
     io = new Server(httpsServer, {
-      cors: corsConfiguration,
+      cors: {
+        origin: process.env.CORS_ALLOW_LIST.split(","),
+        methods: ["GET", "POST"],
+        credentials: true,
+      },
       path: "/socket.io/",
     });
   } else {

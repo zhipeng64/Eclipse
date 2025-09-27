@@ -15,37 +15,61 @@ on:
       - "package.json"
       - "package-lock.json"
 
+env:
+  AWS_REGION: us-east-1
+  BACKEND_IMAGE: eclipse-backend:v1.0
+  NGINX_IMAGE: eclipse-nginx:stable-perl
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
+    # For AWS OIDC
+    # https://github.com/aws-actions/configure-aws-credentials?tab=readme-ov-file#oidc-configuration
+    # Specifies the ONLY permissions granted to the GITHUB_TOKEN for the job
+    permissions:
+      id-token: write
+      contents: read
+
     steps:
       - name: Checkout repository where docker-compose.yml is located
-        uses: actions/checkout@main
+        uses: actions/checkout@v4
 
       - name: Creates secrets directory
-        run: mkdir -p certs
+        run: mkdir certs
+
+      - name: List files in repo
+        run: |
+          echo "Showing current directory:"
+          pwd
+          echo "Listing files:"
+          ls -R
+
+      - name: Configure AWS credentials (uses OIDC for authentication + authorization for AWS)
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: samplerolesession
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Set up Docker Compose environment variables
         run: |
-          echo "BACKEND_IP=${{ secrets.BACKEND_IP }}" >> .env 
-          echo "BACKEND_PORT=${{ secrets.BACKEND_PORT }}" >> .env
-          echo "CORS_ALLOW_LIST=${{ secrets.CORS_ALLOW_LIST }}" >> .env
-          echo "DB_APPNAME=${{ secrets.DB_APPNAME }}" >> .env
-          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "DB_USER_COLLECTION=${{ secrets.DB_USER_COLLECTION }}" >> .env
-          echo "DB_REFRESH_TOKEN_COLLECTION=${{ secrets.DB_REFRESH_TOKEN_COLLECTION }}" >> .env
-          echo "DB_FRIEND_COLLECTION=${{ secrets.DB_FRIEND_COLLECTION }}" >> .env
-          echo "DB_CHATROOM_COLLECTION=${{ secrets.DB_CHATROOM_COLLECTION }}" >> .env
-          echo "DB_MESSAGE_COLLECTION=${{ secrets.DB_MESSAGE_COLLECTION }}" >> .env
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
-          echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> .env
-          echo "EVENT_STATUS_INITIALIZE=${{ vars.EVENT_STATUS_INITIALIZE }}" >> .env
-          echo "EVENT_STATUS_PUSH=${{ vars.EVENT_STATUS_PUSH }}" >> .env
-          echo "EVENT_STATUS_DELETE=${{ vars.EVENT_STATUS_DELETE }}" >> .env
           echo "${{ secrets.SSL_CERT_PEM }}" > certs/Eclipse_SSL_cert.pem
           echo "${{ secrets.SSL_KEY_PEM }}" > certs/Eclipse_dev_private-key.pem
 
       - name: Run the docker-compose command to build images
         run: docker compose build
+
+      - name: Push backend image to Amazon Elastic Container Registry (ECR)
+        uses: jwalton/gh-ecr-push@v2
+        with:
+          region: ${{ env.AWS_REGION }}
+          local-image: ${{ env.BACKEND_IMAGE }}
+          image: ${{ secrets.ECR_CONTAINER_REGISTRY }}:backend-v1.0
+
+      - name: Push nginx image to ECR
+        uses: jwalton/gh-ecr-push@v2
+        with:
+          region: ${{ env.AWS_REGION }}
+          local-image: ${{ env.NGINX_IMAGE }}
+          image: ${{ secrets.ECR_CONTAINER_REGISTRY }}:nginx-v1.0

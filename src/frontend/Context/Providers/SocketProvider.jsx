@@ -8,7 +8,6 @@ import {
 import SocketContext from "../Socket.jsx";
 import { joinRoom } from "../../utils/socket.js";
 import env from "../../config.js";
-import { set } from "zod";
 
 function SocketProvider({ children }) {
   // State to hold the socket instance
@@ -27,6 +26,11 @@ function SocketProvider({ children }) {
   const [newFriendRequest, setNewFriendRequest] = useState(false);
   const [pendingFriendRequests, setPendingFriendRequests] = useState([]);
   const [friends, setFriends] = useState([]);
+
+  // Debug: Log friends state changes
+  useEffect(() => {
+    console.log("FRIENDS STATE CHANGED:", friends, "Length:", friends.length);
+  }, [friends]);
 
   // Chat-related state
   const [conversationHistory, setConversationHistory] = useState([]); // Depends on selectedChat
@@ -80,26 +84,68 @@ function SocketProvider({ children }) {
 
     // Listener for pending friend requests list
     const handlePendingFriendRequests = (list, status) => {
-      console.log("Received pending friend requests:", list, status);
+      console.log(
+        "Received pending friend requests:",
+        list,
+        "STATUS:",
+        status,
+        "TYPE:",
+        typeof status
+      );
       pendingFriendRequestsLoadingRef.current = true;
 
       if (!list) return;
       var comparator = (a, b) => a.username === b.username;
-      switch (status) {
+
+      // Fallback: if status is missing, assume initialize
+      // Normalize status to lowercase to handle case sensitivity
+      const actualStatus = (
+        status || env.VITE_EVENT_STATUS_INITIALIZE
+      ).toLowerCase();
+      console.log("Using pending requests status:", actualStatus);
+
+      switch (actualStatus) {
         // Initial load of pending friend requests
         case env.VITE_EVENT_STATUS_INITIALIZE:
-          useInsertIfNotExists(setPendingFriendRequests, comparator, [
+          console.log("Setting pending requests (INITIALIZE):", [
             ...list,
             ...buffer.current,
           ]);
+          setPendingFriendRequests((prevRequests) => {
+            const allNewRequests = [...list, ...buffer.current];
+            const filteredRequests = allNewRequests.filter(
+              (newRequest) =>
+                !prevRequests.some((existingRequest) =>
+                  comparator(existingRequest, newRequest)
+                )
+            );
+            return [...prevRequests, ...filteredRequests];
+          });
           break;
         // Incremental addition (push) of new friend requests
         case env.VITE_EVENT_STATUS_PUSH:
-          useInsertIfNotExists(setPendingFriendRequests, comparator, [...list]);
+          console.log("Adding pending requests (PUSH):", list);
+          setPendingFriendRequests((prevRequests) => {
+            const filteredRequests = list.filter(
+              (newRequest) =>
+                !prevRequests.some((existingRequest) =>
+                  comparator(existingRequest, newRequest)
+                )
+            );
+            return [...prevRequests, ...filteredRequests];
+          });
           break;
         // Removal of friend requests (e.g., upon acceptance or rejection)
         case env.VITE_EVENT_STATUS_DELETE:
-          useRemoveIfExists(setPendingFriendRequests, comparator, [...list]);
+          console.log("Removing pending requests (DELETE):", list);
+          setPendingFriendRequests((prevRequests) => {
+            return prevRequests.filter(
+              (existingRequest) =>
+                !list.some((requestToRemove) =>
+                  comparator(existingRequest, requestToRemove)
+                )
+            );
+          });
           break;
       }
 
@@ -113,10 +159,27 @@ function SocketProvider({ children }) {
 
     // Listener for full friends list
     const handleFriendsList = (list, status) => {
-      console.log("Received friends list:", list);
+      console.log(
+        "Received friends list:",
+        list,
+        "STATUS:",
+        status,
+        "TYPE:",
+        typeof status
+      );
       if (!list) return;
 
       console.log("FRIENDS LIST: ", list, status);
+      console.log(
+        "Comparing status:",
+        status,
+        "vs expected:",
+        env.VITE_EVENT_STATUS_INITIALIZE
+      );
+      console.log(
+        "Status comparison result:",
+        status === env.VITE_EVENT_STATUS_INITIALIZE
+      );
       if (!Array.isArray(list)) {
         console.error(
           "Expected 'list' to be an array, but got:",
@@ -127,21 +190,76 @@ function SocketProvider({ children }) {
 
       // Do the same as above
       var comparator = (a, b) => a.username === b.username;
-      switch (status) {
+
+      // Fallback: if status is missing, assume initialize
+      // Normalize status to lowercase to handle case sensitivity
+      const actualStatus = (
+        status || env.VITE_EVENT_STATUS_INITIALIZE
+      ).toLowerCase();
+      console.log("Using status:", actualStatus);
+
+      switch (actualStatus) {
         case env.VITE_EVENT_STATUS_INITIALIZE:
-          useInsertIfNotExists(setFriends, comparator, [...list]);
+          console.log("Setting friends (INITIALIZE):", list);
+          setFriends((prevFriends) => {
+            const filteredNewFriends = list.filter(
+              (newFriend) =>
+                !prevFriends.some((existingFriend) =>
+                  comparator(existingFriend, newFriend)
+                )
+            );
+            const updatedFriends = [...prevFriends, ...filteredNewFriends];
+            console.log(
+              "Friends updated from",
+              prevFriends,
+              "to",
+              updatedFriends
+            );
+            return updatedFriends;
+          });
           list.map((friend) =>
             joinRoom(newSocket, "join-chatroom", friend.chatroomId)
           );
           break;
         case env.VITE_EVENT_STATUS_PUSH:
-          useInsertIfNotExists(setFriends, comparator, [...list]);
+          console.log("Adding friends (PUSH):", list);
+          setFriends((prevFriends) => {
+            const filteredNewFriends = list.filter(
+              (newFriend) =>
+                !prevFriends.some((existingFriend) =>
+                  comparator(existingFriend, newFriend)
+                )
+            );
+            const updatedFriends = [...prevFriends, ...filteredNewFriends];
+            console.log(
+              "Friends updated from",
+              prevFriends,
+              "to",
+              updatedFriends
+            );
+            return updatedFriends;
+          });
           list.map((friend) =>
             joinRoom(newSocket, "join-chatroom", friend.chatroomId)
           );
           break;
         case env.VITE_EVENT_STATUS_DELETE:
-          useRemoveIfExists(setFriends, comparator, [...list]);
+          console.log("Removing friends (DELETE):", list);
+          setFriends((prevFriends) => {
+            const updatedFriends = prevFriends.filter(
+              (existingFriend) =>
+                !list.some((friendToRemove) =>
+                  comparator(existingFriend, friendToRemove)
+                )
+            );
+            console.log(
+              "Friends updated from",
+              prevFriends,
+              "to",
+              updatedFriends
+            );
+            return updatedFriends;
+          });
           break;
       }
     };

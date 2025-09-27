@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 
 // Icons
 import { FaUser, FaLock } from "react-icons/fa";
+import env from "../config.js";
 
 export default function LoginModal({ modalRef, forgotPasswordCallback }) {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ export default function LoginModal({ modalRef, forgotPasswordCallback }) {
     const { username, password } = Object.fromEntries(
       new FormData(event.target).entries()
     );
-    const url = `${import.meta.env.VITE_BACKEND_URL}/users/login`;
+    const url = `${env.VITE_BACKEND_URL}/users/login`;
     const postData = {
       username: username,
       password: password,
