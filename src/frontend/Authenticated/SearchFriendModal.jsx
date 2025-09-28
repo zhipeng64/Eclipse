@@ -25,7 +25,7 @@ export default function SearchFriendModal({ friendModalRef }) {
     const { username } = Object.fromEntries(new FormData(event.target));
     setSearchErrors({ searchError: "" }); // reset errors
     try {
-      const url = `${env.VITE_BACKEND_URL}/users/lookup`;
+      const url = `${env.VITE_BACKEND_URL}/api/users/lookup`;
       // Query parameters represented with URLSearchParams
       const queryParams = new URLSearchParams({
         targetUsername: username,
@@ -66,7 +66,7 @@ export default function SearchFriendModal({ friendModalRef }) {
   const handleFriendRequest = async (username) => {
     setFriendRequestErrors({ friendRequestError: "" }); // reset errors
     try {
-      const url = `${env.VITE_BACKEND_URL}/users/friend-requests`;
+      const url = `${env.VITE_BACKEND_URL}/api/users/friend-requests`;
       const postData = {
         username,
       };

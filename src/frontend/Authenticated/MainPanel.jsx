@@ -31,7 +31,7 @@ function MainPanel() {
     return (
       <div
         id="main-panel"
-        className="flex flex-col w-full pb-3 h-screen layer-0"
+        className="flex flex-col w-full pb-3 h-screen bg-gray-950"
       >
         <div>
           {/* Navigation */}
@@ -41,14 +41,14 @@ function MainPanel() {
           />
         </div>
         {/* Main content area */}
-        <div className="flex flex-col md:flex-row flex-1 min-h-0 px-2 pb-1 self-stretch gap-2">
-          <div className="md:flex-[0.40] rounded-lg min-w-[220px] max-w-full h-full max-h-full">
+        <div className="flex flex-row flex-1 min-h-0 px-2 pb-1 self-stretch">
+          <div className="md:flex-[0.30] rounded-lg w-full max-w-full h-full max-h-full">
             <ChatOption
               pendingFriendRequests={pendingFriendRequests}
               friends={friends}
             />
           </div>
-          <div className="md:flex-[0.60] rounded-lg min-w-[260px] max-w-full h-full max-h-full">
+          <div className="md:flex-[0.70] rounded-lg w-full max-w-full h-full max-h-full">
             <ChatPanel />
           </div>
         </div>

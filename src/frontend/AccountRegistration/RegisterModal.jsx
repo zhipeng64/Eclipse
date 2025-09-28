@@ -75,7 +75,7 @@ export default function RegisterModal({ handleRegistrationSuccess, modalRef }) {
     const { username, password, confirmPassword, email } =
       Object.fromEntries(formData);
 
-    const url = `${env.VITE_BACKEND_URL}/registration`;
+    const url = `${env.VITE_BACKEND_URL}/api/registration`;
     const postData = {
       username: username,
       email: email,
@@ -145,7 +145,7 @@ export default function RegisterModal({ handleRegistrationSuccess, modalRef }) {
       <div className="flex modal-overlay">
         <div
           id="modal"
-          className="flex m-auto p-5 w-full max-w-md shadow-card rounded-card dlayer-1"
+          className="flex m-auto p-5 w-full max-w-md shadow-card rounded-card layer-0"
           ref={modalRef}
         >
           <form

@@ -4,7 +4,7 @@ import env from "../config.js";
 
 // Requests backend to check validity of JWT and Refresh tokens
 async function isAuthenticated() {
-  const url = `${env.VITE_BACKEND_URL}/authentication`;
+  const url = `${env.VITE_BACKEND_URL}/api/authentication`;
   const options = {
     method: "GET",
     credentials: "include",

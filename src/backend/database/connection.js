@@ -1,17 +1,6 @@
-import { fileURLToPath } from "url";
-import path from "path";
-import { dirname } from "path";
 import { MongoClient, ServerApiVersion } from "mongodb";
-import dotenv from "dotenv";
 
-// __dirname is the absolute path to where this file resides
-// It is good to import it this way, as simply specifying "../../../.env"
-// is actually relative to the current working directory where you run the file,
-// not where this file resides.
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
-
+console.log("Current NODE_ENV:", process.env.NODE_ENV);
 // MongoDB Connection URL
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@eclipse.yed7zy5.mongodb.net/?retryWrites=true&
   w=majority&appName=${process.env.DB_APPNAME}`;

@@ -17,14 +17,9 @@ function initializeSocket(httpsServer) {
       },
       path: "/socket.io/",
     });
-  } else {
+  } else if (process.env.NODE_ENV === "production") {
     io = new Server(httpsServer, {
       path: "/socket.io/",
-      cors: {
-        origin: "*", // Allow all origins
-        methods: ["GET", "POST"],
-        credentials: false, // Set to false when using wildcard origin
-      },
     });
   }
 
