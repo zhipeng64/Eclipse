@@ -1,16 +1,24 @@
+// Load environment variables
+import "./loadEnv.js";
+
 // Core modules and frameworks
 import express from "express";
-import http from "http";
-// import https from "https";
-// import fs from "fs";
+import fs from "fs";
 
 // Third party modules
-import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
-// Load the environment variables prior to custom modules
-dotenv.config({ path: "../../.env" });
+// Dynamic import based on NODE_ENV
+let server;
+if (process.env.NODE_ENV === "production") {
+  // Renamed destructuring
+  const { default: http } = await import("http");
+  server = http;
+} else {
+  const { default: https } = await import("https");
+  server = https;
+}
 
 // Local custom modules
 import { router as registerRouter } from "./routes/users/register.js";
@@ -20,35 +28,37 @@ import { errorHandler } from "./middleware/error.js";
 import initializeGracefulShutdown from "./shutdown.js";
 import { initializeSocket } from "./socket.js";
 
-// https://expressjs.com/en/resources/middleware/cors.html
-// https://treblle.com/blog/setup-cors-rest-api#heading-how-to-configure-cors-for-your-rest-api
 const app = express();
 
-// Initialize an HTTPS server
-// const privateKey = fs.readFileSync(process.env.CERT_PRIVATE_KEY_PATH);
-// const cert = fs.readFileSync(process.env.CERT_PATH);
-// const options = {
-//   key: privateKey,
-//   cert: cert,
-// };
-// const httpsServer = https.createServer(options, app);
-
-// Initialize an HTTP server
-const httpServer = http.createServer(app);
+// Initialize server based on environment
+let appServer;
+if (process.env.NODE_ENV === "production") {
+  // HTTP server for production (behind reverse proxy)
+  appServer = server.createServer(app);
+} else {
+  // HTTPS server for development
+  const privateKey = fs.readFileSync(process.env.CERT_PRIVATE_KEY_PATH);
+  const cert = fs.readFileSync(process.env.CERT_PATH);
+  const options = {
+    key: privateKey,
+    cert: cert,
+  };
+  appServer = server.createServer(options, app);
+}
 
 // Initialize all route configuration and parser middlewares
-// Enable CORS only in non-production environments. In production the reverse
-// proxy (nginx) should be responsible for CORS and origin restrictions.
+// Enable CORS only in non-production environments
 if (process.env.NODE_ENV !== "production") {
   const corsConfiguration = {
     origin: process.env.CORS_ALLOW_LIST.split(","),
     methods: ["GET", "POST"],
     credentials: true,
   };
-  app.use(cors(corsConfiguration)); // Cors settings applied to all imported public routes
+  app.use(cors(corsConfiguration));
 }
-app.use(express.json()); // Accepts incoming JSON data in HTTP requests
-app.use(cookieParser()); // For parsing cookies from a client
+
+app.use(express.json());
+app.use(cookieParser());
 
 // Check server status
 app.get("/api", (req, res) => {
@@ -64,14 +74,15 @@ app.use("/api/users", userRouter);
 initializeGracefulShutdown();
 
 // Initialize socket object and its listeners
-initializeSocket(httpServer);
+initializeSocket(appServer);
 
 // Initialize a global error-handling middleware
 app.use(errorHandler);
 
 // Start the backend server
-httpServer.listen(process.env.BACKEND_PORT, process.env.BACKEND_IP, () => {
+const protocol = process.env.NODE_ENV === "production" ? "HTTP" : "HTTPS";
+appServer.listen(process.env.BACKEND_PORT, process.env.BACKEND_IP, () => {
   console.log(
-    `HTTP Server listening at ${process.env.BACKEND_IP}:${process.env.BACKEND_PORT}`
+    `${protocol} Server listening at ${process.env.BACKEND_IP}:${process.env.BACKEND_PORT}`
   );
 });

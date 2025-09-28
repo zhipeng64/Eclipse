@@ -22,7 +22,7 @@ function Navigation({ optionSelected, setOptionSelected }) {
   return (
     <nav
       id="top-nav"
-      className="flex flex-row px-3 py-5 justify-center items-center space-x-15 text-white"
+      className="flex flex-row px-3 py-2 justify-center items-center space-x-15 text-white"
     >
       {/* <div
         id="home-option"
@@ -56,7 +56,7 @@ function Navigation({ optionSelected, setOptionSelected }) {
         }
       >
         <i className="navigation-icon">
-          <IoMdChatboxes className="text-[1.4rem] " />
+          <IoMdChatboxes className="text-[1.2rem] " />
         </i>
         <h2 className="text-lg">Chat</h2>
         {showToast && <p>You have a new friend request!</p>}
@@ -74,7 +74,7 @@ function Navigation({ optionSelected, setOptionSelected }) {
         }
       >
         <i className="navigation-icon">
-          <IoSettings className="text-[1.4rem]" />
+          <IoSettings className="text-[1.2rem]" />
         </i>
         <h2 className="text-lg">Settings</h2>
       </div>

@@ -12,7 +12,7 @@ export default function LoginModal({ modalRef, forgotPasswordCallback }) {
     const { username, password } = Object.fromEntries(
       new FormData(event.target).entries()
     );
-    const url = `${env.VITE_BACKEND_URL}/users/login`;
+    const url = `${env.VITE_BACKEND_URL}/api/users/login`;
     const postData = {
       username: username,
       password: password,
@@ -40,7 +40,7 @@ export default function LoginModal({ modalRef, forgotPasswordCallback }) {
     <>
       <div className={"flex modal-overlay"}>
         <div
-          className="m-auto w-full max-w-xs pt-3 px-1 text-[#F5F5F5] shadow-card rounded-card dlayer-1"
+          className="m-auto w-full max-w-xs pt-3 px-1 text-[#F5F5F5] shadow-card rounded-card layer-0"
           ref={modalRef}
         >
           <form className="flex flex-col pb-5 space-y-4" onSubmit={handleForm}>

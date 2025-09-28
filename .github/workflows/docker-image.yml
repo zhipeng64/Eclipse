@@ -19,6 +19,10 @@ env:
   AWS_REGION: us-east-1
   BACKEND_IMAGE: eclipse-backend:v1.0
   NGINX_IMAGE: eclipse-nginx:stable-perl
+  VITE_BACKEND_URL: ""
+  VITE_EVENT_STATUS_INITIALIZE: initialize
+  VITE_EVENT_STATUS_PUSH: push
+  VITE_EVENT_STATUS_DELETE: delete
 
 jobs:
   build:

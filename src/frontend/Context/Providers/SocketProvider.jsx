@@ -62,7 +62,9 @@ function SocketProvider({ children }) {
     if (!isAuthenticated) return;
 
     // Initialize socket connection
-    const serverUrl = "/"; // Root namespace
+    // Use the backend URL from config
+    const serverUrl = env.VITE_BACKEND_URL;
+    console.log("Connecting to Socket.IO server at:", serverUrl);
     const newSocket = io(serverUrl, {
       path: "/socket.io/",
       withCredentials: true,

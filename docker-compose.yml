@@ -28,6 +28,8 @@ services:
     # Map port 8080 on the host to port 8080 in the container
     ports:
       - "8080:8080"
+    env_file:
+      - ./src/frontend/.env.production
 
   backend:
     build:
@@ -35,26 +37,12 @@ services:
       dockerfile: ./docker/backend/Dockerfile
     image: eclipse-backend:v1.0
     container_name: Eclipse-backend
-    # Injects environment variables from a .env file into the container at runtime
-    # Docker Compose automatically loads variables from a .env file in the same directory
-    # as the docker-compose.yml file
-    environment:
-      - BACKEND_IP=${BACKEND_IP}
-      - BACKEND_PORT=${BACKEND_PORT}
-      - CORS_ALLOW_LIST=${CORS_ALLOW_LIST}
-      - DB_APPNAME=${DB_APPNAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_USER_COLLECTION=${DB_USER_COLLECTION}
-      - DB_REFRESH_TOKEN_COLLECTION=${DB_REFRESH_TOKEN_COLLECTION}
-      - DB_FRIEND_COLLECTION=${DB_FRIEND_COLLECTION}
-      - DB_CHATROOM_COLLECTION=${DB_CHATROOM_COLLECTION}
-      - DB_MESSAGE_COLLECTION=${DB_MESSAGE_COLLECTION}
-      - JWT_SECRET=${JWT_SECRET}
-      - NODE_ENV=${NODE_ENV}
-      - EVENT_STATUS_INITIALIZE=${EVENT_STATUS_INITIALIZE}
-      - EVENT_STATUS_PUSH=${EVENT_STATUS_PUSH}
-      - EVENT_STATUS_DELETE=${EVENT_STATUS_DELETE}
+    # Loads environment variables from a .env file for local development.
+    # In this setup, development typically involves running multiple Docker containers locally,
+    # simulating the production environment. However, the same .env file can be used in non-Docker setups.
+    # Note: For production, secrets are managed securely and not via .env files.
+    env_file:
+      - ./.env.production
 
 # Secret files must exist locally and must not be committed to version control for security reasons.
 secrets:

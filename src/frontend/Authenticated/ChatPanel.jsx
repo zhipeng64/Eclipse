@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
 import { IoVideocam } from "react-icons/io5";
 import { IoMic } from "react-icons/io5";
 import { IoSettingsSharp } from "react-icons/io5";
@@ -14,6 +14,7 @@ function ChatPanel() {
     inputRowCount: 1,
     focus: false,
   });
+  const chatMessagesRef = useRef(null);
 
   // Clears previous conversation history and fetches new history when selectedChat changes
   useEffect(() => {
@@ -22,13 +23,28 @@ function ChatPanel() {
       socket.emit("conversation", selectedChat.chatroomId);
     }
   }, [selectedChat, socket]);
+
+  // Auto-scroll to bottom when new messages arrive (only if user is at bottom, within 100px)
+  useEffect(() => {
+    if (chatMessagesRef.current && conversationHistory.length > 0) {
+      const container = chatMessagesRef.current;
+      const isNearBottom =
+        container.scrollTop + container.clientHeight >=
+        container.scrollHeight - 100;
+
+      if (isNearBottom) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+  }, [conversationHistory]);
+
   console.log("Conversation History in ChatPanel:", conversationHistory);
   if (selectedChat === null) {
     // Render everything below but with placeholder
     return (
       <div
         id="chat-panel"
-        className="justify-center items-center text-gray-400 dlayer-3 w-auto h-full max-h-full flex flex-col rounded-lg opac-shadow"
+        className="justify-center items-center text-gray-400 bg-gray-800/65 w-auto h-full max-h-full flex flex-col rounded-lg opac-shadow"
       >
         Select a friend to chat with on the left panel
       </div>
@@ -37,11 +53,11 @@ function ChatPanel() {
   return (
     <div
       id="chat-panel"
-      className="text-white dlayer-3 w-auto h-full max-h-full flex flex-col rounded-lg opac-shadow"
+      className="text-white bg-gray-800/65 w-auto h-full max-h-full flex flex-col rounded-lg opac-shadow"
     >
       <div
         id="recipient"
-        className="flex items-center justify-between px-5 py-2 opac-shadow"
+        className="flex items-center justify-between pl-2 sm:px-5 py-2 opac-shadow"
       >
         <div className="flex items-center">
           <img
@@ -67,6 +83,7 @@ function ChatPanel() {
       </div>
       <div
         id="chat-messages"
+        ref={chatMessagesRef}
         className="text-gray-200 flex flex-col space-y-6 my-3 flex-1 overflow-auto"
       >
         {/* Chat messages go here */}
@@ -100,7 +117,7 @@ function ChatPanel() {
 
       <div
         id="chat-input-box"
-        className="flex items-center px-2 layer-1 rounded-lg"
+        className="flex items-center px-2 bg-gray-800/70 rounded-lg"
       >
         <div className="flex items-center space-x-3 mr-3">
           <i>
@@ -113,7 +130,7 @@ function ChatPanel() {
         <textarea
           id="chat-input"
           placeholder="Type a message..."
-          className="w-full p-2 m-2 rounded-lg text-white min-h-1 layer-2 resize-none hideScrollBar outline-none"
+          className="w-full p-2 m-2 rounded-lg text-white min-h-1 bg-gray-700/40 resize-none hideScrollBar outline-none"
           rows={inputSettings.focus ? inputSettings.inputRowCount : 1}
           onFocus={(e) => {
             e.stopPropagation();

@@ -42,7 +42,7 @@ function ChatOption({ pendingFriendRequests, friends }) {
     // h-full works because parent has resolved height via flex-grow
     <div
       id="chat-option"
-      className="text-white dlayer-4 w-auto h-full max-h-full flex flex-col rounded-lg opac-shadow"
+      className="text-white bg-gray-800/40 w-auto h-full max-h-full flex flex-col rounded-lg opac-shadow"
     >
       {isFriendSearchOpen && (
         <SearchFriendModal friendModalRef={friendModalRef} />
@@ -50,7 +50,7 @@ function ChatOption({ pendingFriendRequests, friends }) {
 
       {isInboxOpen && <InboxModal inboxModalRef={inboxModalRef} />}
       <div id="top-navigation" className="opac-shadow">
-        <div className="flex items-center justify-between p-3 mb-0.5">
+        <div className="flex items-center justify-between pr-3 sm:p-3">
           <h1 className="text-3xl">Chat</h1>
           <div className="flex space-x-7 text-gray-200 pr-2r">
             <i className="standard-icon-container p-1">
@@ -84,7 +84,7 @@ function ChatOption({ pendingFriendRequests, friends }) {
       </div>
       <div
         id="status-bar"
-        className={`flex items-center gap-5 ${friends.length > 0 ? "" : "min-h-[10%]"} px-4 py-2 opac-shado w overflow-auto`}
+        className={`flex items-center gap-3 sm:gap-7 ${friends.length > 0 ? "" : "min-h-[10%]"} px-4 py-2 opac-shado w overflow-auto`}
       >
         {friends.length > 0 ? (
           friends.map((friend) => (

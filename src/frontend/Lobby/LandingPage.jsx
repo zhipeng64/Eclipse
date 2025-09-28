@@ -31,57 +31,100 @@ export default function LandingPage() {
       className="min-h-screen flex flex-col w-auto layer-0"
     >
       <NavigationBar />
-      <div id="body" className="text-gray-200 flex-1 flex items-start">
-        <div id="main-display" className="ml-45 mr-20 max-w-2xl">
-          <div className="flex flex-col space-y-5 w-full break-words p-20 shadow-card rounded-card hover-shadow dlayer-1">
-            <h1 className="heading text-6xl mb-6 ">Join the Community</h1>
-            <div className="text-[#d1d5dc] text-2xl font-medium space-y-2">
-              <p>
-                Welcome to Eclipse, a place to meet others and make longlasting
-                relationships.
-              </p>
-              <p>
-                Get access to emotes, real-time video chats, and an
-                unforgettable memory.
-              </p>
-            </div>
+      <div
+        id="body"
+        className="text-gray-200 flex-1 flex flex-col gap-y-30 sm:px-20 md:px-40 md:gap-20"
+      >
+        {/* Main Content */}
+        <section className="flex flex-col max-w-4xl text-center self-center gap-y-5 lg:max-w-5xl">
+          <div className="flex flex-col gap-y-3 lg:gap-y-5">
+            <h1 className="heading text-5xl md:text-6xl text-center lg:text-7xl">
+              Join the Community
+            </h1>
+            <p className="text-center text-lg lg:text-3xl">
+              Connect with people in real time and make lasting relationships.
+            </p>
+          </div>
 
-            <div className="text-lg font-bold sm:space-x-7 sm:text-base mt-4">
-              <button
-                href="#"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsLogin(true);
-                }}
-                className="neon-button-purple neon-button-purple-animated rounded-lg py-3 px-6"
-              >
-                Log In
-              </button>
-              <button
-                href="#"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsSignUp(true);
-                }}
-                className="neon-button-purple neon-button-purple-animated rounded-lg py-3 px-6"
-              >
-                Sign Up
-              </button>
+          <div
+            id="main-display"
+            className="primary-container-border rounded-lg p-6 lg:py-25 lg:px-20"
+          >
+            <div className="flex flex-col gap-y-4 lg:gap-y-6">
+              <div className="text-gray-300 text-md md:text-lg lg:text-2xl font-medium space-y-2 lg:space-y-4">
+                <p>
+                  Welcome to Eclipse, platform where you can chat and meet new
+                  people.
+                </p>
+                <p>
+                  Get access to emotes, real-time video chats, and an AI
+                  assistant.
+                </p>
+                <p className="text-gray-400 lg:text-xl">
+                  Join now and start your journey towards building meaningful
+                  connections!
+                </p>
+              </div>
+
+              <div className="text-center font-bold text-md space-x-3 sm:space-x-7 mt-4 lg:text-lg">
+                <button
+                  href="#"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsLogin(true);
+                  }}
+                  className="rounded-lg py-2 px-6 md:py-3 md:px-9 lg:py-4 lg:px-12 neon-button-purple neon-button-purple-animated"
+                >
+                  Log In
+                </button>
+                <button
+                  href="#"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsSignUp(true);
+                  }}
+                  className="rounded-lg py-2 px-6 md:py-3 md:px-9- lg:py-4 lg:px-12 neon-button-purple neon-button-purple-animated"
+                >
+                  Sign Up
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-        <div
-          id="feature-section"
-          className="flex flex-col px-15 pb-15 self-center max-w-2xl "
-        >
-          <h1 className="font-bold text-5xl mb-6 text-shadow-[0_0_12px_rgba(144,205,244,0.6)]">
-            Features
-          </h1>
-          <ul className="text-gray-300 font-medium space-y-3 text-xl list-disc list-inside marker:text-[#90cdf4]">
-            <li>Supports up to 1GB file uploads</li>
-            <li>Real-time video chats</li>
-            <li>AI Chat Assistant</li>
-          </ul>
+        </section>
+        <div id="features-container" className="flex flex-col gap-y-5">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl">Features</h2>
+          <div className="grid lg:grid-cols-3 gap-6 lg:gap-6">
+            {/* Feature 1 */}
+            <div className="bg-gray-800/50 p-4 primary-container-border lg:p-4">
+              <p className="text-base sm:text-lg md:text-xl font-semibold mb-2">
+                Real-time Chat
+              </p>
+              <p className="text-gray-400">
+                Engage in seamless conversations with friends and new
+                acquaintances.
+              </p>
+            </div>
+            {/* Feature 2 */}
+            <div className="bg-gray-800/50 p-4 primary-container-border lg:p-4">
+              <p className="text-base sm:text-lg md:text-xl font-semibold mb-2">
+                Video Calls
+              </p>
+              <p className="text-gray-400">
+                Connect face-to-face with friends and family through
+                high-quality video calls.
+              </p>
+            </div>
+            {/* Feature 3 */}
+            <div className="bg-gray-800/50 p-4 primary-container-border lg:p-4">
+              <p className="text-base sm:text-lg md:text-xl font-semibold mb-2">
+                AI Assistant
+              </p>
+              <p className="text-gray-400">
+                Get help from our AI assistant for a more personalized
+                experience.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
       {isSignUp && (

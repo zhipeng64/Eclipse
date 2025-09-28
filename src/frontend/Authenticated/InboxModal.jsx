@@ -9,7 +9,7 @@ function InboxModal({ inboxModalRef }) {
 
   const handleAcceptFriendRequest = async (username) => {
     // Post request
-    const apiUrl = `${env.VITE_BACKEND_URL}/users/friend-requests/acceptance`;
+    const apiUrl = `${env.VITE_BACKEND_URL}/api/users/friend-requests/acceptance`;
     const postData = {
       username: username,
     };

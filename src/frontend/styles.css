@@ -42,7 +42,7 @@ h3 {
 
 /* Base / primary background */
 .layer-0 {
-  background-color: #1d2436;
+  background-color: #121212;
 }
 
 /* Tints */
@@ -82,13 +82,9 @@ h3 {
   border-bottom: 1px solid #90cdf4;
 }
 
-.opac-divider {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-}
-
 /* General shadows */
 .opac-shadow {
-  box-shadow: 0 1px 2px 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 1px 2px 0 rgba(144, 205, 244, 0.3);
 }
 
 /* Modal styling */
@@ -109,8 +105,8 @@ h3 {
 }
 
 .standard-icon-container {
-  color: #90cdf4;
-  box-shadow: 0 0 5px 0px rgba(144, 205, 244, 0.6);
+  color: #b390f4;
+  box-shadow: 0 0 5px 0px rgba(179, 144, 244, 0.6);
 }
 
 .purple-icon-container {
@@ -119,12 +115,12 @@ h3 {
 }
 
 .standard-icon {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   cursor: pointer;
 }
 
 .navigation-icon {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   cursor: pointer;
   color: #a0aec0; /* Tailwind gray-400 */
 }
@@ -133,7 +129,6 @@ h3 {
 
 .heading {
   font-weight: 700; /* font-bold */
-  font-size: 3.75rem; /* text-6xl = 60px (assuming default Tailwind scale) */
   text-shadow: 0 0 12px rgba(144, 205, 244, 0.6);
 }
 
