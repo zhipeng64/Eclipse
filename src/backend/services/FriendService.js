@@ -25,17 +25,32 @@ class FriendService {
         },
       });
     }
-    const pendingFriendEntries =
-      await friendRepository.getFriendRequests(userId);
-
-    return await this._getFriendRequestUserInfoList(
-      pendingFriendEntries,
-      userId,
+    // Get all pending requests
+    const pendingFriendEntries = await friendRepository.getFriendEntriesByMatch(
       {
-        type: "recipient",
+        users: [userId],
         status: "pending",
       }
     );
+    if (!pendingFriendEntries) {
+      return { incoming: [], outgoing: [] };
+    }
+
+    // Split into incoming and outgoing requests
+    return {
+      incoming: await this._getFriendRequestUserInfoList(
+        pendingFriendEntries,
+        userId,
+        "pending",
+        "incoming"
+      ),
+      outgoing: await this._getFriendRequestUserInfoList(
+        pendingFriendEntries,
+        userId,
+        "pending",
+        "outgoing"
+      ),
+    };
   }
 
   async addUser({ currentUserId, targetUsername }) {
@@ -81,14 +96,14 @@ class FriendService {
       });
     }
 
-    const friendRequest = await friendRepository.getFriendEntry(
-      currentUser._id,
-      targetUserId
-    );
+    const friendRequest = await friendRepository.getFriendEntry({
+      users: [currentUser._id, targetUserId],
+    });
 
     if (friendRequest) {
       throw new AppError({
         originalErrorMessage: "FriendRequestExists",
+        originalErrorStackTrace: new Error().stack,
         errorDescription: "Friend request already exists",
         statusCode: 400,
         clientResponse: {
@@ -102,6 +117,7 @@ class FriendService {
       });
     }
 
+    // Creates a new friend request entry
     const friendRequestId = await friendRepository.insertFriendEntry(
       currentUser._id,
       targetUserId
@@ -111,106 +127,49 @@ class FriendService {
       throw new Error("Failed to insert friend request entry");
     }
 
+    // Get the newly created friend entry with user details
+    const friendEntry = await friendRepository.getFriendEntry({
+      users: [currentUser._id, targetUserId],
+    });
+    if (!friendEntry) {
+      throw new Error("Failed to fetch newly created friend request entry");
+    }
+
+    // Get the current user's outgoing request
+    const senderOutgoingRequest = {
+      outgoing: [
+        this._mapToPendingRequest(friendEntry, currentUserId, "outgoing"),
+      ],
+    };
+
+    // Get the target user's incoming request
+    const receiverIncomingRequest = {
+      incoming: [
+        this._mapToPendingRequest(friendEntry, targetUserId, "incoming"),
+      ],
+    };
+
+    console.log("RECEIVER INCOMING REQUEST:", receiverIncomingRequest);
     // Notify recipient if online
-    const userSocket = getMap().get(targetUserId);
-
-    const friendEntry = await friendRepository.getFriendEntry(
-      currentUser._id,
-      targetUserId
+    await notifyUser(
+      targetUserId,
+      "new-friend-request",
+      receiverIncomingRequest,
+      process.env.EVENT_STATUS_PUSH
     );
-    const parsedEntry = await this._getFriendRequestUserInfoList(
-      friendEntry,
-      targetUserId
+    await notifyUser(
+      targetUserId,
+      "pending-friend-requests",
+      receiverIncomingRequest,
+      process.env.EVENT_STATUS_PUSH
     );
 
-    if (!parsedEntry) {
-      throw new Error("Failed to parse friend request entry");
-    }
-
-    if (userSocket) {
-      userSocket.emit("new-friend-request", parsedEntry);
-      userSocket.emit(
-        "pending-friend-requests",
-        parsedEntry,
-        process.env.EVENT_STATUS_PUSH
-      );
-    }
-  }
-
-  // Helper function to parse and get user info for each friend request
-  // By default, if no options are given, the function parses each entry
-  // and returns an array of objects representing only friends of the current user
-  async _getFriendRequestUserInfoList(
-    friendRequests,
-    currentUserId,
-    options = null
-  ) {
-    if (!friendRequests || !currentUserId) {
-      throw new Error(
-        "Invalid parameters given to getFriendRequestUserInfoList"
-      );
-    }
-
-    // Normalize to array: cursor -> array, array -> array, object -> [object]
-    var friendRequestsList = [];
-    // Array of documents
-    if (Array.isArray(friendRequests)) {
-      friendRequestsList = friendRequests;
-    }
-    // Single document
-    else if (typeof friendRequests === "object") {
-      friendRequestsList = [friendRequests];
-    }
-
-    if (!options) {
-      friendRequestsList = friendRequestsList.map((friendRequestEntry) => {
-        // users array contains hex string ids
-        const friendId =
-          friendRequestEntry?.users[0] === currentUserId
-            ? friendRequestEntry?.users[1]
-            : friendRequestEntry?.users[0];
-        return friendId;
-      });
-    } else {
-      switch (options.type) {
-        case "recipient":
-          friendRequestsList = friendRequestsList.map((friendRequestEntry) => {
-            return friendRequestEntry.requestorId;
-          });
-          break;
-        default:
-          throw new Error(
-            "Invalid option type given to getFriendRequestUserInfoList"
-          );
-      }
-    }
-    if (!friendRequestsList) {
-      throw new Error("Failed to parse friend request user ids");
-    }
-
-    // Fetch user info for each id present in friendRequestsList
-    return Promise.all(
-      friendRequestsList.map(async (userId) => {
-        const result = {};
-        const user = await userRepository.getUserById(userId);
-        if (user) {
-          result.username = user?.account?.username || null;
-          result.avatar = user?.profile?.avatarImage || null;
-        }
-        // Get chatroom only if option status is not "pending"
-        const chatroom =
-          options?.status !== "pending"
-            ? await this.chatRoomService.getDMChatroom({
-                userId1: currentUserId,
-                userId2: userId,
-              })
-            : null;
-        if (chatroom) {
-          result.chatroomId = chatroom._id || null;
-        }
-
-        return result;
-      })
+    // Notify the requestor to update their sent requests list
+    await notifyUser(
+      currentUserId,
+      "pending-friend-requests",
+      senderOutgoingRequest,
+      process.env.EVENT_STATUS_PUSH
     );
   }
 
@@ -243,6 +202,16 @@ class FriendService {
       throw new Error("Failed to find target user id in acceptFriendRequest");
     }
 
+    // Check if user is authorized to make the request
+    if (recipientToken !== recipientId) {
+      throw new AppError({
+        originalErrorMessage: "Unauthorized",
+        errorDescription:
+          "FriendService received mismatched userId and recipientToken",
+        statusCode: 400,
+      });
+    }
+
     if (recipientId === requestorId) {
       throw new AppError({
         originalErrorMessage: "SelfAccept",
@@ -259,12 +228,12 @@ class FriendService {
       });
     }
 
-    const friendRequest = await friendRepository.getFriendEntry(
-      recipientId,
-      requestorId
-    );
+    const friendRequest = await friendRepository.getFriendEntry({
+      users: [recipientId, requestorId],
+    });
     const friendRequestId = friendRequest?._id;
     const friendRequestStatus = friendRequest?.status;
+    console.log("FRIEND REQUEST:", friendRequest);
     if (!friendRequest) {
       throw new Error("No friend request entry found");
     }
@@ -272,113 +241,170 @@ class FriendService {
       throw new Error("Friend request entry is not pending");
     }
 
-    const result = await friendRepository.acceptFriendRequest(friendRequestId);
-    if (!result || result.matchedCount === 0) {
-      throw new Error("Updating friend request to accepted failed");
-    }
-
-    console.log("Friend request accepted successfully");
-    // Check if checkroom exists
-
+    // Check if chatroom exists
     const chatRoomExists = await this.chatRoomService.getDMChatroom({
       userId1: recipientId,
       userId2: requestorId,
     });
 
+    console.log("CHATROOM EXISTS:", chatRoomExists);
     // Should not exist before users became friends
     if (chatRoomExists) {
       throw new Error("Chatroom already exists between two users");
     }
-
     const newChatRoomId = await this.chatRoomService.insertDMChatroom({
       userId1: recipientId,
       userId2: requestorId,
     });
-    console.log("New chatroom created with id: ", newChatRoomId);
+    const updateStatus = await friendRepository.updateFriendRequest(
+      friendRequestId,
+      {
+        status: "accepted",
+        chatroomId: newChatRoomId,
+      }
+    );
+    if (!updateStatus) {
+      throw new Error("Failed to update friend request entry status");
+    }
 
-    // Notify recipient to perform a DELETE operation on the matching pending friend request
-    await notifyUser({
-      userId: recipientId,
-      eventName: "pending-friend-requests",
-      eventStatus: process.env.EVENT_STATUS_DELETE,
-      callback: async () => {
-        return await this._getFriendRequestUserInfoList(
-          friendRequest,
-          recipientId,
-          { type: "recipient", status: "pending" }
-        );
-      },
-    });
+    console.log("Friend request accepted successfully");
+    // Notify both users to update their pending requests list (DELETE the accepted request)
+    const recipientUserToDelete = {
+      incoming: [
+        this._mapToPendingRequest(friendRequest, recipientId, "incoming"),
+      ],
+    };
+    const requestorUserToDelete = {
+      outgoing: [
+        this._mapToPendingRequest(friendRequest, requestorId, "outgoing"),
+      ],
+    };
+    await notifyUser(
+      recipientId,
+      "pending-friend-requests",
+      recipientUserToDelete,
+      process.env.EVENT_STATUS_DELETE
+    );
+    await notifyUser(
+      requestorId,
+      "pending-friend-requests",
+      requestorUserToDelete,
+      process.env.EVENT_STATUS_DELETE
+    );
 
-    // Notify both users to update their friends list
-    await this.notifyFriendsList({
-      userId: recipientId,
-      eventStatus: process.env.EVENT_STATUS_PUSH,
-      callback: async () => {
-        return await this._getFriendRequestUserInfoList(
-          friendRequest,
-          recipientId
-        );
-      },
+    const updatedDocument = await friendRepository.getFriendEntry({
+      _id: friendRequestId,
     });
-    await this.notifyFriendsList({
-      userId: requestorId,
-      eventStatus: process.env.EVENT_STATUS_PUSH,
-      callback: async () => {
-        return await this._getFriendRequestUserInfoList(
-          friendRequest,
-          requestorId
-        );
-      },
-    });
+    console.log("UPDATED DOCUMENTTT:", updatedDocument);
+    // Notify both users to update their friends list (ADD the new friend)
+    const recipientFriendToAdd = {
+      friends: [this._mapToAcceptedFriend(updatedDocument, recipientId)],
+    };
+    const requestorFriendToAdd = {
+      friends: [this._mapToAcceptedFriend(updatedDocument, requestorId)],
+    };
+    await notifyUser(
+      recipientId,
+      "friends-list",
+      recipientFriendToAdd,
+      process.env.EVENT_STATUS_PUSH
+    );
+    await notifyUser(
+      requestorId,
+      "friends-list",
+      requestorFriendToAdd,
+      process.env.EVENT_STATUS_PUSH
+    );
   }
 
-  // Gets the friend list for userId, appends chatroom data, and
-  // notifies the socket for userId to update their friends list
-  async notifyFriendsList({ userId, eventStatus, callback = null }) {
-    // Default callback for INITIALIZE event — builds full friends list with chatroomIds
-    const defaultInitializeCallback = async () => {
-      const rawFriendsList = await friendRepository.getFriendsList(userId);
-      const updatedFriendsList = await this._getFriendRequestUserInfoList(
-        rawFriendsList,
-        userId
-      );
+  // Gets the friend list for userId
+  async getFriendsList({ userId }) {
+    if (!userId) {
+      throw new AppError("Invalid user id supplied");
+    }
+    const friends = await friendRepository.getFriendEntriesByMatch({
+      users: [userId],
+      status: "accepted",
+    });
 
-      return Promise.all(
-        updatedFriendsList.map(async (friend, index) => {
-          const friendId =
-            rawFriendsList[index]?.users[0] === userId
-              ? rawFriendsList[index]?.users[1]
-              : rawFriendsList[index]?.users[0];
-          const chatroom = await this.chatRoomService.getDMChatroom({
-            userId1: userId,
-            userId2: friendId,
-          });
-          const chatroomId = chatroom ? chatroom._id : null;
-          return { ...friend, chatroomId };
-        })
-      );
+    const friendsToInitialize = {
+      friends: await this._getFriendRequestUserInfoList(
+        friends,
+        userId,
+        "accepted"
+      ),
     };
+    console.log("Friends to initialize:", friendsToInitialize);
+    return friendsToInitialize;
+  }
 
-    // Choose which payload to use: custom if provided, else default for INITIALIZE
-    const payloadCallback =
-      callback ||
-      (eventStatus === process.env.EVENT_STATUS_INITIALIZE
-        ? defaultInitializeCallback
-        : null);
+  // Data transformation helpers
+  // Gets the pending friend request data for userId from a single friendship entry
+  _mapToPendingRequest(friendshipEntry, userId, direction) {
+    const targetUserId =
+      direction === "incoming"
+        ? friendshipEntry.requestorId
+        : friendshipEntry.recipientId;
 
-    if (!payloadCallback) {
+    const targetUser = friendshipEntry.userDetails.find(
+      (user) => user._id === targetUserId && user._id !== userId
+    );
+
+    if (!targetUser) return null;
+    return {
+      id: friendshipEntry._id,
+      username: targetUser.account.username,
+      avatar: targetUser.profile.avatarImage,
+      avatarImageType: targetUser.profile.avatarImageType,
+    };
+  }
+
+  // Gets the accepted friend data for userId from a single friendship entry
+  _mapToAcceptedFriend(friendshipEntry, userId) {
+    const friendUser = friendshipEntry.userDetails.find(
+      (user) => user._id !== userId
+    );
+
+    if (!friendUser) return null;
+
+    return {
+      id: friendshipEntry._id,
+      friendId: friendUser._id,
+      username: friendUser.account.username,
+      avatar: friendUser.profile.avatarImage,
+      avatarImageType: friendUser.profile.avatarImageType,
+      chatroomId: friendshipEntry.chatroomId,
+    };
+  }
+
+  /*
+   Orchestrator that handles an array of friend requests (as opposed to a single friend request object) 
+   and returns user info based on type (pending/accepted) and subtype (incoming/outgoing for pending)
+  */
+  async _getFriendRequestUserInfoList(
+    friendRequests,
+    userId,
+    type,
+    subtype = null
+  ) {
+    if (!friendRequests || !userId || !type) {
       throw new Error(
-        `No payload callback provided for event status: ${eventStatus}`
+        "Invalid parameters given to getFriendRequestUserInfoList"
       );
     }
 
-    await notifyUser({
-      userId,
-      eventName: "friends-list",
-      eventStatus,
-      callback: payloadCallback,
-    });
+    switch (type) {
+      case "pending":
+        return friendRequests
+          .map((request) => this._mapToPendingRequest(request, userId, subtype))
+          .filter((request) => request !== null);
+      case "accepted":
+        return friendRequests
+          .map((request) => this._mapToAcceptedFriend(request, userId))
+          .filter((request) => request !== null);
+      default:
+        throw new Error(`Unsupported friend request type: ${type}`);
+    }
   }
 }
 

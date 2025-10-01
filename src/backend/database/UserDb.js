@@ -1,5 +1,6 @@
 import { getEntry, insertEntry } from "./crud.js";
 import { ObjectId } from "mongodb";
+import { convertObjectIds } from "./util.js";
 
 class UserRepository {
   constructor() {
@@ -20,7 +21,7 @@ class UserRepository {
       query.$or.push({ "account.email": email });
     }
     const user = await getEntry(query, this.collection);
-    return user;
+    return convertObjectIds(user, ObjectId);
   }
 
   async getUserById(userId) {
@@ -29,23 +30,29 @@ class UserRepository {
     }
     const query = { _id: new ObjectId(userId) };
     const user = await getEntry(query, this.collection);
-    // Convert any ObjectId fields to hex strings before returning
-    return user;
+    return convertObjectIds(user, ObjectId);
   }
 
   // Insert
-  async insertUser(account, profile) {
-    if (!account || !profile)
+  async insertUser({ username, email, hashedPassword, imageData, imageType }) {
+    if (!username || !email || !hashedPassword || !imageData || !imageType)
       throw new Error(
         "Invalid parameters given when inserting user to database"
       );
     const entry = {
-      account,
-      profile,
+      account: {
+        username,
+        email,
+        hashedPassword,
+      },
+      profile: {
+        avatarImage: imageData,
+        avatarImageType: imageType,
+      },
     };
     const collection = this.collection;
     const result = await insertEntry(entry, collection);
-    return result.insertedId;
+    return convertObjectIds(result.insertedId, ObjectId);
   }
 }
 

@@ -25,8 +25,8 @@ function ChatOption({ pendingFriendRequests, friends }) {
   const friendModalRef = useRef(null);
   const inboxModalRef = useRef(null);
 
-  // Get setSelectedChat from context
-  const { selectedChat, setSelectedChat } = useContext(SocketContext);
+  // Get setSelectedFriend from context
+  const { selectedFriend, setSelectedFriend } = useContext(SocketContext);
 
   // Register event listeners
   useCloseOnClickOutside(friendModalRef, isFriendSearchOpen, () =>
@@ -36,8 +36,8 @@ function ChatOption({ pendingFriendRequests, friends }) {
     setIsInboxOpen(false);
   });
 
-  // Optionally, you can log selectedChat for debugging
-  // console.log(selectedChat);
+  // Optionally, you can log selectedFriend for debugging
+  // console.log(selectedFriend);
   return (
     // h-full works because parent has resolved height via flex-grow
     <div
@@ -72,11 +72,12 @@ function ChatOption({ pendingFriendRequests, friends }) {
                 setIsInboxOpen(true);
               }}
             >
-              {pendingFriendRequests.length > 0 && (
-                <span className="absolute top-0 right-0 bg-[#9059f6] text-white text-[10px] rounded-full w-3 h-3 flex items-center justify-center">
-                  {pendingFriendRequests.length}
-                </span>
-              )}
+              {pendingFriendRequests.incoming &&
+                pendingFriendRequests.incoming.length > 0 && (
+                  <span className="absolute top-0 right-0 bg-[#9059f6] text-white text-[10px] rounded-full w-3 h-3 flex items-center justify-center">
+                    {pendingFriendRequests.incoming.length}
+                  </span>
+                )}
               <CiMail className="standard-icon" />
             </i>
           </div>
@@ -93,7 +94,7 @@ function ChatOption({ pendingFriendRequests, friends }) {
               key={friend.username}
             >
               <img
-                src={defaultImage}
+                src={`data:image/${friend.avatarImageType};base64,${friend.avatar || "../assets/sunrise2.jpg"}`}
                 alt="Avatar"
                 className="w-11 h-11 rounded-full"
               />
@@ -113,12 +114,12 @@ function ChatOption({ pendingFriendRequests, friends }) {
         {friends.length > 0 ? (
           friends.map((friend) => (
             <div
-              className={`flex w-full py-2 px-4 opac-shadow cursor-pointer ${selectedChat?.username === friend.username ? "bg-gray-700" : "hover:bg-gray-800 "}`}
+              className={`flex w-full py-2 px-4 opac-shadow cursor-pointer ${selectedFriend?.username === friend.username ? "bg-gray-700" : "hover:bg-gray-800 "}`}
               key={friend.username}
-              onClick={() => setSelectedChat(friend)}
+              onClick={() => setSelectedFriend(friend)}
             >
               <img
-                src={defaultImage}
+                src={`data:image/${friend.avatarImageType};base64,${friend.avatar || "../assets/sunrise2.jpg"}`}
                 alt="Avatar"
                 className="w-11 h-11 rounded-full mr-3.5"
               />

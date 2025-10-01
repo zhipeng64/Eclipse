@@ -44,8 +44,9 @@ function InboxModal({ inboxModalRef }) {
           id="pending-friend-requests-container"
           className="grow dlayer-1 rounded-lg overflow-auto"
         >
-          {pendingFriendRequests.length > 0 &&
-            pendingFriendRequests.map((request) => {
+          {pendingFriendRequests.incoming &&
+            pendingFriendRequests.incoming.length > 0 &&
+            pendingFriendRequests.incoming.map((request) => {
               return (
                 <div
                   className="flex justify-between p-3 opac-shadow"
@@ -53,10 +54,7 @@ function InboxModal({ inboxModalRef }) {
                 >
                   <div className="flex items-center">
                     <img
-                      src={
-                        request?.requestor?.profile?.avatarImage ||
-                        "../assets/sunrise2.jpg"
-                      }
+                      src={`data:image/${request?.avatarImageType};base64,${request?.avatar || "../assets/sunrise2.jpg"}`}
                       alt="Avatar"
                       className="w-11 h-11 rounded-full mr-3.5"
                     />

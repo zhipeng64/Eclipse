@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { getEntry, getAllEntry, insertEntry, updateEntry } from "./crud.js";
+import { convertObjectIds } from "./util.js";
 
 class ChatroomRepository {
   constructor() {
@@ -21,7 +22,7 @@ class ChatroomRepository {
     };
 
     const result = await getEntry(query, this.collection);
-    return result;
+    return convertObjectIds(result, ObjectId);
   }
 
   /**
@@ -32,20 +33,15 @@ class ChatroomRepository {
       throw new Error("Invalid user IDs supplied to insertDMChatroom");
     }
 
-    const sortedParticipants = [
-      new ObjectId(userId1),
-      new ObjectId(userId2),
-    ].sort((a, b) => a.toString().localeCompare(b.toString()));
-
     const newChatroom = {
       isGroup: false,
-      participants: sortedParticipants,
+      participants: [new ObjectId(userId1), new ObjectId(userId2)],
       recentMessageId: null,
       createdAt: new Date(),
     };
 
     const result = await insertEntry(newChatroom, this.collection);
-    return result.insertedId;
+    return convertObjectIds(result.insertedId, ObjectId);
   }
 
   /**
@@ -61,7 +57,11 @@ class ChatroomRepository {
     };
 
     const cursor = await getAllEntry(query, this.collection);
-    return cursor;
+    let result = [];
+    for await (const doc of cursor) {
+      result.push(doc);
+    }
+    return convertObjectIds(result, ObjectId);
   }
 
   /**
@@ -77,7 +77,7 @@ class ChatroomRepository {
     };
 
     const result = await getEntry(query, this.collection);
-    return result;
+    return convertObjectIds(result, ObjectId);
   }
 
   /**
@@ -91,8 +91,8 @@ class ChatroomRepository {
     const query = { _id: new ObjectId(chatroomId) };
     const update = { $set: { recentMessageId: messageId } };
 
-    const result = await updateEntry(query, update, null, this.collection);
-    return result;
+    await updateEntry(query, update, null, this.collection);
+    return true;
   }
 }
 

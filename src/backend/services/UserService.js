@@ -9,6 +9,7 @@ import { AppError } from "../utils/AppError.js";
 import userRepository from "../database/UserDb.js";
 import friendRepository from "../database/FriendDb.js";
 import { encodeBase64 } from "../utils/encodings.js";
+import { ObjectId } from "mongodb";
 
 class UserService {
   // Registers user if no duplicate user is found
@@ -57,26 +58,19 @@ class UserService {
     // Default profile picture
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = dirname(__filename);
-    const imageData = fs.readFileSync(`${__dirname}/../assets/sunrise2.jpg`);
+    const imageData = encodeBase64(
+      fs.readFileSync(`${__dirname}/../assets/sunrise2.jpg`)
+    );
+    const imageType = "image/jpg";
 
     // Insert user and get ID
-    const accountEntry = {
-      account: {
-        username,
-        email,
-        hashedPassword,
-      },
-      profile: {
-        avatarImage: encodeBase64(imageData),
-      },
-    };
-
-    const insertedIdHex = await userRepository.insertUser(
-      accountEntry.account,
-      accountEntry.profile
-    );
-    console.log("insertUser returned:", insertedIdHex, typeof insertedIdHex); // <-- add this
-
+    const insertedIdHex = await userRepository.insertUser({
+      username,
+      email,
+      hashedPassword,
+      imageData,
+      imageType,
+    });
     if (!insertedIdHex) {
       throw new Error("Failed to retrieve inserted id after inserting user");
     }
@@ -269,12 +263,10 @@ class UserService {
       throw new Error("Invalid user field fetched from database");
     }
 
-    // Check friendship (friendRepository still here, it's not friend-logic extraction)
-    const friendship = await friendRepository.getFriendEntry(
-      currentUser._id,
-      user._id
-    );
-
+    // Check friendship
+    const friendship = await friendRepository.getFriendEntry({
+      users: [currentUser._id, user._id],
+    });
     const friendshipData = friendship
       ? {
           status: friendship.status || null,

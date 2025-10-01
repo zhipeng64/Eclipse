@@ -5,7 +5,7 @@ const joinRoom = (socket, endpoint, roomId) => {
     console.log({ socket, endpoint, roomId });
     return;
   }
-  socket.emit(endpoint, roomId);
+  socket.emit(endpoint, { roomId });
   console.log(`Socket ${socket.id} joined room ${roomId}`);
 };
 

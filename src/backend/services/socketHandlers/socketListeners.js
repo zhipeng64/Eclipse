@@ -4,6 +4,7 @@ import userService from "../UserService.js";
 import { roomIdSchema } from "../../validators/zodValidators.js";
 import { sanitizedStringSchema } from "../../sanitizers/zodSanitizers.js";
 import registerMessageListeners from "./messageListeners.js";
+import { notifyUser, notifyRoom } from "../socketHelper.js";
 
 export default function registerListeners({ io, socket, userId }) {
   registerMessageListeners({ io, socket, userId });
@@ -16,30 +17,35 @@ export default function registerListeners({ io, socket, userId }) {
     console.log(`Client socket with socketId "${socket.id}" disconnected`);
   });
 
-  // Handle request for pending friend requests
+  // Gets incoming pending friend requests for user
   socket.on("pending-friend-requests", async () => {
     try {
       const friendRequestList = await friendService.getPendingFriendRequests({
         userId,
       });
 
-      socket.emit(
+      console.log("Emitting pending-friend-requests:", friendRequestList);
+      notifyUser(
+        userId,
         "pending-friend-requests",
         friendRequestList,
         process.env.EVENT_STATUS_INITIALIZE
       );
     } catch (err) {
-      console.error("Error in pending-friend-requests:", err.message);
+      console.error("Error in pending-friend-requests:", err.stack);
     }
   });
 
-  // Handle request for full friends list (including chatrooms)
+  // Handle request for full friends list
   socket.on("friends-list", async () => {
     try {
-      await friendService.notifyFriendsList({
+      const friendsList = await friendService.getFriendsList({ userId });
+      await notifyUser(
         userId,
-        eventStatus: process.env.EVENT_STATUS_INITIALIZE,
-      });
+        "friends-list",
+        friendsList,
+        process.env.EVENT_STATUS_INITIALIZE
+      );
     } catch (err) {
       console.error("Error in friends-list:", err.message);
       console.error(err.stack);
@@ -47,9 +53,9 @@ export default function registerListeners({ io, socket, userId }) {
   });
 
   // Handles a client socket joining a DM chat room
-  socket.on("join-chatroom", async (roomId) => {
+  socket.on("join-chatroom", async ({ roomId }) => {
     try {
-      console.log("join-chatroom event received:", { roomId });
+      console.log("join-chatroom event received:", roomId);
       if (!roomId) {
         throw new Error("Invalid parameters supplied to join-chatroom");
       }
@@ -59,7 +65,6 @@ export default function registerListeners({ io, socket, userId }) {
       if (!isValidRoomId.success) {
         throw new Error("Invalid roomId format supplied to join-chatroom");
       }
-
       // Sanitize the roomId
       const sanitizedRoomId = sanitizedStringSchema.parse(roomId);
       console.log("Sanitized roomId:", sanitizedRoomId);
@@ -81,9 +86,12 @@ export default function registerListeners({ io, socket, userId }) {
       }
       socket.join(sanitizedRoomId);
       console.log("SOCKET HAS JOINED ROOM:", sanitizedRoomId);
-      socket
-        .to(sanitizedRoomId)
-        .emit("join-chatroom", "A new user has joined the chatroom");
+      await notifyRoom(
+        socket,
+        sanitizedRoomId,
+        "join-chatroom",
+        "A new user has joined the chatroom"
+      );
     } catch (err) {
       console.error("Error in join-chatroom:", err.message);
       console.error(err.stack);

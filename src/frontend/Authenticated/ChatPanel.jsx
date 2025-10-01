@@ -7,22 +7,26 @@ import { MdEmojiEmotions } from "react-icons/md";
 import SocketContext from "../Context/Socket.jsx";
 
 function ChatPanel() {
-  // Get the socket and selectedChat from context
-  const { socket, selectedChat, conversationHistory, setConversationHistory } =
-    useContext(SocketContext);
+  // Get the socket and selectedFriend from context
+  const {
+    socket,
+    selectedFriend,
+    conversationHistory,
+    setConversationHistory,
+  } = useContext(SocketContext);
   const [inputSettings, setInputSettings] = useState({
     inputRowCount: 1,
     focus: false,
   });
   const chatMessagesRef = useRef(null);
 
-  // Clears previous conversation history and fetches new history when selectedChat changes
+  // Clears previous conversation history and fetches new history when selectedFriend changes
   useEffect(() => {
-    if (selectedChat && socket) {
+    if (selectedFriend && socket) {
       setConversationHistory([]);
-      socket.emit("conversation", selectedChat.chatroomId);
+      socket.emit("conversation", { chatroomId: selectedFriend.chatroomId });
     }
-  }, [selectedChat, socket]);
+  }, [selectedFriend, socket]);
 
   // Auto-scroll to bottom when new messages arrive (only if user is at bottom, within 100px)
   useEffect(() => {
@@ -39,7 +43,7 @@ function ChatPanel() {
   }, [conversationHistory]);
 
   console.log("Conversation History in ChatPanel:", conversationHistory);
-  if (selectedChat === null) {
+  if (selectedFriend === null) {
     // Render everything below but with placeholder
     return (
       <div
@@ -61,12 +65,12 @@ function ChatPanel() {
       >
         <div className="flex items-center">
           <img
-            src={`data:image/jpg;base64,${selectedChat?.avatar}`}
+            src={`data:image/jpg;base64,${selectedFriend?.avatar}`}
             alt="Avatar"
             className="w-11 h-11 rounded-full mr-2"
           />
           <p className="text-md">
-            {selectedChat ? selectedChat.username : "Unknown"}
+            {selectedFriend ? selectedFriend.username : "Unknown"}
           </p>
         </div>
         <div className="flex space-x-7 text-gray-200 pr-2">
@@ -93,7 +97,7 @@ function ChatPanel() {
               <div className="flex items-start space-x-3">
                 {/* Avatar */}
                 <img
-                  src={`data:image/jpg;base64,${msg.avatar}`}
+                  src={`data:image/${msg.avatarImageType};base64,${msg.avatar || "../assets/sunrise2.jpg"}`}
                   alt="Avatar"
                   className="w-11 h-11 rounded-full"
                 />
@@ -156,11 +160,11 @@ function ChatPanel() {
             else if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault(); // Prevent newline insertion
               if (socket) {
-                socket.emit(
-                  "send-message",
-                  selectedChat?.chatroomId,
-                  e.target.value
-                );
+                console.log("SELECTED FRIEND:", selectedFriend);
+                socket.emit("send-message", {
+                  chatroomId: selectedFriend?.chatroomId,
+                  message: e.target.value,
+                });
                 e.target.value = "";
                 setInputSettings((prevSettings) => ({
                   ...prevSettings,

@@ -155,6 +155,8 @@ class UserController {
     const decodedJwtTokenUserId = req?.user?.id;
 
     console.log("received request to accept friend request");
+    console.log("username:", username);
+    console.log("decodedJwtTokenUserId:", decodedJwtTokenUserId);
     if (!username || !decodedJwtTokenUserId) {
       throw new AppError({
         originalErrorMessage: "InvalidInput",
@@ -171,6 +173,7 @@ class UserController {
         },
       });
     }
+
     await friendService.acceptFriendRequest({
       recipientToken: decodedJwtTokenUserId,
       requestorUsername: username,
