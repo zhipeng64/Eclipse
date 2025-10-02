@@ -1,6 +1,4 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
-
-console.log("Current NODE_ENV:", process.env.NODE_ENV);
 // MongoDB Connection URL
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@eclipse.yed7zy5.mongodb.net/?retryWrites=true&
   w=majority&appName=${process.env.DB_APPNAME}`;
@@ -25,7 +23,6 @@ async function connectToMongo() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     db = client.db(process.env.DB_APPNAME);
-    console.log("mongodb connection established");
     return db;
   } catch (error) {
     throw error;
@@ -35,7 +32,6 @@ async function connectToMongo() {
 async function closeMongoConnection() {
   if (client) {
     await client.close();
-    console.log("MongoDB connection closed.");
   }
 }
 

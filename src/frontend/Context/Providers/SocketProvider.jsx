@@ -27,11 +27,6 @@ function SocketProvider({ children }) {
   });
   const [friends, setFriends] = useState([]);
 
-  // Debug: Log friends state changes
-  useEffect(() => {
-    console.log("FRIENDS STATE CHANGED:", friends, "Length:", friends.length);
-  }, [friends]);
-
   // Chat-related state
   const [conversationHistory, setConversationHistory] = useState([]); // Depends on selectedFriend
   const [recentMessages, setRecentMessages] = useState(new Map()); // Stores recent message per chatroom
@@ -65,7 +60,6 @@ function SocketProvider({ children }) {
     // Initialize socket connection
     // Use the backend URL from config
     const serverUrl = env.VITE_BACKEND_URL;
-    console.log("Connecting to Socket.IO server at:", serverUrl);
     const newSocket = io(serverUrl, {
       path: "/socket.io/",
       withCredentials: true,
@@ -73,13 +67,11 @@ function SocketProvider({ children }) {
 
     // Listener for current user profile info
     const handleCurrentUserProfile = (profile) => {
-      console.log("Received current user profile:", profile);
       setCurrentUser(profile);
     };
 
     // Listener for new incoming friend requests
     const handleNewFriendRequest = (friendRequest) => {
-      console.log("Received new friend request:", friendRequest);
       if (!friendRequest) return;
 
       if (pendingFriendRequestsLoadingRef.current) {
@@ -93,14 +85,6 @@ function SocketProvider({ children }) {
 
     // Listener for pending friend requests list
     const handlePendingFriendRequests = (friendRequests, status) => {
-      console.log(
-        "Received pending friend requests:",
-        friendRequests,
-        "STATUS:",
-        status,
-        "TYPE:",
-        typeof status
-      );
       pendingFriendRequestsLoadingRef.current = true;
 
       if (!friendRequests) return;
@@ -112,13 +96,11 @@ function SocketProvider({ children }) {
         case env.VITE_EVENT_STATUS_INITIALIZE:
           result.incoming = [...newIncomingRequests, ...buffer.current];
           result.outgoing = [...newOutgoingRequests];
-          console.log("Setting pending requests (INITIALIZE):", result);
           setPendingFriendRequests(result);
           buffer.current = [];
           break;
         // Incremental addition (push) of new friend requests
         case env.VITE_EVENT_STATUS_PUSH:
-          console.log("Adding pending requests (PUSH):", friendRequests);
           setPendingFriendRequests((prevObject) => ({
             incoming: [...prevObject.incoming, ...newIncomingRequests],
             outgoing: [...prevObject.outgoing, ...newOutgoingRequests],
@@ -126,7 +108,6 @@ function SocketProvider({ children }) {
           break;
         // Removal of friend requests (e.g., after acceptance/decline)
         case env.VITE_EVENT_STATUS_DELETE:
-          console.log("Removing pending requests (DELETE):", friendRequests);
           setPendingFriendRequests((prevObject) => ({
             incoming: prevObject.incoming.filter(
               (req) => !friendRequests.incoming.some((r) => r.id === req.id)
@@ -140,25 +121,14 @@ function SocketProvider({ children }) {
     };
 
     // Listener to know user has joined a chat room
-    const handleJoinChatRoom = (serverMessage) => {
-      console.log("Join chatroom response:", serverMessage);
-    };
+    const handleJoinChatRoom = (serverMessage) => {};
 
     // Listener for full friends list
     const handleFriendsList = (friends, status) => {
-      console.log(
-        "Received friends list:",
-        friends,
-        "STATUS:",
-        status,
-        "TYPE:",
-        typeof status
-      );
       if (!friends) return;
       const friendArray = friends?.friends || [];
       switch (status) {
         case env.VITE_EVENT_STATUS_INITIALIZE:
-          console.log("Setting friends list (INITIALIZE):", friendArray);
           // Join each chatroom
           friendArray.forEach((friend) => {
             joinRoom(newSocket, "join-chatroom", friend.chatroomId);
@@ -166,14 +136,12 @@ function SocketProvider({ children }) {
           setFriends(friendArray);
           break;
         case env.VITE_EVENT_STATUS_PUSH:
-          console.log("Adding to friends list (PUSH):", friendArray);
           friendArray.forEach((friend) => {
             joinRoom(newSocket, "join-chatroom", friend.chatroomId);
           });
           setFriends((prevArray) => [...prevArray, ...friendArray]);
           break;
         case env.VITE_EVENT_STATUS_DELETE:
-          console.log("Removing from friends list (DELETE):", friendArray);
           setFriends((prevArray) =>
             prevArray.filter(
               (friend) =>
@@ -198,9 +166,6 @@ function SocketProvider({ children }) {
           message.chatroomId === selectedFriendRef.current.chatroomId
       );
 
-      console.log("NEW MESSAGE: ", messageList, status);
-      console.log("Selected Chat Ref:", selectedFriendRef.current);
-      console.log("Message in Chatroom:", messagesInChatroom);
       switch (status) {
         case env.VITE_EVENT_STATUS_INITIALIZE:
           setConversationHistory(messagesInChatroom);

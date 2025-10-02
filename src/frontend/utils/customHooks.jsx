@@ -58,7 +58,6 @@ function useAuthenticationChecks() {
   useEffect(() => {
     const authHandler = async () => {
       const authStatus = await checkAuth();
-      console.log("auth status: ", authStatus);
       setIsAuthenticated(authStatus);
       setIsLoading(false);
 

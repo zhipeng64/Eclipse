@@ -60,7 +60,6 @@ class FriendRepository {
       }
       delete matchFilter.users;
     }
-    console.log(matchFilter.users);
 
     const aggregationQuery = [
       { $match: { ...matchFilter, ...usersMatch } },
@@ -73,11 +72,8 @@ class FriendRepository {
         },
       },
     ];
-    console.log("AGGREGATION QUERY:", aggregationQuery);
-    console.log("USERS: ", usersMatch);
     const cursor = await getAggregation(aggregationQuery, this.collection);
     const results = [];
-    console.log("AGGREGATION RESULTS:", results);
     for await (const doc of cursor) {
       results.push(doc);
     }

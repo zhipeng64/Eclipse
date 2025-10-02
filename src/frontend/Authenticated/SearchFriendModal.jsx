@@ -53,8 +53,6 @@ export default function SearchFriendModal({ friendModalRef }) {
         setSearchErrors(newErrors);
       } else {
         const users = data.searchResults;
-        console.log("search results");
-        console.log(data);
         setUsersSearched(users);
       }
     } catch (error) {

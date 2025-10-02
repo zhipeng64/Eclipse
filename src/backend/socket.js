@@ -31,9 +31,9 @@ function initializeSocket(httpsServer) {
   */
   io.on("connection", async (socket) => {
     io.engine.on("initial_headers", (headers) => {
-      console.log("Initial headers:", headers);
+      // Removed console.log statement
     });
-    console.log(`Client socket with socketId "${socket.id}" connected`);
+    // Removed console.log statement
     try {
       // Authenticate and extract user ID from cookies
       const cookieString = socket.handshake.headers.cookie;
@@ -46,11 +46,7 @@ function initializeSocket(httpsServer) {
       // Register all socket event listeners for this user
       registerListeners({ io, socket, userId });
     } catch (error) {
-      console.warn("Socket auth failed", {
-        socketId: socket.id,
-        ip: socket.handshake.address,
-        error: error.message,
-      });
+      // Removed console.warn statement
 
       // Disconnect unauthorized socket
       socket.disconnect();

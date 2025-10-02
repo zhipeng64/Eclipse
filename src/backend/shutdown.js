@@ -16,11 +16,9 @@ const initializeGracefulShutdown = () => {
 
   // Runtime errors
   process.on("uncaughtException", async (err) => {
-    console.error(err);
     await gracefulShutdown();
   });
   process.on("unhandledRejection", async (reason) => {
-    console.error(reason);
     await gracefulShutdown();
   });
 };

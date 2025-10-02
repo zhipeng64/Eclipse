@@ -139,15 +139,12 @@ class FriendService {
       [],
       [this._mapToPendingRequest(friendEntry, currentUserId, "outgoing")]
     );
-    console.log("SENDER OUTGOING REQUEST:", senderOutgoingRequest);
 
     // Get the target user's incoming request
     const receiverIncomingRequest = this._buildPendingRequestFormat(
       [this._mapToPendingRequest(friendEntry, targetUserId, "incoming")],
       []
     );
-
-    console.log("RECEIVER INCOMING REQUEST:", receiverIncomingRequest);
     // Notify recipient if online
     await notifyUser(
       targetUserId,
@@ -231,7 +228,6 @@ class FriendService {
     });
     const friendRequestId = friendRequest?._id;
     const friendRequestStatus = friendRequest?.status;
-    console.log("FRIEND REQUEST:", friendRequest);
     if (!friendRequest) {
       throw new Error("No friend request entry found");
     }
@@ -245,7 +241,6 @@ class FriendService {
       userId2: requestorId,
     });
 
-    console.log("CHATROOM EXISTS:", chatRoomExists);
     // Should not exist before users became friends
     if (chatRoomExists) {
       throw new Error("Chatroom already exists between two users");
@@ -265,7 +260,6 @@ class FriendService {
       throw new Error("Failed to update friend request entry status");
     }
 
-    console.log("Friend request accepted successfully");
     // Notify both users to update their pending requests list (DELETE the accepted request)
     const recipientUserToDelete = this._buildPendingRequestFormat(
       [this._mapToPendingRequest(friendRequest, recipientId, "incoming")],
@@ -291,7 +285,6 @@ class FriendService {
     const updatedDocument = await friendRepository.getFriendEntry({
       _id: friendRequestId,
     });
-    console.log("UPDATED DOCUMENTTT:", updatedDocument);
     // Notify both users to update their friends list (ADD the new friend)
     const recipientFriendToAdd = this._buildFriendsListUpdateFormat([
       this._mapToAcceptedFriend(updatedDocument, recipientId),
@@ -326,7 +319,6 @@ class FriendService {
     const friendsToInitialize = this._buildFriendsListUpdateFormat(
       await this._getFriendRequestUserInfoList(friends, userId, "accepted")
     );
-    console.log("Friends to initialize:", friendsToInitialize);
     return friendsToInitialize;
   }
 

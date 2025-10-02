@@ -4,7 +4,6 @@ import { useState } from "react";
 // Icons
 import { FaUser, FaLock } from "react-icons/fa";
 import env from "../config.js";
-import { set } from "zod";
 
 export default function LoginModal({ modalRef, forgotPasswordCallback }) {
   const [errors, setErrors] = useState({});
@@ -34,7 +33,6 @@ export default function LoginModal({ modalRef, forgotPasswordCallback }) {
         const data = await response.json();
         const errors = data?.errors || [];
         const errorObj = {};
-        console.log(errors);
         errors.forEach((error) => {
           errorObj[error.field] = error.msg;
         });
@@ -43,7 +41,7 @@ export default function LoginModal({ modalRef, forgotPasswordCallback }) {
         navigate("/main-lobby");
       }
     } catch (error) {
-      console.log(error);
+      setErrors({ customError: "Network error. Please try again." });
     }
   };
   return (

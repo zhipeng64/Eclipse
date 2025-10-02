@@ -36,7 +36,6 @@ class UserController {
         email,
         password,
       });
-    console.log("user registered successfully");
     return res
       .cookie("jwt", jwt, createCookieOptions(jwtExpiresAt))
       .cookie(
@@ -67,7 +66,6 @@ class UserController {
       });
     }
 
-    console.log("Logging in user:", username);
     const { jwt, refreshToken, jwtExpiresAt, refreshTokenExpiresAt } =
       await userService.signInUser({ username, plaintextPassword: password });
     return res
@@ -137,7 +135,6 @@ class UserController {
       currentUserId: decodedJwtTokenUserId,
       targetUsername: username,
     });
-    console.log("Friend request entry made");
     return res.status(200).json({
       username: username,
       success: true,
@@ -149,9 +146,6 @@ class UserController {
     const { username } = req?.body;
     const decodedJwtTokenUserId = req?.user?.id;
 
-    console.log("received request to accept friend request");
-    console.log("username:", username);
-    console.log("decodedJwtTokenUserId:", decodedJwtTokenUserId);
     if (!username || !decodedJwtTokenUserId) {
       throw new AppError({
         originalErrorMessage: "InvalidInput",
@@ -173,7 +167,6 @@ class UserController {
       recipientToken: decodedJwtTokenUserId,
       requestorUsername: username,
     });
-    console.log("Friend request accepted");
     return res.status(200).json({
       success: true,
     });

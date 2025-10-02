@@ -69,14 +69,12 @@ const insertEntry = async (query, collection) => {
     Object.keys(query).length === 0 ||
     !ALLOWED_COLLECTIONS.includes(collection)
   ) {
-    console.log("Invalid input to insertEntry:", { query, collection });
     throw new Error("Failed to insert entry: invalid query or collection");
   }
 
   try {
     const db = await connectToMongo();
     const result = await db.collection(collection).insertOne(query);
-    console.log("Entry inserted successfully");
     return result;
   } catch (error) {
     throw error;
@@ -91,12 +89,6 @@ const updateEntry = async (query, update, options, collection) => {
     !update ||
     Object.keys(update).length === 0
   ) {
-    console.log("Invalid input to updateEntry:", {
-      query,
-      collection,
-      update,
-      options,
-    });
     throw new Error(
       "Failed to update entry: invalid query, update, options, or collection"
     );
@@ -126,12 +118,6 @@ const findAndUpdateEntry = async (query, update, options, collection) => {
     !update ||
     Object.keys(update).length === 0
   ) {
-    console.log("Invalid input to updateEntry:", {
-      query,
-      collection,
-      update,
-      options,
-    });
     throw new Error(
       "Failed to update entry: invalid query, update, options, or collection"
     );

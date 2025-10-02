@@ -9,14 +9,12 @@ import { fr } from "zod/v4/locales";
 export default function registerMessageListeners({ io, socket, userId }) {
   // Fetch conversation history for a chatroom
   socket.on("conversation", async ({ chatroomId, limit = 50, skip = 0 }) => {
-    console.log(chatroomId);
     try {
       const formattedMessages = await messageService.getConversation({
         chatroomId,
         limit,
         skip,
       });
-      console.log(typeof formattedMessages);
 
       await notifyUser(
         userId,
@@ -25,7 +23,6 @@ export default function registerMessageListeners({ io, socket, userId }) {
         process.env.EVENT_STATUS_INITIALIZE
       );
     } catch (err) {
-      console.log(err.stack);
       socket.emit("conversation", [{ status: "ERROR", error: err.message }]);
     }
   });
@@ -44,7 +41,6 @@ export default function registerMessageListeners({ io, socket, userId }) {
 
   // Emits back to all clients' conversation history and recent messages
   socket.on("send-message", async ({ chatroomId, message }) => {
-    console.log("send-message event received:", { chatroomId, message });
     try {
       if (!chatroomId || !message) {
         throw new Error("chatroomId and message are required");
@@ -72,8 +68,6 @@ export default function registerMessageListeners({ io, socket, userId }) {
         throw new Error("Failed to retrieve the sent message");
       }
 
-      console.log("Formatted message:", formattedMessage);
-      console.log("ROOM ID:", chatroomId);
       await notifyRoom(
         io,
         chatroomId,

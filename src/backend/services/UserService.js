@@ -280,10 +280,6 @@ class UserService {
 
   // Helper for basic user data (single responsibility: format core user fields)
   _formatBasicUserData(user) {
-    console.log(
-      "USER IN FORMAT BASIC USER DATA:",
-      user?.profile?.avatarImageType
-    );
     return {
       username: user?.account?.username,
       avatar: user?.profile?.avatarImage,

@@ -16,7 +16,6 @@ async function isAuthenticated() {
     }
     return true;
   } catch (error) {
-    console.log(error);
     return false;
   }
 }

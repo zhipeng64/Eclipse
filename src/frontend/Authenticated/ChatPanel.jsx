@@ -43,7 +43,6 @@ function ChatPanel() {
     }
   }, [conversationHistory]);
 
-  console.log("Conversation History in ChatPanel:", conversationHistory);
   if (selectedFriend === null) {
     // Render everything below but with placeholder
     return (
@@ -168,7 +167,6 @@ function ChatPanel() {
             else if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault(); // Prevent newline insertion
               if (socket) {
-                console.log("SELECTED FRIEND:", selectedFriend);
                 socket.emit("send-message", {
                   chatroomId: selectedFriend?.chatroomId,
                   message: e.target.value,

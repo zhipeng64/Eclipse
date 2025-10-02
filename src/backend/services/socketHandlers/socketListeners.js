@@ -17,7 +17,6 @@ export default function registerListeners({ io, socket, userId }) {
   socket.on("disconnect", () => {
     const map = getMap();
     map.delete(userId);
-    console.log(`Client socket with socketId "${socket.id}" disconnected`);
   });
 
   // Get and emit current user's profile info
@@ -46,7 +45,6 @@ export default function registerListeners({ io, socket, userId }) {
         userId,
       });
 
-      console.log("Emitting pending-friend-requests:", friendRequestList);
       notifyUser(
         userId,
         "pending-friend-requests",
@@ -77,7 +75,6 @@ export default function registerListeners({ io, socket, userId }) {
   // Handles a client socket joining a DM chat room
   socket.on("join-chatroom", async ({ roomId }) => {
     try {
-      console.log("join-chatroom event received:", roomId);
       if (!roomId) {
         throw new Error("Invalid parameters supplied to join-chatroom");
       }
@@ -89,7 +86,6 @@ export default function registerListeners({ io, socket, userId }) {
       }
       // Sanitize the roomId
       const sanitizedRoomId = sanitizedStringSchema.parse(roomId);
-      console.log("Sanitized roomId:", sanitizedRoomId);
 
       // Check current user is valid
       const currentUser = await userService.getUserById({ userId });
@@ -107,7 +103,6 @@ export default function registerListeners({ io, socket, userId }) {
         );
       }
       socket.join(sanitizedRoomId);
-      console.log("SOCKET HAS JOINED ROOM:", sanitizedRoomId);
       await notifyRoom(
         socket,
         sanitizedRoomId,

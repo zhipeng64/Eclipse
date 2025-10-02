@@ -135,7 +135,6 @@ export class AuthService {
 
       return decodedJwt;
     } catch (err) {
-      console.log("JWT verification failed:", err.message);
       return null;
     }
   }
