@@ -1,5 +1,12 @@
-.env*
 
+# Ignore all .env files in root directory
+/.env*
+
+# Ignore .env.development in frontend, but allow .env.vite.production
+/src/frontend/.env.development
+
+# Allow .env.vite.production specifically
+!/src/frontend/.env.vite.production
 
 /docs
 /certs
