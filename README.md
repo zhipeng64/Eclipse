@@ -71,20 +71,20 @@ The project follows a **layered architecture** pattern that separates concerns a
 - Friend discovery and recommendations
 - Friend search filters and sorting
 
-  **AI Assistant Integration**
+**AI Assistant Integration**
 
 - Intelligent chat assistance
 - Smart message suggestions
 - Automated moderation features
 
-  **Video & Audio Chat**
+**Video & Audio Chat**
 
 - WebRTC integration
 - Voice calls between friends
 - Video conferencing capabilities
 - Screen sharing functionality
 
-  **File Sharing**
+**File Sharing**
 
 - Document upload and sharing
 - Image sharing in chats
