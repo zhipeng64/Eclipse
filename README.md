@@ -30,7 +30,6 @@ The project follows a **layered architecture** pattern that separates concerns a
 - Socket.IO integration for live messaging
 - Friend system (add/accept friend requests)
 - Real-time chat functionality
-- Online status tracking
 
 ### Technology Stack
 
@@ -66,26 +65,26 @@ The project follows a **layered architecture** pattern that separates concerns a
 
 ## Upcoming Features (Roadmap)
 
-🚧 **Enhanced Friend Search**
+**Enhanced Friend Search**
 
 - Advanced user search functionality
 - Friend discovery and recommendations
 - Friend search filters and sorting
 
-🚧 **AI Assistant Integration**
+  **AI Assistant Integration**
 
 - Intelligent chat assistance
 - Smart message suggestions
 - Automated moderation features
 
-🚧 **Video & Audio Chat**
+  **Video & Audio Chat**
 
 - WebRTC integration
 - Voice calls between friends
 - Video conferencing capabilities
 - Screen sharing functionality
 
-🚧 **File Sharing**
+  **File Sharing**
 
 - Document upload and sharing
 - Image sharing in chats
@@ -135,4 +134,4 @@ The application provides RESTful APIs for:
 
 ## Project Version
 
-1
+Eclipse: version 1 (v1)
