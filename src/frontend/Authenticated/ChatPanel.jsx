@@ -10,6 +10,7 @@ function ChatPanel() {
   // Get the socket and selectedFriend from context
   const {
     socket,
+    currentUser,
     selectedFriend,
     conversationHistory,
     setConversationHistory,
@@ -65,7 +66,7 @@ function ChatPanel() {
       >
         <div className="flex items-center">
           <img
-            src={`data:image/jpg;base64,${selectedFriend?.avatar}`}
+            src={`data:image/${selectedFriend?.avatarImageType || "jpeg"};base64,${selectedFriend?.avatar || "../assets/sunrise2.jpg"}`}
             alt="Avatar"
             className="w-11 h-11 rounded-full mr-2"
           />
@@ -95,11 +96,18 @@ function ChatPanel() {
           conversationHistory.map((msg) => (
             <div className="chat-message ml-6 rounded-md" key={msg.messageId}>
               <div className="flex items-start space-x-3">
-                {/* Avatar */}
+                {/* Avatar, loaded only once on connection for optimization*/}
                 <img
-                  src={`data:image/${msg.avatarImageType};base64,${msg.avatar || "../assets/sunrise2.jpg"}`}
-                  alt="Avatar"
-                  className="w-11 h-11 rounded-full"
+                  src={`data:image/${
+                    msg.sentBy == selectedFriend.username
+                      ? selectedFriend.avatarImageType || "jpeg"
+                      : currentUser.avatarImageType || "jpeg"
+                  };base64,${
+                    msg.sentBy == selectedFriend.username
+                      ? selectedFriend.avatar || "../assets/sunrise2.jpg"
+                      : currentUser.avatar || "../assets/sunrise2.jpg"
+                  }`}
+                  className="w-11 h-11 rounded-full mr-2"
                 />
                 {/* Right side: Name, Timestamp, Message */}
                 <div>

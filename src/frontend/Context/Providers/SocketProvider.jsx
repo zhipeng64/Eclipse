@@ -19,6 +19,7 @@ function SocketProvider({ children }) {
   const { isLoading, isAuthenticated } = useAuthenticationChecks();
 
   // UI state
+  const [currentUser, setCurrentUser] = useState({}); // Holds current user's profile info
   const [newFriendRequest, setNewFriendRequest] = useState(false);
   const [pendingFriendRequests, setPendingFriendRequests] = useState({
     incoming: [],
@@ -42,6 +43,7 @@ function SocketProvider({ children }) {
   // Context value to be shared with children components
   const data = {
     socket,
+    currentUser,
     newFriendRequest,
     pendingFriendRequests,
     friends,
@@ -68,6 +70,12 @@ function SocketProvider({ children }) {
       path: "/socket.io/",
       withCredentials: true,
     });
+
+    // Listener for current user profile info
+    const handleCurrentUserProfile = (profile) => {
+      console.log("Received current user profile:", profile);
+      setCurrentUser(profile);
+    };
 
     // Listener for new incoming friend requests
     const handleNewFriendRequest = (friendRequest) => {
@@ -227,6 +235,7 @@ function SocketProvider({ children }) {
     };
 
     // Register socket event listeners
+    newSocket.on("current-user-profile", handleCurrentUserProfile);
     newSocket.on("new-friend-request", handleNewFriendRequest);
     newSocket.on("pending-friend-requests", handlePendingFriendRequests);
     newSocket.on("friends-list", handleFriendsList);
@@ -253,6 +262,7 @@ function SocketProvider({ children }) {
     setSocket(newSocket);
 
     // Initial emits to fetch necessary data
+    newSocket.emit("current-user-profile");
     newSocket.emit("pending-friend-requests");
     newSocket.emit("friends-list");
 

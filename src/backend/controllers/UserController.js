@@ -59,13 +59,15 @@ class UserController {
         clientResponse: {
           errors: [
             {
-              field: "customError",
+              field: "loginError",
               msg: "Invalid username or password",
             },
           ],
         },
       });
     }
+
+    console.log("Logging in user:", username);
     const { jwt, refreshToken, jwtExpiresAt, refreshTokenExpiresAt } =
       await userService.signInUser({ username, plaintextPassword: password });
     return res
@@ -100,19 +102,12 @@ class UserController {
         },
       });
     }
-    const { username, avatarImage, friendshipData } =
-      await userService.searchUser({
-        currentUserId: decodedJwtTokenUserId,
-        targetUsername,
-      });
+    const searchResults = await userService.searchUser({
+      currentUserId: decodedJwtTokenUserId,
+      targetUsername,
+    });
     return res.status(200).json({
-      searchResults: [
-        {
-          username,
-          avatarImage,
-          friendshipData,
-        },
-      ],
+      ...searchResults,
       success: true,
     });
   }

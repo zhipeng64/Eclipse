@@ -91,19 +91,21 @@ class UserService {
     };
   }
 
-  // Gets a user by ID
+  // Gets a user by ID (updated to use helper)
   async getUserById({ userId }) {
     const user = await userRepository.getUserById(userId);
-    return user;
+    if (!user) return null;
+    return this._formatBasicUserData(user);
   }
 
-  // Gets a user by username
+  // Gets a user by username (updated to use helper)
   async getUser({ username }) {
     const user = await userRepository.getUser(username);
-    return user;
+    if (!user) return null;
+    return this._formatBasicUserData(user);
   }
 
-  // Logs in the user and assigns the user jwt and refresh tokens
+  // Logs in the user and assigns the user jwt and refresh tokens (no change needed)
   async signInUser({ username, plaintextPassword }) {
     if (!username || !plaintextPassword) {
       throw new AppError({
@@ -113,7 +115,7 @@ class UserService {
         clientResponse: {
           errors: [
             {
-              field: "customError",
+              field: "loginError",
               msg: "Invalid username or password",
             },
           ],
@@ -131,8 +133,8 @@ class UserService {
         clientResponse: {
           errors: [
             {
-              field: "customError",
-              msg: "User not found",
+              field: "loginError",
+              msg: "Invalid username or password",
             },
           ],
         },
@@ -158,8 +160,8 @@ class UserService {
         clientResponse: {
           errors: [
             {
-              field: "customError",
-              msg: "Incorrect password",
+              field: "loginError",
+              msg: "Invalid username or password",
             },
           ],
         },
@@ -197,15 +199,18 @@ class UserService {
           errors: [
             {
               field: "customError",
-              msg: "Invalid username",
+              msg: "Failed to retrieve user avatar",
             },
           ],
         },
       });
     }
 
-    const avatarImage = (await userRepository.getUser(username))?.profile
-      ?.avatarImage;
+    const user = await userRepository.getUser(username);
+    if (!user) {
+      throw new Error("Failed to retrieve user avatar");
+    }
+    const { avatarImage } = this._formatBasicUserData(user);
     if (!avatarImage) {
       throw new Error("Failed to retrieve user avatar");
     }
@@ -257,13 +262,6 @@ class UserService {
       });
     }
 
-    const username = user?.account?.username;
-    const avatarImage = user?.profile?.avatarImage;
-    if (!username || !avatarImage) {
-      throw new Error("Invalid user field fetched from database");
-    }
-
-    // Check friendship
     const friendship = await friendRepository.getFriendEntry({
       users: [currentUser._id, user._id],
     });
@@ -277,10 +275,26 @@ class UserService {
         }
       : null;
 
+    return this._formatSearchUserData(user, friendshipData);
+  }
+
+  // Helper for basic user data (single responsibility: format core user fields)
+  _formatBasicUserData(user) {
+    console.log(
+      "USER IN FORMAT BASIC USER DATA:",
+      user?.profile?.avatarImageType
+    );
     return {
-      username,
-      avatarImage,
-      friendshipData,
+      username: user?.account?.username,
+      avatar: user?.profile?.avatarImage,
+      avatarImageType: user?.profile?.avatarImageType,
+    };
+  }
+
+  // Helper for search user data (single responsibility: format search-specific data with friendship)
+  _formatSearchUserData(user, friendshipData) {
+    return {
+      searchResults: [{ ...this._formatBasicUserData(user), friendshipData }],
     };
   }
 }

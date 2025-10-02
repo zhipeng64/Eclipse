@@ -2,6 +2,7 @@
 import { insertEntry, getAggregation } from "./crud.js";
 import { ObjectId } from "mongodb";
 import { convertObjectIds } from "./util.js";
+import { connectToMongo } from "./connection.js";
 
 class MessagesDb {
   constructor() {
@@ -21,14 +22,6 @@ class MessagesDb {
 
   // Fetch messages for a chatroom with pagination, sorted by timestamp ascending
   async getMessages(matchFilter, limit = 50, skip = 0) {
-    // const db = await getDb();
-    // return db
-    //   .collection(COLLECTION)
-    //   .find({ chatroom_id: new ObjectId(chatroom_id) })
-    //   .sort({ timestamp: 1 })
-    //   .skip(skip)
-    //   .limit(limit)
-    //   .toArray();
     if (!matchFilter) {
       throw new Error("Invalid chatroomId supplied to getMessages");
     }
@@ -54,16 +47,36 @@ class MessagesDb {
         },
       },
       { $unwind: "$userDetails" }, // Unwind because message and user is 1-to-many relationship
-      { $sort: { timestamp: -1 } }, // Sort by timestamp descending order
+      {
+        $project: {
+          _id: 1,
+          message: 1,
+          timestamp: 1,
+          chatroomId: 1,
+          sentBy: 1,
+          userDetails: {
+            account: { username: 1 },
+          },
+        },
+      },
+      { $sort: { timestamp: 1 } }, // Sort by timestamp ascending order
     ];
-    console.time("MESSAGE AGGREGATION TIME");
     const cursor = await getAggregation(aggregationQuery, this.collection);
-    const results = [];
-    console.timeEnd("MESSAGE AGGREGATION TIME");
 
-    for await (const doc of cursor) {
-      results.push(doc);
-    }
+    // Explain the results
+    // let db = await connectToMongo();
+    // const explanation = await db
+    //   .collection(this.collection)
+    //   .aggregate(aggregationQuery)
+    //   .explain("executionStats");
+    // console.dir(explanation, { depth: 5, colors: true }); // Use console.dir to avoid circular ref error
+
+    // for await (const doc of cursor) {
+    //   results.push(doc);
+    // }
+    console.time("Cursor toArray Time");
+    const results = await cursor.toArray(); // Faster than for-await loop
+    console.timeEnd("Cursor toArray Time");
     return results.length > 0 ? convertObjectIds(results, ObjectId) : [];
   }
 
@@ -75,24 +88,6 @@ class MessagesDb {
     const aggregationQuery = { _id: new ObjectId(messageId) };
     const result = await this.getMessages(aggregationQuery);
     return result.length === 1 ? result[0] : null;
-  }
-
-  // Fetch a single user's avatar (profile.avatarImage and profile.avatarImageType) on demand
-  async getUserAvatar(userId) {
-    if (!userId) {
-      throw new Error("Invalid userId supplied to getUserAvatar");
-    }
-    const _id = new ObjectId(userId);
-    const pipeline = [
-      { $match: { _id } },
-      { $project: { "profile.avatarImage": 1, "profile.avatarImageType": 1 } },
-    ];
-    const cursor = await getAggregation(pipeline, "users");
-    for await (const doc of cursor) {
-      // return the profile object (may contain binary avatar)
-      return doc.profile || null;
-    }
-    return null;
   }
 }
 

@@ -5,6 +5,7 @@ import { roomIdSchema } from "../../validators/zodValidators.js";
 import { sanitizedStringSchema } from "../../sanitizers/zodSanitizers.js";
 import registerMessageListeners from "./messageListeners.js";
 import { notifyUser, notifyRoom } from "../socketHelper.js";
+import { getMap } from "../../socket.js";
 
 export default function registerListeners({ io, socket, userId }) {
   registerMessageListeners({ io, socket, userId });
@@ -14,7 +15,28 @@ export default function registerListeners({ io, socket, userId }) {
 
   // Handle disconnect event
   socket.on("disconnect", () => {
+    const map = getMap();
+    map.delete(userId);
     console.log(`Client socket with socketId "${socket.id}" disconnected`);
+  });
+
+  // Get and emit current user's profile info
+  socket.on("current-user-profile", async () => {
+    try {
+      const userProfile = await userService.getUserById({ userId });
+      if (!userProfile) {
+        throw new Error("Failed to fetch user profile");
+      }
+      await notifyUser(
+        userId,
+        "current-user-profile",
+        userProfile,
+        process.env.EVENT_STATUS_INITIALIZE
+      );
+    } catch (err) {
+      console.error("Error in current-user-profile:", err.message);
+      console.error(err.stack);
+    }
   });
 
   // Gets incoming pending friend requests for user

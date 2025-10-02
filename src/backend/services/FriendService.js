@@ -2,7 +2,6 @@ import friendRepository from "../database/FriendDb.js";
 import userRepository from "../database/UserDb.js";
 import { notifyUser } from "./socketHelper.js";
 import { AppError } from "../utils/AppError.js";
-import { getMap } from "../socket.js";
 import chatRoomService from "./ChatRoomService.js";
 
 class FriendService {
@@ -37,20 +36,20 @@ class FriendService {
     }
 
     // Split into incoming and outgoing requests
-    return {
-      incoming: await this._getFriendRequestUserInfoList(
+    return this._buildPendingRequestFormat(
+      await this._getFriendRequestUserInfoList(
         pendingFriendEntries,
         userId,
         "pending",
         "incoming"
       ),
-      outgoing: await this._getFriendRequestUserInfoList(
+      await this._getFriendRequestUserInfoList(
         pendingFriendEntries,
         userId,
         "pending",
         "outgoing"
-      ),
-    };
+      )
+    );
   }
 
   async addUser({ currentUserId, targetUsername }) {
@@ -136,18 +135,17 @@ class FriendService {
     }
 
     // Get the current user's outgoing request
-    const senderOutgoingRequest = {
-      outgoing: [
-        this._mapToPendingRequest(friendEntry, currentUserId, "outgoing"),
-      ],
-    };
+    const senderOutgoingRequest = this._buildPendingRequestFormat(
+      [],
+      [this._mapToPendingRequest(friendEntry, currentUserId, "outgoing")]
+    );
+    console.log("SENDER OUTGOING REQUEST:", senderOutgoingRequest);
 
     // Get the target user's incoming request
-    const receiverIncomingRequest = {
-      incoming: [
-        this._mapToPendingRequest(friendEntry, targetUserId, "incoming"),
-      ],
-    };
+    const receiverIncomingRequest = this._buildPendingRequestFormat(
+      [this._mapToPendingRequest(friendEntry, targetUserId, "incoming")],
+      []
+    );
 
     console.log("RECEIVER INCOMING REQUEST:", receiverIncomingRequest);
     // Notify recipient if online
@@ -269,16 +267,14 @@ class FriendService {
 
     console.log("Friend request accepted successfully");
     // Notify both users to update their pending requests list (DELETE the accepted request)
-    const recipientUserToDelete = {
-      incoming: [
-        this._mapToPendingRequest(friendRequest, recipientId, "incoming"),
-      ],
-    };
-    const requestorUserToDelete = {
-      outgoing: [
-        this._mapToPendingRequest(friendRequest, requestorId, "outgoing"),
-      ],
-    };
+    const recipientUserToDelete = this._buildPendingRequestFormat(
+      [this._mapToPendingRequest(friendRequest, recipientId, "incoming")],
+      []
+    );
+    const requestorUserToDelete = this._buildPendingRequestFormat(
+      [],
+      [this._mapToPendingRequest(friendRequest, requestorId, "outgoing")]
+    );
     await notifyUser(
       recipientId,
       "pending-friend-requests",
@@ -297,12 +293,12 @@ class FriendService {
     });
     console.log("UPDATED DOCUMENTTT:", updatedDocument);
     // Notify both users to update their friends list (ADD the new friend)
-    const recipientFriendToAdd = {
-      friends: [this._mapToAcceptedFriend(updatedDocument, recipientId)],
-    };
-    const requestorFriendToAdd = {
-      friends: [this._mapToAcceptedFriend(updatedDocument, requestorId)],
-    };
+    const recipientFriendToAdd = this._buildFriendsListUpdateFormat([
+      this._mapToAcceptedFriend(updatedDocument, recipientId),
+    ]);
+    const requestorFriendToAdd = this._buildFriendsListUpdateFormat([
+      this._mapToAcceptedFriend(updatedDocument, requestorId),
+    ]);
     await notifyUser(
       recipientId,
       "friends-list",
@@ -327,15 +323,21 @@ class FriendService {
       status: "accepted",
     });
 
-    const friendsToInitialize = {
-      friends: await this._getFriendRequestUserInfoList(
-        friends,
-        userId,
-        "accepted"
-      ),
-    };
+    const friendsToInitialize = this._buildFriendsListUpdateFormat(
+      await this._getFriendRequestUserInfoList(friends, userId, "accepted")
+    );
     console.log("Friends to initialize:", friendsToInitialize);
     return friendsToInitialize;
+  }
+
+  // Standardizes formatting of pending friend requests
+  _buildPendingRequestFormat(incoming = [], outgoing = []) {
+    return { incoming, outgoing };
+  }
+
+  // Standardizes formatting of accepted friends
+  _buildFriendsListUpdateFormat(friends = []) {
+    return { friends };
   }
 
   // Data transformation helpers
@@ -398,10 +400,12 @@ class FriendService {
         return friendRequests
           .map((request) => this._mapToPendingRequest(request, userId, subtype))
           .filter((request) => request !== null);
+
       case "accepted":
         return friendRequests
           .map((request) => this._mapToAcceptedFriend(request, userId))
           .filter((request) => request !== null);
+
       default:
         throw new Error(`Unsupported friend request type: ${type}`);
     }

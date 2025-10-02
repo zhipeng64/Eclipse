@@ -1,10 +1,13 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 // Icons
 import { FaUser, FaLock } from "react-icons/fa";
 import env from "../config.js";
+import { set } from "zod";
 
 export default function LoginModal({ modalRef, forgotPasswordCallback }) {
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
   const handleForm = async (event) => {
     event.stopPropagation();
@@ -28,7 +31,14 @@ export default function LoginModal({ modalRef, forgotPasswordCallback }) {
       });
 
       if (!response.ok) {
-        throw new Error("Login for user failed");
+        const data = await response.json();
+        const errors = data?.errors || [];
+        const errorObj = {};
+        console.log(errors);
+        errors.forEach((error) => {
+          errorObj[error.field] = error.msg;
+        });
+        setErrors(errorObj);
       } else {
         navigate("/main-lobby");
       }
@@ -43,54 +53,68 @@ export default function LoginModal({ modalRef, forgotPasswordCallback }) {
           className="m-auto w-full max-w-xs pt-3 px-1 text-[#F5F5F5] shadow-card rounded-card layer-0"
           ref={modalRef}
         >
-          <form className="flex flex-col pb-5 space-y-4" onSubmit={handleForm}>
-            <h1 className="text-center text-2xl mb-6">Login</h1>
-            <div className="flex justify-center items-center gap-x-3">
-              <FaUser />
-              <input
-                className="w-[65%] p-1 rounded-lg neon-input"
-                name="username"
-                placeholder="username"
-                type="text"
-                autoComplete="on"
-              ></input>
-            </div>
-            <div className="flex flex-col gap-y-2">
-              <div className="flex justify-center items-center gap-x-3">
-                <FaLock />
-                <input
-                  className="w-[65%] border-solid p-1 rounded-lg neon-input"
-                  placeholder="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                ></input>
-              </div>
-              <a className="text-xs ml-17 text-[#90cdf4] w-fit" href="#">
-                Forgot Password?
-              </a>
-            </div>
+          <form className="flex flex-col pb-5" onSubmit={handleForm}>
+            <h1 className="text-center text-2xl mb-5">Login</h1>
+
             <div className="flex flex-col">
-              <div className="flex justify-center">
-                <input
-                  className="w-[90%] font-semibold p-1.5 rounded-lg neon-button-purple neon-button-purple-animated"
-                  type="submit"
-                  value="Login"
-                ></input>
-              </div>
-              <div className="flex justify-center">
-                <p className="text-xs p-1.5 w-[90%]">
-                  Don't have an account?{" "}
-                  <button
-                    className="text-[#90cdf4] w-fit cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      forgotPasswordCallback();
-                    }}
-                  >
-                    Register here
-                  </button>
-                </p>
+              {errors.loginError && (
+                <span
+                  id="login-error"
+                  className="text-red-500 text-center text-sm mb-2"
+                >
+                  {errors.loginError || ""}
+                </span>
+              )}
+
+              <div className="flex flex-col gap-y-4">
+                <div className="flex justify-center items-center gap-x-3">
+                  <FaUser />
+                  <input
+                    className="w-[65%] p-1 rounded-lg neon-input"
+                    name="username"
+                    placeholder="username"
+                    type="text"
+                    autoComplete="on"
+                  ></input>
+                </div>
+                <div className="flex flex-col gap-y-2">
+                  <div className="flex justify-center items-center gap-x-3">
+                    <FaLock />
+                    <input
+                      className="w-[65%] border-solid p-1 rounded-lg neon-input"
+                      placeholder="password"
+                      name="password"
+                      type="password"
+                      autoComplete="current-password"
+                    ></input>
+                  </div>
+                  <a className="text-xs ml-17 text-[#90cdf4] w-fit" href="#">
+                    Forgot Password?
+                  </a>
+                </div>
+                <div className="flex flex-col">
+                  <div className="flex justify-center">
+                    <input
+                      className="w-[90%] font-semibold p-1.5 rounded-lg neon-button-purple neon-button-purple-animated"
+                      type="submit"
+                      value="Login"
+                    ></input>
+                  </div>
+                  <div className="flex justify-center">
+                    <p className="text-xs p-1.5 w-[90%]">
+                      Don't have an account?{" "}
+                      <button
+                        className="text-[#90cdf4] w-fit cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          forgotPasswordCallback();
+                        }}
+                      >
+                        Register here
+                      </button>
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </form>

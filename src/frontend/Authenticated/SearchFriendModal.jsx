@@ -55,7 +55,6 @@ export default function SearchFriendModal({ friendModalRef }) {
         const users = data.searchResults;
         console.log("search results");
         console.log(data);
-        console.log(users);
         setUsersSearched(users);
       }
     } catch (error) {
@@ -153,7 +152,8 @@ export default function SearchFriendModal({ friendModalRef }) {
               <p>No users found with current username</p>
             ) : (
               usersSearched.map((user) => {
-                const { username, avatarImage, friendshipData } = user;
+                const { username, avatar, avatarImageType, friendshipData } =
+                  user;
                 let message;
 
                 if (!friendshipData) {
@@ -183,7 +183,7 @@ export default function SearchFriendModal({ friendModalRef }) {
                   >
                     <div className="flex items-center">
                       <img
-                        src="../assets/sunrise2.jpg"
+                        src={`data:image/${avatarImageType || "jpeg"};base64,${avatar || "../assets/sunrise2.jpg"}`}
                         alt="Avatar"
                         className="w-11 h-11 rounded-full mr-2"
                       />
