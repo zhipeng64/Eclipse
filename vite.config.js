@@ -8,7 +8,7 @@ import fs from "fs";
 if (process.env.NODE_ENV === "development") {
   dotenv.config({ path: "./.env.development" });
 } else if (process.env.NODE_ENV === "production") {
-  dotenv.config({ path: "./.env.production" });
+  dotenv.config({ path: "./vite.env.production" });
 }
 
 export default defineConfig({

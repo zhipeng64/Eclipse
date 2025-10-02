@@ -15,6 +15,7 @@ COPY ./package-lock.json ./package-lock.json
 COPY ./vite.config.js ./vite.config.js
 COPY ./vitest.config.js ./vitest.config.js
 COPY ./src/frontend/ ./src/frontend
+
 RUN npm install \
     && npm run build
 

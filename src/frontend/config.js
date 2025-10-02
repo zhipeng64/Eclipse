@@ -2,7 +2,7 @@
 // Export plain values so other files can import a stable object instead of
 // accessing `import.meta.env` directly everywhere.
 
-// Note that Vite automatically loads .env.development or .env.production
+// Note that Vite automatically loads .env.development or vite.env.production
 // based on whether it is a development or production build
 const config = {
   // Backend API base (VITE_BACKEND_URL should include any base path like '/api')

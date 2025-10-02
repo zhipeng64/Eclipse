@@ -28,8 +28,6 @@ services:
     # Map port 8080 on the host to port 8080 in the container
     ports:
       - "8080:8080"
-    env_file:
-      - ./src/frontend/.env.production
 
   backend:
     build:
