@@ -18,26 +18,19 @@ The project follows a **layered architecture** pattern that separates concerns a
 
 ### Features
 
-✅ **User Authentication & Authorization**
+**User Authentication & Authorization**
 
 - Secure user registration and login
 - JWT-based authentication
 - Session management with refresh tokens
 - Protected routes and middleware
 
-✅ **Real-time Communication**
+**Real-time Communication**
 
 - Socket.IO integration for live messaging
 - Friend system (add/accept friend requests)
 - Real-time chat functionality
 - Online status tracking
-
-✅ **Friend Management**
-
-- Send and receive friend requests
-- Accept/decline friend invitations
-- Friends list management
-- Real-time friend status updates
 
 ### Technology Stack
 
@@ -63,13 +56,21 @@ The project follows a **layered architecture** pattern that separates concerns a
 - Docker for containerization
 - Git for version control
 
+**CI/CD:**
+
+- Github Actions to automate workflow
+
+**Deployment:**
+
+- Amazon ECS with IAM
+
 ## Upcoming Features (Roadmap)
 
 🚧 **Enhanced Friend Search**
 
 - Advanced user search functionality
 - Friend discovery and recommendations
-- Search filters and sorting
+- Friend search filters and sorting
 
 🚧 **AI Assistant Integration**
 
@@ -89,7 +90,6 @@ The project follows a **layered architecture** pattern that separates concerns a
 - Document upload and sharing
 - Image sharing in chats
 - File preview capabilities
-- Cloud storage integration
 
 ## Getting Started
 
@@ -97,7 +97,7 @@ The project follows a **layered architecture** pattern that separates concerns a
 
 - Node.js (v16 or higher)
 - MongoDB (local or cloud instance)
-- npm or yarn package manager
+- npm package manager
 
 ### Installation
 
@@ -117,34 +117,12 @@ The project follows a **layered architecture** pattern that separates concerns a
 3. **Environment Setup:**
    - Copy `.env.example` to `.env.development`
    - Configure your MongoDB connection string
-   - Set JWT secrets and other environment variables
+   - Set JWT secret for signing JWT and other environment variables
 
-4. **Start the development server:**
+4. **Start the frontend development server:**
    ```bash
    npm run dev
    ```
-
-### Project Structure
-
-```
-Eclipse/
-├── src/
-│   ├── backend/           # Server-side code
-│   │   ├── controllers/   # Request handlers
-│   │   ├── services/      # Business logic
-│   │   ├── database/      # Data access layer
-│   │   ├── middleware/    # Express middleware
-│   │   ├── routes/        # API route definitions
-│   │   └── utils/         # Utility functions
-│   └── frontend/          # Client-side code
-│       ├── components/    # React components
-│       ├── Context/       # React context providers
-│       ├── utils/         # Client utilities
-│       └── assets/        # Static assets
-├── docs/                  # Documentation
-├── tests/                 # Test suites
-└── docker/               # Docker configuration
-```
 
 ## API Documentation
 
@@ -155,35 +133,6 @@ The application provides RESTful APIs for:
 - **Friends**: `/api/friends/*`
 - **Messages**: Real-time via Socket.IO
 
-## Contributing
+## Project Version
 
-We welcome contributions! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Development Guidelines
-
-- Follow the existing code style and architecture patterns
-- Write meaningful commit messages
-- Add appropriate documentation for new features
-- Ensure all tests pass before submitting PRs
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Support
-
-If you encounter any issues or have questions:
-
-1. Check the existing issues on GitHub
-2. Create a new issue with detailed information
-3. Join our community discussions
-
----
-
-**Eclipse v1** - Building the future of real-time communication 🚀
+1
