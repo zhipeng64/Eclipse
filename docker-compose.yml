@@ -25,9 +25,9 @@ services:
     # Image and tag name
     image: eclipse-nginx:stable-perl
     container_name: Eclipse-nginx
-    # Map port 8080 on the host to port 8080 in the container
+    # Map port 80 on the host to port 80 in the container
     ports:
-      - "8080:8080"
+      - "80:80"
 
   backend:
     build:

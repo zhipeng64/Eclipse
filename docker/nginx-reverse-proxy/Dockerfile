@@ -22,8 +22,10 @@ RUN npm install \
 
 # Production Stage 
 FROM nginx:stable-perl
+RUN rm /etc/nginx/conf.d/default.conf && \
+    mkdir -p /var/www/html/.well-known/pki-validation
 COPY ./docker/nginx-reverse-proxy/nginx.conf /etc/nginx/nginx.conf
-COPY ./33DAB0F1AE5ED314CA5147C7526D4D11.txt /var/www/html/33DAB0F1AE5ED314CA5147C7526D4D11.txt
+COPY ./verifier.txt /var/www/html/.well-known/pki-validation/33DAB0F1AE5ED314CA5147C7526D4D11.txt
 COPY --from=builder /app/src/frontend/dist/ /var/www/html/
 
 # Build-time secrets will only be available within the temporary container 
