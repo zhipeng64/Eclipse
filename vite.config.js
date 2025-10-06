@@ -36,7 +36,7 @@ export default defineConfig({
         cert: fs.readFileSync(env.VITE_CERT_PATH),
       },
     }),
-    host: "localhost",
+    host: true,
     port: 5173,
   },
 });
