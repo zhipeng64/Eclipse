@@ -32,8 +32,8 @@ export default defineConfig({
     // Configure HTTPS for development only
     ...(process.env.NODE_ENV === "development" && {
       https: {
-        key: fs.readFileSync(process.env.CERT_PRIVATE_KEY_PATH),
-        cert: fs.readFileSync(process.env.CERT_PATH),
+        key: fs.readFileSync(env.VITE_CERT_PRIVATE_KEY_PATH),
+        cert: fs.readFileSync(env.VITE_CERT_PATH),
       },
     }),
     host: "localhost",

@@ -2,11 +2,12 @@ import { useState, useContext, useEffect, useRef } from "react";
 import { IoVideocam } from "react-icons/io5";
 import { IoMic } from "react-icons/io5";
 import { IoSettingsSharp } from "react-icons/io5";
+import { FaArrowLeft } from "react-icons/fa";
 import { FaPlus } from "react-icons/fa";
 import { MdEmojiEmotions } from "react-icons/md";
 import SocketContext from "../Context/Socket.jsx";
 
-function ChatPanel() {
+function ChatPanel({ toggleBackButton }) {
   // Get the socket and selectedFriend from context
   const {
     socket,
@@ -48,7 +49,7 @@ function ChatPanel() {
     return (
       <div
         id="chat-panel"
-        className="justify-center items-center text-gray-400 bg-gray-800/65 w-auto h-full max-h-full flex flex-col rounded-lg opac-shadow"
+        className="justify-center items-center text-center text-gray-400 bg-[oklch(0.17_0.0_0)] w-auto h-full max-h-full flex flex-col rounded-lg opac-shadow"
       >
         Select a friend to chat with on the left panel
       </div>
@@ -57,17 +58,24 @@ function ChatPanel() {
   return (
     <div
       id="chat-panel"
-      className="text-white bg-gray-800/65 w-auto h-full max-h-full flex flex-col rounded-lg opac-shadow"
+      className="text-white w-auto h-full max-h-full flex flex-col rounded-lg opac-shadow
+      "
     >
       <div
         id="recipient"
-        className="flex items-center justify-between pl-2 sm:px-5 py-2 opac-shadow"
+        className="flex items-center justify-between p-2 sm:px-5 sm:py-1 opac-shadow bg-[oklch(0.16_0_0)]"
       >
-        <div className="flex items-center">
+        <div className="flex flex-row items-center">
+          <button
+            className={`sm:hidden text-md text-b cursor-pointer font-bold text-[oklch(0.7252_0.145_298.87)] ${selectedFriend ? "block pr-2" : "hidden"}`}
+            onClick={() => toggleBackButton()}
+          >
+            <FaArrowLeft />
+          </button>
           <img
             src={`data:image/${selectedFriend?.avatarImageType || "jpeg"};base64,${selectedFriend?.avatar || "../assets/sunrise2.jpg"}`}
             alt="Avatar"
-            className="w-11 h-11 rounded-full mr-2"
+            className="w-11 h-11 rounded-full mr-2 drop-shadow-[oklch(0.8_0.05_246.6)]/40 drop-shadow-sm"
           />
           <p className="text-md">
             {selectedFriend ? selectedFriend.username : "Unknown"}
@@ -77,7 +85,7 @@ function ChatPanel() {
           <i className="standard-icon-container p-1">
             <IoVideocam className="standard-icon" />
           </i>
-          <i className="standard-icon-container p-1">
+          <i className="purple-icon-container p-1">
             <IoMic className="standard-icon" />
           </i>
           <i className="standard-icon-container p-1">
@@ -106,7 +114,7 @@ function ChatPanel() {
                       ? selectedFriend.avatar || "../assets/sunrise2.jpg"
                       : currentUser.avatar || "../assets/sunrise2.jpg"
                   }`}
-                  className="w-11 h-11 rounded-full mr-2"
+                  className="w-11 h-11 rounded-full mr-2 drop-shadow-[oklch(0.8_0.05_246.6)]/40 drop-shadow-sm"
                 />
                 {/* Right side: Name, Timestamp, Message */}
                 <div>
@@ -128,7 +136,7 @@ function ChatPanel() {
 
       <div
         id="chat-input-box"
-        className="flex items-center px-2 bg-gray-800/70 rounded-lg"
+        className="flex items-center px-2 bg-[oklch(0.18_0.0_0)] rounded-lg "
       >
         <div className="flex items-center space-x-3 mr-3">
           <i>
@@ -141,7 +149,7 @@ function ChatPanel() {
         <textarea
           id="chat-input"
           placeholder="Type a message..."
-          className="w-full p-2 m-2 rounded-lg text-white min-h-1 bg-gray-700/40 resize-none hideScrollBar outline-none"
+          className="w-full p-2 m-2 rounded-lg text-white min-h-1 bg-[oklch(0.25_0.0_0)] resize-none hideScrollBar outline-none"
           rows={inputSettings.focus ? inputSettings.inputRowCount : 1}
           onFocus={(e) => {
             e.stopPropagation();

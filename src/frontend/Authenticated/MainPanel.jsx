@@ -2,20 +2,35 @@ import { Navigation } from "./Navigation";
 import { ChatOption } from "./ChatOption";
 import { ChatPanel } from "./ChatPanel";
 import { useAuthenticationChecks } from "../utils/customHooks";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import SocketContext from "../Context/Socket.jsx";
 import { HomeOption } from "./HomeOption";
 
 function MainPanel() {
   const { isLoading, isAuthenticated } = useAuthenticationChecks();
   // Access socket context for real-time updates
-  const { pendingFriendRequests, friends } = useContext(SocketContext);
+  const { pendingFriendRequests, friends, selectedFriend } =
+    useContext(SocketContext);
+
+  // Back button for mobile screen
+  const [isBackButtonVisible, setIsBackButtonVisible] = useState(false);
 
   const [optionSelected, setOptionSelected] = useState({
     // homeOption: false,
     chatOption: true,
     settingsOption: false,
   });
+
+  const toggleBackButton = () => {
+    setIsBackButtonVisible(!isBackButtonVisible);
+  };
+
+  // Show back button if a friend is selected (for mobile view)
+  useEffect(() => {
+    if (selectedFriend) {
+      toggleBackButton();
+    }
+  }, [selectedFriend]);
   if (isLoading) {
     return null;
   }
@@ -24,25 +39,32 @@ function MainPanel() {
     return (
       <div
         id="main-panel"
-        className="flex flex-col w-full pb-3 h-screen bg-gray-950"
+        className="flex flex-row w-full h-screen bg-[oklch(0.08_0_0)]"
       >
-        <div>
-          {/* Navigation */}
+        <div className="w-auto flex flex-col lg:m-2 opac-shadow rounded-lg">
           <Navigation
             optionSelected={optionSelected}
             setOptionSelected={setOptionSelected}
           />
         </div>
         {/* Main content area */}
-        <div className="flex flex-row flex-1 min-h-0 px-2 pb-1 self-stretch">
-          <div className="md:flex-[0.30] rounded-lg w-full max-w-full h-full max-h-full">
+        <div className="flex flex-row flex-1">
+          <div
+            className={`rounded-lg flex-1 sm:max-w-sm sm:block opac-shadow lg:m-2 ${
+              isBackButtonVisible ? "hidden" : "block"
+            }`}
+          >
             <ChatOption
               pendingFriendRequests={pendingFriendRequests}
               friends={friends}
             />
           </div>
-          <div className="md:flex-[0.70] rounded-lg w-full max-w-full h-full max-h-full">
-            <ChatPanel />
+          <div
+            className={`sm:block rounded-lg flex-1 opac-shadow lg:m-2 ${
+              isBackButtonVisible ? "block" : "hidden"
+            }`}
+          >
+            <ChatPanel toggleBackButton={toggleBackButton} />
           </div>
         </div>
 

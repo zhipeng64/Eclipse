@@ -32,28 +32,30 @@ function ChatOption({ pendingFriendRequests, friends }) {
     // h-full works because parent has resolved height via flex-grow
     <div
       id="chat-option"
-      className="text-white bg-gray-800/40 w-auto h-full max-h-full flex flex-col rounded-lg opac-shadow"
+      className="text-gray-300 bg-[oklch(0.12_0_0)] w-auto h-full max-h-full flex flex-col rounded-lg lg:p-0 opac-shadow"
     >
       {isFriendSearchOpen && (
         <SearchFriendModal friendModalRef={friendModalRef} />
       )}
 
       {isInboxOpen && <InboxModal inboxModalRef={inboxModalRef} />}
-      <div id="top-navigation" className="opac-shadow">
-        <div className="flex items-center justify-between pr-3 sm:p-3">
-          <h1 className="text-3xl">Chat</h1>
-          <div className="flex space-x-7 text-gray-200 pr-2r">
+      <div id="top-navigation">
+        <div className="flex flex-row items-center justify-between bottom-divider">
+          <h1 className="text-2xl sm:text-3xl p-2 text-[oklch(0.75_0.04_246.6)]">
+            Chat
+          </h1>
+          <div className="flex flex-row text-gray-200 p-2 gap-x-4 lg:gap-x-6">
             <i className="standard-icon-container p-1">
-              <FaSearch className="standard-icon" />
+              <FaSearch className="text-[1.2rem]" />
             </i>
             <i
-              className="standard-icon-container p-1"
+              className="purple-icon-container p-1"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsFriendSearchOpen(true);
               }}
             >
-              <IoPersonAddSharp className="standard-icon" />
+              <IoPersonAddSharp className="text-[1.2rem]" />
             </i>
             <i
               className="relative standard-icon-container p-1"
@@ -68,14 +70,14 @@ function ChatOption({ pendingFriendRequests, friends }) {
                     {pendingFriendRequests.incoming.length}
                   </span>
                 )}
-              <CiMail className="standard-icon" />
+              <CiMail className="text-[1.2rem]" />
             </i>
           </div>
         </div>
       </div>
       <div
         id="status-bar"
-        className={`flex items-center gap-3 sm:gap-7 ${friends.length > 0 ? "" : "min-h-[10%]"} px-4 py-2 opac-shado w overflow-auto`}
+        className={`flex items-center gap-x-4 px-4 lg:gap-x-5 ${friends.length > 0 ? "" : "min-h-[10%]"} p-2 overflow-auto bottom-divider`}
       >
         {friends.length > 0 ? (
           friends.map((friend) => (
@@ -86,13 +88,13 @@ function ChatOption({ pendingFriendRequests, friends }) {
               <img
                 src={`data:image/${friend.avatarImageType};base64,${friend.avatar || "../assets/sunrise2.jpg"}`}
                 alt="Avatar"
-                className="w-11 h-11 rounded-full"
+                className="w-10 h-10 lg:w-11 lg:h-11 rounded-full drop-shadow-[oklch(0.8_0.05_246.6)]/40 drop-shadow-sm"
               />
-              <p className="text-sm">{friend.username}</p>
+              <p className="text-xs lg:text-md">{friend.username}</p>
             </div>
           ))
         ) : (
-          <div className="flex grow items-center justify-center text-gray-400">
+          <div className="text-sm sm:text-md flex grow items-center justify-center text-gray-400">
             No friends yet
           </div>
         )}
@@ -104,14 +106,14 @@ function ChatOption({ pendingFriendRequests, friends }) {
         {friends.length > 0 ? (
           friends.map((friend) => (
             <div
-              className={`flex w-full py-2 px-4 opac-shadow cursor-pointer ${selectedFriend?.username === friend.username ? "bg-gray-700" : "hover:bg-gray-800 "}`}
+              className={`flex w-full py-2 px-4 cursor-pointer bottom-divider ${selectedFriend?.username === friend.username ? "bg-gray-900" : "hover:bg-[oklch(0.20_0_0)]"}`}
               key={friend.username}
               onClick={() => setSelectedFriend(friend)}
             >
               <img
                 src={`data:image/${friend.avatarImageType};base64,${friend.avatar || "../assets/sunrise2.jpg"}`}
                 alt="Avatar"
-                className="w-11 h-11 rounded-full mr-3.5"
+                className="w-10 h-10 lg:w-11 lg:h-11 rounded-full mr-3.5 drop-shadow-[oklch(0.8_0.05_246.6)]/40 drop-shadow-sm"
               />
               <div className="flex flex-col">
                 <p className="text-sm">{friend.username}</p>
@@ -123,7 +125,7 @@ function ChatOption({ pendingFriendRequests, friends }) {
             </div>
           ))
         ) : (
-          <div className="flex grow self-stretch items-center justify-center text-gray-400">
+          <div className="flex grow self-stretch items-center justify-center text-gray-400 text-sm sm:text-md">
             No recent chats
           </div>
         )}
