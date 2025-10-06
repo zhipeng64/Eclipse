@@ -26,10 +26,7 @@ export default function LandingPage() {
     navigate("/main-lobby");
   };
   return (
-    <div
-      id="landing-page"
-      className="min-h-screen flex flex-col w-auto layer-0"
-    >
+    <div id="landing-page" className="min-h-dvh flex flex-col w-auto layer-0">
       <NavigationBar />
       <div
         id="body"

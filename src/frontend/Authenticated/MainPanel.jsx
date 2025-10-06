@@ -39,7 +39,7 @@ function MainPanel() {
     return (
       <div
         id="main-panel"
-        className="flex flex-row w-full h-screen bg-[oklch(0.08_0_0)]"
+        className="flex flex-row w-full h-dvh bg-[oklch(0.08_0_0)]"
       >
         <div className="w-auto flex flex-col lg:m-2 opac-shadow rounded-lg">
           <Navigation

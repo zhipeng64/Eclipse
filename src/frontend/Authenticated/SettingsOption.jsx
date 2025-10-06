@@ -4,7 +4,7 @@ function SettingsOption() {
   return (
     <div
       id="settings-page"
-      className="flex flex-col primary-background h-screen w-full px-30 border-solid"
+      className="flex flex-col primary-background h-dvh w-full px-30 border-solid"
     >
       <Navigation />
       <div id="title" className="opac-divider">
