@@ -38,10 +38,10 @@ export default function LandingPage() {
         {/* Main Content */}
         <section className="flex flex-col max-w-4xl text-center self-center gap-y-5 lg:max-w-5xl">
           <div className="flex flex-col gap-y-3 lg:gap-y-5">
-            <h1 className="heading text-5xl md:text-6xl text-center lg:text-7xl">
+            <h1 className="text-[oklch(0.75_0.04_246.6)] text-5xl md:text-6xl text-center lg:text-7xl">
               Join the Community
             </h1>
-            <p className="text-center text-lg lg:text-3xl">
+            <p className="text-center text-lg lg:text-2xl">
               Connect with people in real time and make lasting relationships.
             </p>
           </div>
@@ -92,7 +92,9 @@ export default function LandingPage() {
           </div>
         </section>
         <div id="features-container" className="flex flex-col gap-y-5">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl">Features</h2>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl text-[oklch(0.75_0.04_246.6)]">
+            Features
+          </h2>
           <div className="grid lg:grid-cols-3 gap-6 lg:gap-6">
             {/* Feature 1 */}
             <div className="bg-gray-800/50 p-4 primary-container-border lg:p-4">
@@ -109,7 +111,7 @@ export default function LandingPage() {
               <p className="text-base sm:text-lg md:text-xl font-semibold mb-2">
                 Video Calls
               </p>
-              <p className="text-gray-400">
+              <p className="text-gray-400 ">
                 Connect face-to-face with friends and family through
                 high-quality video calls.
               </p>

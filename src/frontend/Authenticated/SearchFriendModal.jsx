@@ -109,13 +109,15 @@ export default function SearchFriendModal({ friendModalRef }) {
         {/* overflow:auto creates scrollbar within container to contain elements */}
         <div
           id="search-friend-modal"
-          className="flex flex-col self-center p-5 w-full max-w-xl h-full min-h-100 md:min-h-120 max-h-[80vh] overflow-auto shadow-card rounded-card dlayer-4"
+          className="flex flex-col self-center p-5 w-full max-w-md sm:max-w-xl h-full min-h-100 md:min-h-120 max-h-[80vh] overflow-auto shadow-card rounded-card bg-[oklch(0.12_0_0)]"
           ref={friendModalRef}
         >
-          <h1 className="text-center pb-5">Search for users</h1>
+          <h1 className="text-center lg:text-xl pb-5 text-[oklch(0.75_0.04_246.6)]">
+            Search for users
+          </h1>
           <form className="flex pb-5" onSubmit={handleSearch}>
             <div className="flex space-x-3 grow-1 pr-4">
-              <i className="flex justify-center items-center standard-icon-container p-1">
+              <i className="flex justify-center items-center standard-icon-container p-2">
                 <FaSearch className="standard-icon" />
               </i>
               <div className="w-full">
@@ -130,7 +132,7 @@ export default function SearchFriendModal({ friendModalRef }) {
             </div>
             <button
               type="submit"
-              className="grow-1 neon-button-purple neon-button-purple-animated rounded-lg"
+              className="grow-1 p-2 neon-button-purple neon-button-purple-animated rounded-lg"
             >
               Search
             </button>
@@ -142,7 +144,7 @@ export default function SearchFriendModal({ friendModalRef }) {
           are constraints, not definitions. */}
           <div
             id="search-person-results-container"
-            className={`flex flex-col dlayer-1 grow rounded-lg ${
+            className={`flex flex-col bg-[oklch(0.17_0.0_0)] grow rounded-lg opac-shadow text-sm sm:text-md lg:text-lg ${
               usersSearched.length === 0 ? "items-center justify-center" : ""
             }`}
           >
@@ -183,7 +185,7 @@ export default function SearchFriendModal({ friendModalRef }) {
                       <img
                         src={`data:image/${avatarImageType || "jpeg"};base64,${avatar || "../assets/sunrise2.jpg"}`}
                         alt="Avatar"
-                        className="w-11 h-11 rounded-full mr-2"
+                        className="w-11 h-11 rounded-full mr-2 drop-shadow-[oklch(0.8_0.05_246.6)]/40 drop-shadow-sm"
                       />
                       <p className="text-md">{username}</p>
                     </div>

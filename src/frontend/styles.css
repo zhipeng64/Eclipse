@@ -37,7 +37,7 @@ h1,
 h2,
 h3 {
   font-family: "Orbitron", sans-serif;
-  text-shadow: 0 0 12px rgba(144, 205, 244, 1);
+  text-shadow: 0 0 8px rgba(144, 205, 244, 1);
 }
 
 /* Base / primary background */
@@ -78,8 +78,8 @@ h3 {
 }
 
 /* Divider styling */
-.neon-divider {
-  border-bottom: 1px solid #90cdf4;
+.bottom-divider {
+  border-bottom: 1px solid rgba(144, 205, 244, 0.1);
 }
 
 /* General shadows */
@@ -105,13 +105,15 @@ h3 {
 }
 
 .standard-icon-container {
-  color: #b390f4;
+  color: #90cdf4;
+  cursor: pointer;
   box-shadow: 0 0 5px 0px rgba(179, 144, 244, 0.6);
 }
 
 .purple-icon-container {
   color: #b390f4;
-  box-shadow: 0 0 5px 0px rgba(179, 144, 244, 0.6);
+  cursor: pointer;
+  box-shadow: 0 0 5px 0px rgba(144, 205, 244, 0.6); /* blue shadow */
 }
 
 .standard-icon {

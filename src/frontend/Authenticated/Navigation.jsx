@@ -21,8 +21,8 @@ function Navigation({ optionSelected, setOptionSelected }) {
   }, [newFriendRequest]);
   return (
     <nav
-      id="top-nav"
-      className="flex flex-row px-3 py-2 justify-center items-center space-x-15 text-white"
+      id="side-nav"
+      className="h-full w-full flex flex-col text-sm p-2 justify-between bg-[oklch(0.18_0_0)] items-center text-white opac-shadow"
     >
       {/* <div
         id="home-option"
@@ -45,8 +45,11 @@ function Navigation({ optionSelected, setOptionSelected }) {
       from the right edge of its container for absolute positioning*/}
       <div
         id="chat-option"
-        className={`relative flex flex-col items-center cursor-pointer p-2 rounded-lg ${optionSelected.chatOption ? "layer-2" : ""}
-  `}
+        className={`flex flex-row items-center cursor-pointer p-2 rounded-lg ${
+          optionSelected.chatOption
+            ? "bg-[oklch(0.65_0.06_237.18)]"
+            : "hover:shadow-[0_0_8px_0_oklch(0.664_0.222_282.5)]"
+        }`}
         onClick={() =>
           setOptionSelected({
             // homeOption: false,
@@ -56,15 +59,24 @@ function Navigation({ optionSelected, setOptionSelected }) {
         }
       >
         <i className="navigation-icon">
-          <IoMdChatboxes className="text-[1.2rem] " />
+          <IoMdChatboxes
+            className={`text-[1.1rem] lg:text-[1.5rem] ${
+              optionSelected.chatOption
+                ? "text-black"
+                : "text-[oklch(0.8_0.05_237.18)]"
+            }`}
+          />
         </i>
-        <h2 className="text-lg">Chat</h2>
         {showToast && <p>You have a new friend request!</p>}
       </div>
 
       <div
         id="settings-option"
-        className={`flex flex-col items-center cursor-pointer p-2 rounded-lg ${optionSelected.settingsOption ? "bg-gray-700" : ""}`}
+        className={`flex flex-row items-center cursor-pointer px-2 py-4 rounded-lg ${
+          optionSelected.settingsOption
+            ? "bg-[oklch(0.65_0.06_237.18)]"
+            : "hover:shadow-[0_0_8px_0_oklch(0.664_0.222_282.5)]"
+        }`}
         onClick={() =>
           setOptionSelected({
             // homeOption: false,
@@ -74,9 +86,14 @@ function Navigation({ optionSelected, setOptionSelected }) {
         }
       >
         <i className="navigation-icon">
-          <IoSettings className="text-[1.2rem]" />
+          <IoSettings
+            className={`text-[1.1rem] lg:text-[1.5rem] ${
+              optionSelected.settingsOption
+                ? "text-black"
+                : "text-[oklch(0.8_0.05_237.18)]"
+            }`}
+          />
         </i>
-        <h2 className="text-lg">Settings</h2>
       </div>
     </nav>
   );
