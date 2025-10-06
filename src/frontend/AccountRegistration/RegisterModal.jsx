@@ -153,7 +153,7 @@ export default function RegisterModal({ handleRegistrationSuccess, modalRef }) {
             className="text-gray-200 w-full flex flex-col space-y-6"
             onSubmit={handleSubmit}
           >
-            <h1 className="font-bold text-2xl mb-6 text-center">
+            <h1 className="text-2xl mb-6 text-center text-[oklch(0.75_0.04_246.6)]">
               Register account
             </h1>
             <div>

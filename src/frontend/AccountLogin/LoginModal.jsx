@@ -52,7 +52,9 @@ export default function LoginModal({ modalRef, forgotPasswordCallback }) {
           ref={modalRef}
         >
           <form className="flex flex-col pb-5" onSubmit={handleForm}>
-            <h1 className="text-center text-2xl mb-5">Login</h1>
+            <h1 className="text-center text-2xl mb-5 text-[oklch(0.75_0.04_246.6)]">
+              Login
+            </h1>
 
             <div className="flex flex-col">
               {errors.loginError && (
